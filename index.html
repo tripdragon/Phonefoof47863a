@@ -36,6 +36,46 @@
         padding: clamp(1.5rem, 4vw, 3rem);
       }
 
+      .menu {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .brand {
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        color: #1e1b4b;
+      }
+
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0;
+        padding: 0;
+        gap: 0.5rem;
+      }
+
+      .menu-link {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        color: #4338ca;
+        padding: 0.45rem 0.7rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .menu-link:hover,
+      .menu-link:focus-visible {
+        background: #eef2ff;
+        outline: none;
+      }
+
       .hero-label {
         font-size: 0.85rem;
         font-weight: 700;
@@ -102,11 +142,27 @@
         padding: 0.1rem 0.35rem;
         border-radius: 4px;
       }
+
+      @media (max-width: 700px) {
+        .menu {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
     </style>
   </head>
   <body>
     <main>
       <section class="hero" aria-live="polite">
+        <nav class="menu" aria-label="Primary">
+          <span class="brand">Phonefoof</span>
+          <ul class="menu-list">
+            <li><a class="menu-link" href="#">Dashboard</a></li>
+            <li><a class="menu-link" href="#">Calls</a></li>
+            <li><a class="menu-link" href="#">Analytics</a></li>
+            <li><a class="menu-link" href="#">Settings</a></li>
+          </ul>
+        </nav>
         <p class="hero-label" id="hero-kicker"></p>
         <h1 class="hero-title" id="hero-title"></h1>
         <p class="hero-subtitle" id="hero-subtitle"></p>

@@ -129,6 +129,12 @@
       const cube1 = new THREE.Mesh(cubegeo1,mat1);
       scene.add(cube1);
 
+      const cubegeo2 = new THREE.BoxGeometry(1, 1, 1);
+      const mat2 = new THREE.MeshBasicMaterial({ color: 0x93c5fd });
+      const cube2 = new THREE.Mesh(cubegeo2, mat2);
+      cube2.position.y = 1.4;
+      scene.add(cube2);
+
 /*
       function onPointerDown(event) {
         pointer.x = (event.clientX / window.innerWidth) * 2 - 1;

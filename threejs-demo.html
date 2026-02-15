@@ -124,7 +124,13 @@
 
       const boardBase = new THREE.Mesh(
         new THREE.BoxGeometry(6, 0.35, 6),
-        new THREE.MeshStandardMaterial({ color: 0x2d1b0f, roughness: 0.8, metalness: 0.12 })
+        new THREE.MeshStandardMaterial({
+          color: 0x1d4ed8,
+          roughness: 0.45,
+          metalness: 0.2,
+          emissive: 0x0b1f66,
+          emissiveIntensity: 0.35,
+        })
       );
       boardBase.position.y = -0.2;
       boardBase.castShadow = true;
@@ -132,15 +138,19 @@
       boardGroup.add(boardBase);
 
       const tileGeometry = new THREE.BoxGeometry(0.72, 0.08, 0.72);
-      const lightTile = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.75, metalness: 0.08 });
-      const darkTile = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.75, metalness: 0.1 });
+      const tilePalette = [
+        new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.6, metalness: 0.18, emissive: 0x64123f }),
+        new THREE.MeshStandardMaterial({ color: 0x22d3ee, roughness: 0.58, metalness: 0.2, emissive: 0x083344 }),
+        new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.62, metalness: 0.16, emissive: 0x713f12 }),
+        new THREE.MeshStandardMaterial({ color: 0x4ade80, roughness: 0.57, metalness: 0.22, emissive: 0x14532d }),
+      ];
 
       const boardSize = 6;
       const offset = (boardSize - 1) * 0.38;
 
       for (let row = 0; row < boardSize; row += 1) {
         for (let col = 0; col < boardSize; col += 1) {
-          const tile = new THREE.Mesh(tileGeometry, (row + col) % 2 === 0 ? lightTile : darkTile);
+          const tile = new THREE.Mesh(tileGeometry, tilePalette[(row + col) % tilePalette.length]);
           tile.position.set(col * 0.76 - offset, 0.03, row * 0.76 - offset);
           tile.receiveShadow = true;
           boardGroup.add(tile);
@@ -193,7 +203,13 @@
 
       const accentRing = new THREE.Mesh(
         new THREE.TorusGeometry(2.72, 0.08, 12, 80),
-        new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.35, metalness: 0.5 })
+        new THREE.MeshStandardMaterial({
+          color: 0xf43f5e,
+          roughness: 0.3,
+          metalness: 0.55,
+          emissive: 0x4c0519,
+          emissiveIntensity: 0.45,
+        })
       );
       accentRing.rotation.x = Math.PI / 2;
       accentRing.position.y = 0.01;

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js Interactive Demo</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: radial-gradient(circle at top, #0f172a 0%, #020617 70%);
+        color: #e2e8f0;
+      }
+
+      #app {
+        position: fixed;
+        inset: 0;
+      }
+
+      .hud {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 10;
+        display: grid;
+        gap: 0.5rem;
+        padding: 0.85rem 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.68);
+        backdrop-filter: blur(8px);
+        max-width: min(90vw, 420px);
+      }
+
+      .hud h1 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .hud p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #cbd5e1;
+      }
+
+      .hud kbd {
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        border-bottom-width: 2px;
+        border-radius: 6px;
+        padding: 0.1rem 0.35rem;
+        font-size: 0.78rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      .status {
+        font-size: 0.82rem;
+        color: #93c5fd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hud">
+      <h1>Interactive Three.js Demo</h1>
+      <p>
+        Drag to orbit, scroll to zoom, and click a floating shape to randomize its color.
+      </p>
+      <p>
+        Keyboard: <kbd>R</kbd> reset camera · <kbd>Space</kbd> toggle auto-spin
+      </p>
+      <p class="status" id="status">Auto-spin: on</p>
+    </div>
+    <div id="app" aria-hidden="true"></div>
+
+    <script type="module">
+      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
+      import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js";
+
+      const container = document.getElementById("app");
+      const statusLabel = document.getElementById("status");
+
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(0x020617, 12, 28);
+
+      const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(4.5, 2.8, 6.5);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      container.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.minDistance = 3;
+      controls.maxDistance = 15;
+      controls.target.set(0, 0.8, 0);
+
+      const ambient = new THREE.HemisphereLight(0x93c5fd, 0x1e293b, 0.7);
+      scene.add(ambient);
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      keyLight.position.set(4, 8, 2);
+      scene.add(keyLight);
+
+      const fillLight = new THREE.DirectionalLight(0x60a5fa, 0.5);
+      fillLight.position.set(-3, 2, -6);
+      scene.add(fillLight);
+
+      const ground = new THREE.Mesh(
+        new THREE.CircleGeometry(16, 96),
+        new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.95, metalness: 0.05 })
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -1.2;
+      scene.add(ground);
+
+      const pedestal = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.2, 1.35, 0.55, 40),
+        new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.4, metalness: 0.25 })
+      );
+      pedestal.position.y = -0.95;
+      scene.add(pedestal);
+
+      const shapes = [];
+      const geometryOptions = [
+        new THREE.IcosahedronGeometry(0.9, 0),
+        new THREE.TorusKnotGeometry(0.58, 0.2, 150, 24),
+        new THREE.OctahedronGeometry(0.85, 0),
+      ];
+
+      const getRandomColor = () => {
+        const hue = Math.random();
+        return new THREE.Color().setHSL(hue, 0.75, 0.52);
+      };
+
+      geometryOptions.forEach((geometry, index) => {
+        const material = new THREE.MeshStandardMaterial({
+          color: getRandomColor(),
+          roughness: 0.28,
+          metalness: 0.48,
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set((index - 1) * 2.2, 0.6 + Math.random() * 0.3, index % 2 ? -0.4 : 0.6);
+        mesh.userData.baseY = mesh.position.y;
+        mesh.userData.spinScale = 0.5 + Math.random() * 0.8;
+        scene.add(mesh);
+        shapes.push(mesh);
+      });
+
+      const stars = new THREE.Points(
+        new THREE.BufferGeometry(),
+        new THREE.PointsMaterial({ color: 0x93c5fd, size: 0.04, sizeAttenuation: true })
+      );
+
+      const starVertices = [];
+      for (let i = 0; i < 800; i += 1) {
+        const radius = 18 + Math.random() * 14;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        starVertices.push(
+          radius * Math.sin(phi) * Math.cos(theta),
+          radius * Math.sin(phi) * Math.sin(theta),
+          radius * Math.cos(phi)
+        );
+      }
+      stars.geometry.setAttribute("position", new THREE.Float32BufferAttribute(starVertices, 3));
+      scene.add(stars);
+
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+      let autoSpin = true;
+
+      function updateStatus() {
+        statusLabel.textContent = `Auto-spin: ${autoSpin ? "on" : "off"}`;
+      }
+
+      function onPointerDown(event) {
+        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+
+        const hit = raycaster.intersectObjects(shapes)[0];
+        if (!hit) {
+          return;
+        }
+
+        hit.object.material.color = getRandomColor();
+      }
+
+      function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      window.addEventListener("resize", onResize);
+      window.addEventListener("pointerdown", onPointerDown);
+      window.addEventListener("keydown", (event) => {
+        if (event.code === "Space") {
+          autoSpin = !autoSpin;
+          updateStatus();
+          return;
+        }
+
+        if (event.key.toLowerCase() === "r") {
+          camera.position.set(4.5, 2.8, 6.5);
+          controls.target.set(0, 0.8, 0);
+          controls.update();
+        }
+      });
+
+      const clock = new THREE.Clock();
+
+      function animate() {
+        const t = clock.getElapsedTime();
+
+        shapes.forEach((shape, idx) => {
+          shape.rotation.x += 0.006 + idx * 0.0015;
+          shape.rotation.y += 0.012 + idx * 0.0018;
+          shape.position.y = shape.userData.baseY + Math.sin(t * (1 + idx * 0.15)) * 0.2;
+        });
+
+        if (autoSpin) {
+          const radius = Math.hypot(camera.position.x, camera.position.z);
+          const angle = Math.atan2(camera.position.z, camera.position.x) + 0.0025;
+          camera.position.x = Math.cos(angle) * radius;
+          camera.position.z = Math.sin(angle) * radius;
+          camera.lookAt(controls.target);
+        }
+
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+
+      updateStatus();
+      animate();
+    </script>
+  </body>
+</html>

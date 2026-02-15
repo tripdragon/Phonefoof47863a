@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Three.js Interactive Demo</title>
+    <title>Three.js Candy Party Board</title>
     <style>
       :root {
         color-scheme: dark;
@@ -23,9 +23,7 @@
 
       #app {
         position: fixed;
-        background: #ff22aa;
         inset: 0;
-        height:600px;
       }
 
       .hud {
@@ -34,8 +32,8 @@
         left: 1rem;
         z-index: 10;
         display: grid;
-        gap: 0.5rem;
-        padding: 0.85rem 1rem;
+        gap: 0.4rem;
+        padding: 0.8rem 1rem;
         border: 1px solid rgba(148, 163, 184, 0.3);
         border-radius: 12px;
         background: rgba(15, 23, 42, 0.68);
@@ -50,125 +48,225 @@
 
       .hud p {
         margin: 0;
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         color: #cbd5e1;
-      }
-
-      .hud kbd {
-        border: 1px solid rgba(148, 163, 184, 0.4);
-        border-bottom-width: 2px;
-        border-radius: 6px;
-        padding: 0.1rem 0.35rem;
-        font-size: 0.78rem;
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      }
-
-      .status {
-        font-size: 0.82rem;
-        color: #93c5fd;
       }
     </style>
   </head>
   <body>
-    
+    <div class="hud">
+      <h1>🎲 Candy Party Board</h1>
+      <p>Colorful tiles, glowing towers, confetti, and a bouncy token parade.</p>
+    </div>
     <div id="app" aria-hidden="true"></div>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
-  }
-}
-</script>
-	  
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+        }
+      }
+    </script>
+
     <script type="module">
       import * as THREE from "three";
-	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
       const container = document.getElementById("app");
-      const statusLabel = document.getElementById("status");
 
       const scene = new THREE.Scene();
-      //scene.fog = new THREE.Fog(0x020617, 12, 28);
+      scene.background = new THREE.Color(0x12072b);
+      scene.fog = new THREE.Fog(0x12072b, 12, 28);
 
-      const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 0, -4);
+      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(5.2, 6.2, 6.8);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-      //renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(window.innerWidth, window.innerHeight);
-      //renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
-      controls.minDistance = 3;
-      controls.maxDistance = 15;
-      controls.target.set(0, 0.8, 0);
+      controls.target.set(0, 0.2, 0);
+      controls.minDistance = 4;
+      controls.maxDistance = 16;
+      controls.maxPolarAngle = Math.PI * 0.48;
 
-      const ambient = new THREE.HemisphereLight(0x93c5fd, 0x1e293b, 0.7);
+      const ambient = new THREE.HemisphereLight(0xffc8ff, 0x2b1550, 0.8);
       scene.add(ambient);
 
-      const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
-      keyLight.position.set(0,1,0);
-      scene.add(keyLight);
+      const sun = new THREE.DirectionalLight(0xfff6b7, 1.3);
+      sun.position.set(7, 11, 5);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048);
+      sun.shadow.camera.left = -8;
+      sun.shadow.camera.right = 8;
+      sun.shadow.camera.top = 8;
+      sun.shadow.camera.bottom = -8;
+      scene.add(sun);
 
+      const pinkLight = new THREE.PointLight(0xff3ea5, 2.4, 20);
+      pinkLight.position.set(-4, 3.8, 3.2);
+      scene.add(pinkLight);
 
-/*
+      const cyanLight = new THREE.PointLight(0x18f0ff, 2.2, 20);
+      cyanLight.position.set(4, 3.8, -3.2);
+      scene.add(cyanLight);
+
       const ground = new THREE.Mesh(
-        new THREE.CircleGeometry(16, 96),
-        new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.95, metalness: 0.05 })
+        new THREE.CircleGeometry(14, 96),
+        new THREE.MeshStandardMaterial({ color: 0x2b1458, roughness: 0.9, metalness: 0.1 })
       );
       ground.rotation.x = -Math.PI / 2;
-      ground.position.y = -1.2;
+      ground.position.y = -0.7;
+      ground.receiveShadow = true;
       scene.add(ground);
-*/
 
-			const cubegeo1 = new THREE.BoxGeometry(1,1,1);
-      const mat1 = new THREE.MeshBasicMaterial();
-      const cube1 = new THREE.Mesh(cubegeo1,mat1);
-      scene.add(cube1);
+      const boardGroup = new THREE.Group();
+      scene.add(boardGroup);
 
-/*
-      function onPointerDown(event) {
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(pointer, camera);
+      const boardBase = new THREE.Mesh(
+        new THREE.BoxGeometry(6, 0.35, 6),
+        new THREE.MeshStandardMaterial({ color: 0xff9d2e, roughness: 0.55, metalness: 0.2 })
+      );
+      boardBase.position.y = -0.2;
+      boardBase.castShadow = true;
+      boardBase.receiveShadow = true;
+      boardGroup.add(boardBase);
 
-        const hit = raycaster.intersectObjects(shapes)[0];
-        if (!hit) {
-          return;
+      const tileGeometry = new THREE.BoxGeometry(0.72, 0.08, 0.72);
+      const rainbow = [0xff4d6d, 0xfaa307, 0xfff275, 0x4cc9f0, 0x00f5d4, 0xb5179e];
+
+      const boardSize = 6;
+      const offset = (boardSize - 1) * 0.38;
+
+      for (let row = 0; row < boardSize; row += 1) {
+        for (let col = 0; col < boardSize; col += 1) {
+          const tileColor = rainbow[(row + col) % rainbow.length];
+          const tile = new THREE.Mesh(
+            tileGeometry,
+            new THREE.MeshStandardMaterial({
+              color: tileColor,
+              roughness: 0.45,
+              metalness: 0.22,
+              emissive: tileColor,
+              emissiveIntensity: 0.1,
+            })
+          );
+          tile.position.set(col * 0.76 - offset, 0.03, row * 0.76 - offset);
+          tile.receiveShadow = true;
+          boardGroup.add(tile);
         }
-
-        hit.object.material.color = getRandomColor();
-      }
-*/
-      function onResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
       }
 
-      //window.addEventListener("resize", onResize);
-      //window.addEventListener("pointerdown", onPointerDown);
-      
+      const towerMaterial = new THREE.MeshStandardMaterial({ color: 0x7a1cff, roughness: 0.35, metalness: 0.55, emissive: 0x24084a, emissiveIntensity: 0.5 });
+      const towerTopMaterial = new THREE.MeshStandardMaterial({ color: 0xffa6f6, roughness: 0.25, metalness: 0.55, emissive: 0x6f1a68, emissiveIntensity: 0.45 });
+
+      const corners = [
+        [-2.45, -2.45],
+        [2.45, -2.45],
+        [-2.45, 2.45],
+        [2.45, 2.45],
+      ];
+
+      corners.forEach(([x, z]) => {
+        const tower = new THREE.Group();
+
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.27, 1, 20), towerMaterial);
+        stem.position.y = 0.45;
+        stem.castShadow = true;
+        tower.add(stem);
+
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.2, 0.2, 20), towerTopMaterial);
+        top.position.y = 1.05;
+        top.castShadow = true;
+        tower.add(top);
+
+        tower.position.set(x, 0, z);
+        boardGroup.add(tower);
+      });
+
+      const token = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(0.28, 1),
+        new THREE.MeshStandardMaterial({ color: 0x39ff7a, roughness: 0.2, metalness: 0.5, emissive: 0x0a5f2f, emissiveIntensity: 0.8 })
+      );
+      token.position.set(-1.9, 0.32, -1.9);
+      token.castShadow = true;
+      boardGroup.add(token);
+
+      const tokenPath = [
+        new THREE.Vector3(-1.9, 0.32, -1.9),
+        new THREE.Vector3(-1.14, 0.32, -1.14),
+        new THREE.Vector3(-0.38, 0.32, -0.38),
+        new THREE.Vector3(0.38, 0.32, 0.38),
+        new THREE.Vector3(1.14, 0.32, 1.14),
+        new THREE.Vector3(1.9, 0.32, 1.9),
+      ];
+
+      const accentRing = new THREE.Mesh(
+        new THREE.TorusGeometry(2.72, 0.08, 12, 80),
+        new THREE.MeshStandardMaterial({ color: 0x00e5ff, roughness: 0.28, metalness: 0.65, emissive: 0x006677, emissiveIntensity: 0.7 })
+      );
+      accentRing.rotation.x = Math.PI / 2;
+      accentRing.position.y = 0.01;
+      accentRing.receiveShadow = true;
+      boardGroup.add(accentRing);
+
+      const confetti = new THREE.Group();
+      for (let i = 0; i < 40; i += 1) {
+        const color = rainbow[i % rainbow.length];
+        const piece = new THREE.Mesh(
+          new THREE.SphereGeometry(0.08 + Math.random() * 0.06, 12, 10),
+          new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.35, metalness: 0.25, roughness: 0.4 })
+        );
+        const angle = (i / 40) * Math.PI * 2;
+        const radius = 3.5 + Math.random() * 1.3;
+        piece.position.set(Math.cos(angle) * radius, 0.6 + Math.random() * 1.8, Math.sin(angle) * radius);
+        piece.castShadow = true;
+        confetti.add(piece);
+      }
+      scene.add(confetti);
 
       const clock = new THREE.Clock();
 
       function animate() {
         const t = clock.getElapsedTime();
 
-        
+        const segment = Math.floor((t * 0.7) % (tokenPath.length - 1));
+        const lerpT = (t * 0.7) % 1;
+        token.position.lerpVectors(tokenPath[segment], tokenPath[segment + 1], lerpT);
+        token.position.y = 0.32 + Math.sin(t * 4) * 0.05;
+
+        token.rotation.y += 0.05;
+        token.rotation.x += 0.03;
+        accentRing.rotation.z = Math.sin(t * 1.1) * 0.2;
+        boardGroup.rotation.y = Math.sin(t * 0.35) * 0.15;
+        accentRing.material.emissiveIntensity = 0.45 + Math.sin(t * 3.2) * 0.25;
+
+        confetti.children.forEach((piece, i) => {
+          piece.position.y += Math.sin(t * 2 + i) * 0.002;
+          piece.rotation.y += 0.02;
+          piece.rotation.x += 0.014;
+        });
 
         controls.update();
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
       }
 
-      
+      function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      window.addEventListener("resize", onResize);
       animate();
-      
-      
     </script>
   </body>
 </html>

@@ -72,10 +72,18 @@
   <body>
     
     <div id="app" aria-hidden="true"></div>
-
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+  }
+}
+</script>
+	  
     <script type="module">
-      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
-      import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js";
+      import * as THREE from "three";
+	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
       const container = document.getElementById("app");
       const statusLabel = document.getElementById("status");

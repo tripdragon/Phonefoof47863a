@@ -22,7 +22,7 @@
       }
 
       #app {
-        position: fixed;
+        //position: fixed;
         background: #ff22aa;
         inset: 0;
       }
@@ -95,7 +95,7 @@
       camera.position.set(0, 0, 4);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      //renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(window.innerWidth, window.innerHeight);
       //renderer.outputColorSpace = THREE.SRGBColorSpace;
       container.appendChild(renderer.domElement);

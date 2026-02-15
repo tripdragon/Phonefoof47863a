@@ -22,9 +22,10 @@
       }
 
       #app {
-        //position: fixed;
+        position: fixed;
         background: #ff22aa;
         inset: 0;
+        height:600px;
       }
 
       .hud {
@@ -69,16 +70,7 @@
     </style>
   </head>
   <body>
-    <div class="hud">
-      <h1>Interactive Three.js Demo</h1>
-      <p>
-        Drag to orbit, scroll to zoom, and click a floating shape to randomize its color.
-      </p>
-      <p>
-        Keyboard: <kbd>R</kbd> reset camera · <kbd>Space</kbd> toggle auto-spin
-      </p>
-      <p class="status" id="status">Auto-spin: on</p>
-    </div>
+    
     <div id="app" aria-hidden="true"></div>
 
     <script type="module">

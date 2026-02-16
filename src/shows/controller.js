@@ -7,6 +7,7 @@ function toShowInput(form) {
     title: formData.get("title"),
     genre: formData.get("genre"),
     seasons: formData.get("seasons"),
+    link: formData.get("link"),
     status: formData.get("status"),
   };
 }
@@ -60,6 +61,13 @@ export function renderShowsSection(container) {
         }
         refresh();
         render();
+      }
+
+      if (action === "copy-link") {
+        const link = button.dataset.link;
+        if (link) {
+          navigator.clipboard?.writeText(link);
+        }
       }
 
       if (action === "clear-selection") {

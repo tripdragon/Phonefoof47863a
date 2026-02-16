@@ -32,7 +32,7 @@ function sanitizeShow(show) {
     title: String(show.title ?? "").trim(),
     genre: String(show.genre ?? "").trim(),
     seasons: Number.parseInt(show.seasons, 10) || 1,
-    episode: Math.max(0, Number.parseInt(show.episode, 10) || 0),
+    episode: Math.max(1, Number.parseInt(show.episode, 10) || 1),
     status: String(show.status ?? "Planned").trim() || "Planned",
     notes: String(show.notes ?? "").trim(),
     link: String(show.link ?? "").trim(),
@@ -46,7 +46,7 @@ export function createShowsStore(storage = window.localStorage) {
   }
 
   function read() {
-    return parseShows(storage.getItem(STORAGE_KEY));
+    return parseShows(storage.getItem(STORAGE_KEY)).map(sanitizeShow);
   }
 
   function listShows() {

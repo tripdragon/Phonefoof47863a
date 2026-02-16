@@ -147,7 +147,7 @@ function renderShowsRoute() {
               </span>
               <span class="show-item-content">
                 <strong>${escapeHtml(show.title)}</strong>
-                <span>${escapeHtml(show.genre)} · ${show.seasons} season${show.seasons === 1 ? "" : "s"} · Episode ${show.episode}</span>
+                <span>${escapeHtml(show.genre)} · ${show.seasons} season${show.seasons === 1 ? "" : "s"} · Episode ${show.episode ?? 1}</span>
               </span>
             </li>
           `,

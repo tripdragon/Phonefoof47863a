@@ -59,15 +59,32 @@ export function renderThreeDemoRoute(container) {
     return cube;
   });
 
-  function updateCubeDistance(distance) {
+  let targetDistance = Number(distanceSlider.value);
+  const positionVelocities = cubes.map(() => 0);
+
+  const springConfig = {
+    stiffness: 220,
+    damping: 18,
+    settleDistance: 0.0008,
+    settleVelocity: 0.0015,
+  };
+
+  function updateCubeDistance(distance, { immediate = false } = {}) {
+    targetDistance = distance;
     const centerOffset = (cubes.length - 1) / 2;
     cubes.forEach((cube, index) => {
-      cube.position.set((index - centerOffset) * distance, 0, 0);
+      const targetX = (index - centerOffset) * targetDistance;
+
+      if (immediate) {
+        cube.position.x = targetX;
+        positionVelocities[index] = 0;
+      }
     });
+
     distanceValue.value = distance.toFixed(1);
   }
 
-  updateCubeDistance(Number(distanceSlider.value));
+  updateCubeDistance(targetDistance, { immediate: true });
 
   function onDistanceInput(event) {
     updateCubeDistance(Number(event.target.value));
@@ -76,6 +93,7 @@ export function renderThreeDemoRoute(container) {
   distanceSlider.addEventListener("input", onDistanceInput);
 
   let animationFrameId = null;
+  let previousTimestamp = performance.now();
 
   function resizeRenderer() {
     const width = canvasWrap.clientWidth;
@@ -85,8 +103,31 @@ export function renderThreeDemoRoute(container) {
     camera.updateProjectionMatrix();
   }
 
-  function animate() {
+  function animate(timestamp) {
     animationFrameId = window.requestAnimationFrame(animate);
+
+    const deltaTime = Math.min((timestamp - previousTimestamp) / 1000, 0.05);
+    previousTimestamp = timestamp;
+
+    const centerOffset = (cubes.length - 1) / 2;
+    cubes.forEach((cube, index) => {
+      const targetX = (index - centerOffset) * targetDistance;
+      const displacement = cube.position.x - targetX;
+      const acceleration =
+        -springConfig.stiffness * displacement - springConfig.damping * positionVelocities[index];
+
+      positionVelocities[index] += acceleration * deltaTime;
+      cube.position.x += positionVelocities[index] * deltaTime;
+
+      const isSettled =
+        Math.abs(targetX - cube.position.x) < springConfig.settleDistance &&
+        Math.abs(positionVelocities[index]) < springConfig.settleVelocity;
+
+      if (isSettled) {
+        cube.position.x = targetX;
+        positionVelocities[index] = 0;
+      }
+    });
 
     cubes.forEach((cube, index) => {
       cube.rotation.x += 0.005 + index * 0.0015;

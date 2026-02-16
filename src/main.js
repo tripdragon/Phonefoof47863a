@@ -16,6 +16,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/" href="#/">Home</a></li>
           <li><a class="menu-link" data-route="/shows" href="#/shows">Shows</a></li>
           <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
+          <li><a class="menu-link" href="/threejs-demo.html">Three.js Demo</a></li>
         </ul>
       </nav>
       <div id="route-content"></div>

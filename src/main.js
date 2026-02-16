@@ -1,5 +1,6 @@
 import "./style.css";
 import { renderShowsSection } from "./shows/controller";
+import { createShowsStore } from "./shows/store";
 
 const appVersion = `v${__APP_VERSION__}`;
 
@@ -120,14 +121,24 @@ function renderHomeRoute() {
 }
 
 function renderShowsRoute() {
+  const store = createShowsStore();
+  const shows = store.seedIfEmpty();
+
   routeContent.innerHTML = `
     <p class="hero-label">Shows</p>
-    <h1 class="hero-title">Browse featured shows</h1>
-    <p class="hero-subtitle">Jump back to Home anytime, or keep this page open to explore recent highlights.</p>
+    <h1 class="hero-title">Your shows list</h1>
+    <p class="hero-subtitle">A quick overview of your saved shows. Go to Shows CRUD to manage the full library.</p>
     <ul class="show-list" aria-label="Featured shows list">
-      <li class="show-item">Morning Standup</li>
-      <li class="show-item">Weekly Product Review</li>
-      <li class="show-item">Customer Call Insights</li>
+      ${shows
+        .map(
+          (show) => `
+            <li class="show-item">
+              <strong>${show.title}</strong>
+              <span> · ${show.genre} · ${show.seasons} season${show.seasons === 1 ? "" : "s"}</span>
+            </li>
+          `,
+        )
+        .join("")}
     </ul>
     <a class="action" href="#/" aria-label="Go to home">Back home</a>
   `;

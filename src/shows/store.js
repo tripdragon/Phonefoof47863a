@@ -7,6 +7,7 @@ const DEFAULT_SHOWS = [
     genre: "Science Fiction",
     seasons: 6,
     status: "Completed",
+    link: "https://upload.wikimedia.org/wikipedia/en/4/44/Expanse_%28TV_series%29_titlecard.jpg",
   },
 ];
 
@@ -30,6 +31,7 @@ function sanitizeShow(show) {
     genre: String(show.genre ?? "").trim(),
     seasons: Number.parseInt(show.seasons, 10) || 1,
     status: String(show.status ?? "Planned").trim() || "Planned",
+    link: String(show.link ?? "").trim(),
   };
 }
 

@@ -44,12 +44,19 @@ function renderShowDetail(show) {
   return `
     <article class="shows-detail-card" aria-live="polite">
       <h3>${escapeHtml(show.title)}</h3>
+      <div class="shows-thumbnail" aria-label="Show thumbnail preview">
+        ${show.link ? `<img src="${escapeHtml(show.link)}" alt="${escapeHtml(show.title)} thumbnail" loading="lazy" />` : '<p>No image link added.</p>'}
+      </div>
       <dl>
         <div><dt>Genre</dt><dd>${escapeHtml(show.genre)}</dd></div>
         <div><dt>Seasons</dt><dd>${show.seasons}</dd></div>
         <div><dt>Status</dt><dd>${escapeHtml(show.status)}</dd></div>
+        <div><dt>Link</dt><dd>${show.link ? `<a href="${escapeHtml(show.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(show.link)}</a>` : '—'}</dd></div>
       </dl>
-      <button class="danger" type="button" data-action="delete" data-id="${show.id}">Delete show</button>
+      <div class="shows-detail-actions">
+        <button class="ghost" type="button" data-action="copy-link" data-link="${escapeHtml(show.link)}" ${show.link ? "" : "disabled"}>Copy link</button>
+        <button class="danger" type="button" data-action="delete" data-id="${show.id}">Delete show</button>
+      </div>
     </article>
   `;
 }
@@ -71,6 +78,10 @@ function renderShowForm(show) {
       <label>
         Seasons
         <input required min="1" type="number" name="seasons" value="${show?.seasons ?? 1}" />
+      </label>
+      <label>
+        Link
+        <input type="url" name="link" placeholder="https://example.com/poster.jpg" value="${escapeHtml(show?.link ?? "")}" />
       </label>
       <label>
         Status

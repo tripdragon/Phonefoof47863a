@@ -32,6 +32,7 @@ function sanitizeShow(show) {
     seasons: Number.parseInt(show.seasons, 10) || 1,
     status: String(show.status ?? "Planned").trim() || "Planned",
     link: String(show.link ?? "").trim(),
+    thumbnail: String(show.thumbnail ?? "").trim(),
   };
 }
 

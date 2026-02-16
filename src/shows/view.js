@@ -45,7 +45,7 @@ function renderShowDetail(show) {
     <article class="shows-detail-card" aria-live="polite">
       <h3>${escapeHtml(show.title)}</h3>
       <div class="shows-thumbnail" aria-label="Show thumbnail preview">
-        ${show.link ? `<img src="${escapeHtml(show.link)}" alt="${escapeHtml(show.title)} thumbnail" loading="lazy" />` : '<p>No image link added.</p>'}
+        ${show.thumbnail ? `<img src="${escapeHtml(show.thumbnail)}" alt="${escapeHtml(show.title)} thumbnail" loading="lazy" />` : show.link ? `<img src="${escapeHtml(show.link)}" alt="${escapeHtml(show.title)} thumbnail" loading="lazy" />` : '<p>No thumbnail added.</p>'}
       </div>
       <dl>
         <div><dt>Genre</dt><dd>${escapeHtml(show.genre)}</dd></div>
@@ -63,6 +63,7 @@ function renderShowDetail(show) {
 
 function renderShowForm(show) {
   const formTitle = show ? "Edit show" : "Add show";
+  const thumbnail = show?.thumbnail ?? "";
 
   return `
     <form class="shows-form" id="shows-form">
@@ -83,6 +84,17 @@ function renderShowForm(show) {
         Link
         <input type="url" name="link" placeholder="https://example.com/poster.jpg" value="${escapeHtml(show?.link ?? "")}" />
       </label>
+      <div class="shows-thumb-field">
+        <span class="shows-thumb-label">Thumbnail (max 50 × 50)</span>
+        <button class="shows-thumb-picker" type="button" data-action="pick-thumbnail" aria-label="Select thumbnail image">
+          <span class="shows-thumb-preview" data-thumbnail-preview>
+            ${thumbnail ? `<img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(show?.title ?? "Selected")} thumbnail" />` : "<span>Tap to choose image</span>"}
+          </span>
+        </button>
+        <input class="hidden" type="file" accept="image/*" name="thumbnailFile" />
+        <input type="hidden" name="thumbnailData" value="${escapeHtml(thumbnail)}" />
+        <button class="ghost" type="button" data-action="clear-thumbnail" ${thumbnail ? "" : "disabled"}>Clear thumbnail</button>
+      </div>
       <label>
         Status
         <select name="status">

@@ -1,6 +1,66 @@
 import { createShowsStore } from "./store";
 import { renderShowsView } from "./view";
 
+function fileToImage(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Failed to load image"));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(new Error("Failed to read blob"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function createThumbnailDataUrl(file) {
+  const image = await fileToImage(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = 50;
+  canvas.height = 50;
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    return "";
+  }
+
+  const scale = Math.min(50 / image.width, 50 / image.height);
+  const drawWidth = Math.max(1, Math.round(image.width * scale));
+  const drawHeight = Math.max(1, Math.round(image.height * scale));
+  const dx = Math.floor((50 - drawWidth) / 2);
+  const dy = Math.floor((50 - drawHeight) / 2);
+
+  context.clearRect(0, 0, 50, 50);
+  context.drawImage(image, dx, dy, drawWidth, drawHeight);
+
+  const blob = await new Promise((resolve) => {
+    canvas.toBlob((nextBlob) => resolve(nextBlob), "image/png");
+  });
+
+  if (!blob) {
+    return "";
+  }
+
+  return blobToDataUrl(blob);
+}
+
 function toShowInput(form) {
   const formData = new FormData(form);
   return {
@@ -9,7 +69,29 @@ function toShowInput(form) {
     seasons: formData.get("seasons"),
     link: formData.get("link"),
     status: formData.get("status"),
+    thumbnail: formData.get("thumbnailData"),
   };
+}
+
+function renderThumbnailPreview(form, thumbnailData) {
+  const preview = form.querySelector("[data-thumbnail-preview]");
+  const hiddenInput = form.querySelector('input[name="thumbnailData"]');
+  const clearButton = form.querySelector('[data-action="clear-thumbnail"]');
+
+  if (!preview || !hiddenInput || !clearButton) {
+    return;
+  }
+
+  hiddenInput.value = thumbnailData;
+  clearButton.disabled = !thumbnailData;
+  preview.innerHTML = thumbnailData ? '<img src="" alt="Selected thumbnail" />' : "<span>Tap to choose image</span>";
+
+  if (thumbnailData) {
+    const image = preview.querySelector("img");
+    if (image) {
+      image.src = thumbnailData;
+    }
+  }
 }
 
 export function renderShowsSection(container) {
@@ -40,7 +122,7 @@ export function renderShowsSection(container) {
       selectedShow: selectedShow(),
     });
 
-    refs.showsRoot?.addEventListener("click", (event) => {
+    refs.showsRoot?.addEventListener("click", async (event) => {
       const button = event.target.closest("button[data-action]");
       if (!button) {
         return;
@@ -48,6 +130,7 @@ export function renderShowsSection(container) {
 
       const action = button.dataset.action;
       const showId = button.dataset.id;
+      const form = refs.form;
 
       if (action === "select" && showId) {
         state.selectedShowId = showId;
@@ -74,6 +157,31 @@ export function renderShowsSection(container) {
         state.selectedShowId = null;
         render();
       }
+
+      if (action === "pick-thumbnail" && form) {
+        const fileInput = form.querySelector('input[name="thumbnailFile"]');
+        fileInput?.click();
+      }
+
+      if (action === "clear-thumbnail" && form) {
+        renderThumbnailPreview(form, "");
+        const fileInput = form.querySelector('input[name="thumbnailFile"]');
+        if (fileInput) {
+          fileInput.value = "";
+        }
+      }
+    });
+
+    const fileInput = refs.form?.querySelector('input[name="thumbnailFile"]');
+    fileInput?.addEventListener("change", async (event) => {
+      const input = event.currentTarget;
+      const [file] = input.files ?? [];
+      if (!file || !refs.form) {
+        return;
+      }
+
+      const thumbnailData = await createThumbnailDataUrl(file);
+      renderThumbnailPreview(refs.form, thumbnailData);
     });
 
     refs.form?.addEventListener("submit", (event) => {

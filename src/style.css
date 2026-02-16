@@ -340,3 +340,41 @@ code {
     grid-template-columns: 1fr;
   }
 }
+
+.shows-thumb-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.shows-thumb-label {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.shows-thumb-picker {
+  justify-self: start;
+  border: 1px dashed #94a3b8;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.4rem;
+  cursor: pointer;
+}
+
+.shows-thumb-preview {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #475569;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.shows-thumb-preview img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}

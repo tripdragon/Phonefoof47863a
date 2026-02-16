@@ -6,10 +6,28 @@ export function renderThreeDemoRoute(container) {
     <p class="hero-label">Three.js Demo</p>
     <h1 class="hero-title">Stacked cubes scene</h1>
     <p class="hero-subtitle">Drag to orbit around the cubes. Scroll to zoom and right-click to pan.</p>
+    <div class="three-demo-controls" aria-label="Three.js demo controls">
+      <label class="three-demo-slider-label" for="cube-distance">
+        Cube distance
+        <output id="cube-distance-value" class="three-demo-slider-value">1.2</output>
+      </label>
+      <input
+        id="cube-distance"
+        class="three-demo-slider"
+        type="range"
+        min="0.7"
+        max="3"
+        step="0.1"
+        value="1.2"
+        aria-describedby="cube-distance-value"
+      />
+    </div>
     <div class="three-demo-canvas-wrap" id="three-demo-canvas-wrap" aria-label="Three-dimensional demo scene"></div>
   `;
 
   const canvasWrap = container.querySelector("#three-demo-canvas-wrap");
+  const distanceSlider = container.querySelector("#cube-distance");
+  const distanceValue = container.querySelector("#cube-distance-value");
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#e2e8f0");
 
@@ -22,12 +40,12 @@ export function renderThreeDemoRoute(container) {
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  controls.target.set(0, 1, 0);
+  controls.target.set(0, 0, 0);
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
   scene.add(ambientLight);
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.4);
   directionalLight.position.set(5, 6, 4);
   scene.add(directionalLight);
 
@@ -37,18 +55,25 @@ export function renderThreeDemoRoute(container) {
 
   const cubes = cubeMaterials.map((material, index) => {
     const cube = new THREE.Mesh(cubeGeometry, material);
-    cube.position.y = index * 1.1;
     scene.add(cube);
     return cube;
   });
 
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(8, 8),
-    new THREE.MeshStandardMaterial({ color: "#cbd5e1", roughness: 0.9, metalness: 0.05 }),
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -0.85;
-  scene.add(ground);
+  function updateCubeDistance(distance) {
+    const centerOffset = (cubes.length - 1) / 2;
+    cubes.forEach((cube, index) => {
+      cube.position.set((index - centerOffset) * distance, 0, 0);
+    });
+    distanceValue.value = distance.toFixed(1);
+  }
+
+  updateCubeDistance(Number(distanceSlider.value));
+
+  function onDistanceInput(event) {
+    updateCubeDistance(Number(event.target.value));
+  }
+
+  distanceSlider.addEventListener("input", onDistanceInput);
 
   let animationFrameId = null;
 
@@ -83,10 +108,9 @@ export function renderThreeDemoRoute(container) {
     }
 
     window.removeEventListener("resize", resizeRenderer);
+    distanceSlider.removeEventListener("input", onDistanceInput);
     controls.dispose();
     cubeGeometry.dispose();
-    ground.geometry.dispose();
-    ground.material.dispose();
     cubeMaterials.forEach((material) => material.dispose());
     renderer.dispose();
     canvasWrap.innerHTML = "";

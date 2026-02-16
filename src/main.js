@@ -1,10 +1,15 @@
 import "./style.css";
 
+const appVersion = "v1.0.0";
+
 document.querySelector("#app").innerHTML = `
   <main>
     <section class="hero" aria-live="polite">
       <nav class="menu" aria-label="Primary">
-        <span class="brand">Phonefoof</span>
+        <div class="brand-wrap">
+          <span class="brand">Phonefoof</span>
+          <span class="version" aria-label="Application version">${appVersion}</span>
+        </div>
         <ul class="menu-list">
           <li><a class="menu-link" href="./threejs-demo.html">33333d</a></li>
           <li><a class="menu-link" href="./example-2.html">Example 2</a></li>

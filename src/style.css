@@ -43,6 +43,21 @@ main {
   color: #1e1b4b;
 }
 
+.brand-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.version {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
 .menu-list {
   list-style: none;
   display: flex;

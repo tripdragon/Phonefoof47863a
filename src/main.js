@@ -1,6 +1,6 @@
 import "./style.css";
 
-const appVersion = "v1.0.0";
+const appVersion = `v${__APP_VERSION__}`;
 
 document.querySelector("#app").innerHTML = `
   <main>

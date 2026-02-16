@@ -44,6 +44,15 @@ const slides = [
 const routeContent = document.getElementById("route-content");
 let activeRouteCleanup = null;
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function getCurrentRoute() {
   const hash = window.location.hash || "#/";
   if (!hash.startsWith("#/")) {
@@ -133,8 +142,13 @@ function renderShowsRoute() {
         .map(
           (show) => `
             <li class="show-item">
-              <strong>${show.title}</strong>
-              <span> · ${show.genre} · ${show.seasons} season${show.seasons === 1 ? "" : "s"}</span>
+              <span class="show-item-thumb" aria-hidden="true">
+                ${show.thumbnail || show.link ? `<img src="${escapeHtml(show.thumbnail || show.link)}" alt="" loading="lazy" />` : "<span>📺</span>"}
+              </span>
+              <span class="show-item-content">
+                <strong>${escapeHtml(show.title)}</strong>
+                <span>${escapeHtml(show.genre)} · ${show.seasons} season${show.seasons === 1 ? "" : "s"}</span>
+              </span>
             </li>
           `,
         )

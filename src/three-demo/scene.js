@@ -1,6 +1,13 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
+
+import { Primitives } from 'superneatlib';
+// import {CheapPool} from './superneatlib.js';
+
+// need to know how references
+// import { APP as _o } from "superneatlib";
+
 export function renderThreeDemoRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js Demo</p>
@@ -58,6 +65,13 @@ export function renderThreeDemoRoute(container) {
     scene.add(cube);
     return cube;
   });
+
+
+  const ball = Primitives.ball({scale: 1.4, color: 0x44aaff});
+  ball.position.y += 0.1;
+  ball.position.z += 2.1;
+  scene.add(ball);
+
 
   function updateCubeDistance(distance) {
     const centerOffset = (cubes.length - 1) / 2;

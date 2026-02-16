@@ -67,6 +67,8 @@ function toShowInput(form) {
     title: formData.get("title"),
     genre: formData.get("genre"),
     seasons: formData.get("seasons"),
+    episode: formData.get("episode"),
+    notes: formData.get("notes"),
     link: formData.get("link"),
     status: formData.get("status"),
     thumbnail: formData.get("thumbnailData"),

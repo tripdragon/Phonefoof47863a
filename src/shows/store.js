@@ -6,7 +6,9 @@ const DEFAULT_SHOWS = [
     title: "The Expanse",
     genre: "Science Fiction",
     seasons: 6,
+    episode: 62,
     status: "Completed",
+    notes: "A complete adaptation with a strong finish.",
     link: "https://upload.wikimedia.org/wikipedia/en/4/44/Expanse_%28TV_series%29_titlecard.jpg",
   },
 ];
@@ -30,7 +32,9 @@ function sanitizeShow(show) {
     title: String(show.title ?? "").trim(),
     genre: String(show.genre ?? "").trim(),
     seasons: Number.parseInt(show.seasons, 10) || 1,
+    episode: Math.max(0, Number.parseInt(show.episode, 10) || 0),
     status: String(show.status ?? "Planned").trim() || "Planned",
+    notes: String(show.notes ?? "").trim(),
     link: String(show.link ?? "").trim(),
     thumbnail: String(show.thumbnail ?? "").trim(),
   };

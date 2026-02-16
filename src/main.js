@@ -1,6 +1,7 @@
 import "./style.css";
 import { renderShowsSection } from "./shows/controller";
 import { createShowsStore } from "./shows/store";
+import { renderThreeDemoRoute } from "./three-demo/scene";
 
 const appVersion = `v${__APP_VERSION__}`;
 
@@ -16,7 +17,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/" href="#/">Home</a></li>
           <li><a class="menu-link" data-route="/shows" href="#/shows">Shows</a></li>
           <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
-          <li><a class="menu-link" href="/Phonefoof47863a/threejs-demo.html">Three.js Demo</a></li>
+          <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
         </ul>
       </nav>
       <div id="route-content"></div>
@@ -165,10 +166,16 @@ function renderShowsCrudRoute() {
   renderShowsSection(showsCrudContainer);
 }
 
+
+function renderThreeRoute() {
+  return renderThreeDemoRoute(routeContent);
+}
+
 const routes = {
   "/": renderHomeRoute,
   "/shows": renderShowsRoute,
   "/shows-crud": renderShowsCrudRoute,
+  "/three-demo": renderThreeRoute,
 };
 
 function renderRoute() {

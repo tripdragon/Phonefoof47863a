@@ -1,4 +1,5 @@
 import "./style.css";
+import { createShowsController } from "./shows/controller.js";
 
 const appVersion = `v${__APP_VERSION__}`;
 
@@ -24,6 +25,7 @@ document.querySelector("#app").innerHTML = `
       <div class="hero-controls" id="hero-controls"></div>
       <a class="action" href="#" aria-label="Get started">Get started</a>
     </section>
+    <section id="shows-app"></section>
   </main>
 `;
 
@@ -90,3 +92,39 @@ setInterval(() => {
   currentSlide = (currentSlide + 1) % slides.length;
   renderSlide(currentSlide);
 }, 4000);
+
+const showsStore = (() => {
+  let shows = [
+    {
+      id: crypto.randomUUID(),
+      title: "Launch Recap",
+      description: "Weekly review of support calls and incidents.",
+    },
+    {
+      id: crypto.randomUUID(),
+      title: "Roadmap Live",
+      description: "Upcoming feature prioritization and release notes.",
+    },
+  ];
+
+  return {
+    async createShow(payload) {
+      shows = [...shows, { ...payload, id: crypto.randomUUID() }];
+    },
+    async getShows() {
+      return [...shows];
+    },
+    async updateShow(id, updates) {
+      shows = shows.map((show) => (show.id === id ? { ...show, ...updates } : show));
+    },
+    async deleteShow(id) {
+      shows = shows.filter((show) => show.id !== id);
+    },
+  };
+})();
+
+const showsRoot = document.getElementById("shows-app");
+if (showsRoot) {
+  const controller = createShowsController({ root: showsRoot, store: showsStore });
+  controller.init();
+}

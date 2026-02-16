@@ -23,6 +23,8 @@ npm run build
 
 The production output is generated in the `dist/` directory.
 
+The build now runs a prebuild step that automatically increments the patch version in `package.json` when the current branch is `main`, so `main` builds always advance the app version.
+
 ## Run with Docker Compose
 
 ```bash

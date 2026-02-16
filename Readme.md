@@ -1,7 +1,27 @@
 https://tripdragon.github.io/Phonefoof47863a/
 # Phonefoof App
 
-This project is dockerized and runs as a static web app served by NGINX.
+This project now uses Vite for local development and production builds.
+
+## Run locally with Vite
+
+```bash
+npm install
+npm run dev
+```
+
+Then open the URL shown in your terminal (typically <http://localhost:5173>).  
+The demo pages are available at:
+- <http://localhost:5173/example-2.html>
+- <http://localhost:5173/threejs-demo.html>
+
+## Build
+
+```bash
+npm run build
+```
+
+The production output is generated in the `dist/` directory.
 
 ## Run with Docker Compose
 
@@ -18,10 +38,9 @@ docker build -t phonefoof-app .
 docker run --rm -p 8080:80 phonefoof-app
 ```
 
-
 ## Deploy with GitHub Pages
 
-This repository includes a GitHub Actions workflow at `.github/workflows/deploy-pages.yml` that deploys the static site to GitHub Pages whenever changes are pushed to `main`.
+This repository includes a GitHub Actions workflow at `.github/workflows/deploy-pages.yml` that builds with Vite and deploys the `dist/` output to GitHub Pages whenever changes are pushed to `main`.
 
 ### One-time repository setup
 

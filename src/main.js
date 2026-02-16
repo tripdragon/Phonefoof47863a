@@ -14,11 +14,11 @@ document.querySelector("#app").innerHTML = `
         <ul class="menu-list">
           <li><a class="menu-link" data-route="/" href="#/">Home</a></li>
           <li><a class="menu-link" data-route="/shows" href="#/shows">Shows</a></li>
+          <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
         </ul>
       </nav>
       <div id="route-content"></div>
     </section>
-    <section id="shows-section" class="hidden"></section>
   </main>
 `;
 
@@ -133,9 +133,16 @@ function renderShowsRoute() {
   `;
 }
 
+function renderShowsCrudRoute() {
+  routeContent.innerHTML = '<div id="shows-crud-route"></div>';
+  const showsCrudContainer = document.getElementById("shows-crud-route");
+  renderShowsSection(showsCrudContainer);
+}
+
 const routes = {
   "/": renderHomeRoute,
   "/shows": renderShowsRoute,
+  "/shows-crud": renderShowsCrudRoute,
 };
 
 function renderRoute() {

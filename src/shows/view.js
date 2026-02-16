@@ -21,7 +21,7 @@ function renderShowList(shows, selectedShowId) {
             <li>
               <button class="shows-item" type="button" data-action="select" data-id="${show.id}" aria-current="${selected}">
                 <span class="shows-item-title">${escapeHtml(show.title)}</span>
-                <span class="shows-item-meta">${escapeHtml(show.genre)} · ${show.seasons} season(s) · ${escapeHtml(show.status)}</span>
+                <span class="shows-item-meta">${escapeHtml(show.genre)} · ${show.seasons} season(s) · Episode ${show.episode} · ${escapeHtml(show.status)}</span>
               </button>
             </li>
           `;
@@ -51,6 +51,8 @@ function renderShowDetail(show) {
         <div><dt>Genre</dt><dd>${escapeHtml(show.genre)}</dd></div>
         <div><dt>Seasons</dt><dd>${show.seasons}</dd></div>
         <div><dt>Status</dt><dd>${escapeHtml(show.status)}</dd></div>
+        <div><dt>Episode</dt><dd>${show.episode}</dd></div>
+        <div><dt>Notes</dt><dd>${escapeHtml(show.notes) || "—"}</dd></div>
         <div><dt>Link</dt><dd>${show.link ? `<a href="${escapeHtml(show.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(show.link)}</a>` : '—'}</dd></div>
       </dl>
       <div class="shows-detail-actions">
@@ -79,6 +81,14 @@ function renderShowForm(show) {
       <label>
         Seasons
         <input required min="1" type="number" name="seasons" value="${show?.seasons ?? 1}" />
+      </label>
+      <label>
+        Episode
+        <input required min="0" type="number" name="episode" value="${show?.episode ?? 0}" />
+      </label>
+      <label>
+        Notes
+        <textarea name="notes" rows="3" placeholder="Add any viewing notes...">${escapeHtml(show?.notes ?? "")}</textarea>
       </label>
       <label>
         Link

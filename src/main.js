@@ -1,10 +1,11 @@
 import "./style.css";
+import { renderShowsSection } from "./shows/controller";
 
 const appVersion = `v${__APP_VERSION__}`;
 
 document.querySelector("#app").innerHTML = `
   <main>
-    <section class="hero" aria-live="polite">
+    <section class="hero" aria-live="polite" id="home-section">
       <nav class="menu" aria-label="Primary">
         <div class="brand-wrap">
           <span class="brand">Phonefoof</span>
@@ -17,6 +18,7 @@ document.querySelector("#app").innerHTML = `
       </nav>
       <div id="route-content"></div>
     </section>
+    <section id="shows-section" class="hidden"></section>
   </main>
 `;
 
@@ -32,9 +34,9 @@ const slides = [
     subtitle: "Run <code>docker compose up --build</code> and open <code>http://localhost:8080</code>.",
   },
   {
-    kicker: "Built for speed",
-    title: "Keep focus with a rotating, message-driven hero",
-    subtitle: "Each spotlight message refreshes automatically every 4 seconds, with manual controls.",
+    kicker: "Shows Tracker",
+    title: "Organize what you watch with local persistence",
+    subtitle: "Use the new shows section to create, update, and remove your favorite titles.",
   },
 ];
 

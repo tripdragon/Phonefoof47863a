@@ -139,6 +139,39 @@ main {
   font-size: 0.95rem;
 }
 
+.weather-widget {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #dbe3f4;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.weather-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #4338ca;
+}
+
+.weather-content p {
+  margin: 0.15rem 0;
+}
+
+.weather-status {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.weather-location,
+.weather-metrics {
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+
 .action {
   display: inline-block;
   margin-top: 1.5rem;

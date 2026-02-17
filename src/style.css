@@ -477,6 +477,23 @@ code {
   touch-action: pan-x;
 }
 
+.three-demo-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin: 0.6rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.three-demo-score-value {
+  min-width: 2ch;
+  text-align: right;
+  color: #0f172a;
+}
+
 @media (max-width: 640px) {
   .three-demo-controls {
     padding: 0.85rem;

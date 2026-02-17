@@ -87,6 +87,13 @@ function renderHomeRoute() {
         <p class="weather-metrics" id="weather-metrics"></p>
       </div>
     </section>
+    <section class="scribble-widget" aria-label="Scribble board">
+      <div class="scribble-header">
+        <p class="scribble-title">Quick Scribble Board</p>
+        <button class="scribble-download" id="scribble-download" type="button">Download sketch</button>
+      </div>
+      <canvas id="scribble-canvas" class="scribble-canvas" width="480" height="220" aria-label="Scribble drawing area"></canvas>
+    </section>
     <a class="action" href="#/shows" aria-label="Open shows">View shows</a>
   `;
 
@@ -97,6 +104,8 @@ function renderHomeRoute() {
   const weatherStatus = document.getElementById("weather-status");
   const weatherLocation = document.getElementById("weather-location");
   const weatherMetrics = document.getElementById("weather-metrics");
+  const scribbleCanvas = document.getElementById("scribble-canvas");
+  const scribbleDownload = document.getElementById("scribble-download");
 
   let currentSlide = 0;
 
@@ -193,7 +202,69 @@ function renderHomeRoute() {
     weatherMetrics.textContent = "";
   });
 
-  return () => window.clearInterval(intervalId);
+  const drawingContext = scribbleCanvas.getContext("2d");
+  drawingContext.fillStyle = "#ffffff";
+  drawingContext.fillRect(0, 0, scribbleCanvas.width, scribbleCanvas.height);
+  drawingContext.strokeStyle = "#4338ca";
+  drawingContext.lineWidth = 3;
+  drawingContext.lineCap = "round";
+  drawingContext.lineJoin = "round";
+
+  let isDrawing = false;
+
+  function getCanvasPoint(event) {
+    const bounds = scribbleCanvas.getBoundingClientRect();
+    return {
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    };
+  }
+
+  function startDrawing(event) {
+    isDrawing = true;
+    const point = getCanvasPoint(event);
+    drawingContext.beginPath();
+    drawingContext.moveTo(point.x, point.y);
+  }
+
+  function draw(event) {
+    if (!isDrawing) {
+      return;
+    }
+
+    const point = getCanvasPoint(event);
+    drawingContext.lineTo(point.x, point.y);
+    drawingContext.stroke();
+  }
+
+  function stopDrawing() {
+    if (!isDrawing) {
+      return;
+    }
+
+    isDrawing = false;
+    drawingContext.closePath();
+  }
+
+  scribbleCanvas.addEventListener("pointerdown", startDrawing);
+  scribbleCanvas.addEventListener("pointermove", draw);
+  scribbleCanvas.addEventListener("pointerup", stopDrawing);
+  scribbleCanvas.addEventListener("pointerleave", stopDrawing);
+
+  scribbleDownload.addEventListener("click", () => {
+    const anchor = document.createElement("a");
+    anchor.href = scribbleCanvas.toDataURL("image/png");
+    anchor.download = "phonefoof-scribble.png";
+    anchor.click();
+  });
+
+  return () => {
+    window.clearInterval(intervalId);
+    scribbleCanvas.removeEventListener("pointerdown", startDrawing);
+    scribbleCanvas.removeEventListener("pointermove", draw);
+    scribbleCanvas.removeEventListener("pointerup", stopDrawing);
+    scribbleCanvas.removeEventListener("pointerleave", stopDrawing);
+  };
 }
 
 function renderShowsRoute() {

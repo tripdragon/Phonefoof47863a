@@ -28,6 +28,10 @@ export function renderThreeDemoRoute(container) {
         value="1.2"
         aria-describedby="cube-distance-value"
       />
+      <p class="three-demo-score-row">
+        <span>Overlap score</span>
+        <output id="cube-overlap-score" class="three-demo-score-value">0</output>
+      </p>
     </div>
     <div class="three-demo-canvas-wrap" id="three-demo-canvas-wrap" aria-label="Three-dimensional demo scene"></div>
   `;
@@ -35,6 +39,8 @@ export function renderThreeDemoRoute(container) {
   const canvasWrap = container.querySelector("#three-demo-canvas-wrap");
   const distanceSlider = container.querySelector("#cube-distance");
   const distanceValue = container.querySelector("#cube-distance-value");
+  const scoreValue = container.querySelector("#cube-overlap-score");
+  scoreValue.textContent = "0";
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#e2e8f0");
 

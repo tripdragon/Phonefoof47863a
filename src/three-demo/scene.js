@@ -40,8 +40,8 @@ export function renderThreeDemoRoute(container) {
   const distanceSlider = container.querySelector("#cube-distance");
   const distanceValue = container.querySelector("#cube-distance-value");
   const scoreValue = container.querySelector("#cube-overlap-score");
-  let overlapScore = 0;
-  scoreValue.textContent = String(overlapScore);
+  let score = 0;
+  scoreValue.textContent = String(score);
   const overlappingPairs = new Set();
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#e2e8f0");
@@ -80,6 +80,10 @@ export function renderThreeDemoRoute(container) {
   ball.position.z += 2.1;
   scene.add(ball);
 
+  function randomizeCubeColor(cube) {
+    cube.material.color.setHex(Math.floor(Math.random() * 0xffffff));
+  }
+
 
   function updateCubeDistance(distance) {
     const centerOffset = (cubes.length - 1) / 2;
@@ -99,7 +103,10 @@ export function renderThreeDemoRoute(container) {
         const wasOverlapping = overlappingPairs.has(pairKey);
 
         if (countNewEvents && isOverlapping && !wasOverlapping) {
-          overlapScore += 1;
+          randomizeCubeColor(cubeA);
+          randomizeCubeColor(cubeB);
+          score += 1;
+          scoreValue.textContent = String(score);
         }
 
         if (isOverlapping) {
@@ -110,7 +117,6 @@ export function renderThreeDemoRoute(container) {
       }
     }
 
-    scoreValue.textContent = String(overlapScore);
   }
 
   updateCubeDistance(Number(distanceSlider.value));

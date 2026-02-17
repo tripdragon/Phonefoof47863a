@@ -79,6 +79,14 @@ function renderHomeRoute() {
     <h1 class="hero-title" id="hero-title"></h1>
     <p class="hero-subtitle" id="hero-subtitle"></p>
     <div class="hero-controls" id="hero-controls"></div>
+    <section class="weather-widget" aria-live="polite" aria-label="Current weather">
+      <p class="weather-label">Current Weather</p>
+      <div class="weather-content">
+        <p class="weather-status" id="weather-status">Loading weather…</p>
+        <p class="weather-location" id="weather-location"></p>
+        <p class="weather-metrics" id="weather-metrics"></p>
+      </div>
+    </section>
     <a class="action" href="#/shows" aria-label="Open shows">View shows</a>
   `;
 
@@ -86,6 +94,9 @@ function renderHomeRoute() {
   const heroTitle = document.getElementById("hero-title");
   const heroSubtitle = document.getElementById("hero-subtitle");
   const heroControls = document.getElementById("hero-controls");
+  const weatherStatus = document.getElementById("weather-status");
+  const weatherLocation = document.getElementById("weather-location");
+  const weatherMetrics = document.getElementById("weather-metrics");
 
   let currentSlide = 0;
 
@@ -127,6 +138,60 @@ function renderHomeRoute() {
     currentSlide = (currentSlide + 1) % slides.length;
     renderSlide(currentSlide);
   }, 4000);
+
+  async function fetchWeather(latitude, longitude) {
+    const response = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,wind_speed_10m&timezone=auto`,
+    );
+
+    if (!response.ok) {
+      throw new Error("Weather request failed");
+    }
+
+    return response.json();
+  }
+
+  function renderWeather(data, locationLabel) {
+    const current = data.current;
+    weatherStatus.textContent = `${Math.round(current.temperature_2m)}°C and feels like ${Math.round(current.apparent_temperature)}°C`;
+    weatherLocation.textContent = locationLabel;
+    weatherMetrics.textContent = `Wind ${Math.round(current.wind_speed_10m)} km/h`;
+  }
+
+  async function loadWeather() {
+    const fallback = { latitude: 40.7128, longitude: -74.006, label: "New York, fallback" };
+
+    const loadFromCoordinates = async (latitude, longitude, label) => {
+      const data = await fetchWeather(latitude, longitude);
+      renderWeather(data, label);
+    };
+
+    if (!navigator.geolocation) {
+      await loadFromCoordinates(fallback.latitude, fallback.longitude, fallback.label);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          await loadFromCoordinates(latitude, longitude, "Your location");
+        } catch {
+          await loadFromCoordinates(fallback.latitude, fallback.longitude, fallback.label);
+        }
+      },
+      async () => {
+        await loadFromCoordinates(fallback.latitude, fallback.longitude, fallback.label);
+      },
+      { timeout: 3000 },
+    );
+  }
+
+  loadWeather().catch(() => {
+    weatherStatus.textContent = "Weather unavailable right now.";
+    weatherLocation.textContent = "";
+    weatherMetrics.textContent = "";
+  });
 
   return () => window.clearInterval(intervalId);
 }

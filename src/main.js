@@ -273,19 +273,27 @@ function renderHomeRoute() {
   });
 
   function toHexWordGroups(text) {
-    const words = text.trim().split(/\s+/).filter(Boolean);
-    if (!words.length) {
-      return [];
-    }
-
-    return words.map((word) => {
+    return Array.from(text.matchAll(/\S+/g), (match) => {
+      const [word] = match;
       const bytes = new TextEncoder().encode(word);
-      return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(" ");
+      const group = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(" ");
+
+      return {
+        group,
+        start: match.index,
+        end: (match.index ?? 0) + word.length,
+      };
     });
+  }
+
+  function findActiveHexGroupIndex(groups, cursorPosition) {
+    return groups.findIndex(({ start, end }) => cursorPosition >= start && cursorPosition <= end);
   }
 
   function syncHexOutput() {
     const groups = toHexWordGroups(hexInput.value);
+    const cursorPosition = hexInput.selectionStart ?? 0;
+    const activeGroupIndex = findActiveHexGroupIndex(groups, cursorPosition);
     hexOutput.replaceChildren();
 
     if (!groups.length) {
@@ -293,9 +301,10 @@ function renderHomeRoute() {
       return;
     }
 
-    groups.forEach((group, index) => {
+    groups.forEach(({ group }, index) => {
       const groupSpan = document.createElement("span");
       groupSpan.className = `hex-group ${index % 2 === 0 ? "is-primary" : "is-secondary"}`;
+      groupSpan.classList.toggle("is-active", index === activeGroupIndex);
       groupSpan.textContent = group;
       hexOutput.appendChild(groupSpan);
 
@@ -309,6 +318,9 @@ function renderHomeRoute() {
   }
 
   hexInput.addEventListener("input", syncHexOutput);
+  hexInput.addEventListener("click", syncHexOutput);
+  hexInput.addEventListener("keyup", syncHexOutput);
+  hexInput.addEventListener("select", syncHexOutput);
   syncHexOutput();
 
   return () => {
@@ -318,6 +330,9 @@ function renderHomeRoute() {
     scribbleCanvas.removeEventListener("pointerup", stopDrawing);
     scribbleCanvas.removeEventListener("pointerleave", stopDrawing);
     hexInput.removeEventListener("input", syncHexOutput);
+    hexInput.removeEventListener("click", syncHexOutput);
+    hexInput.removeEventListener("keyup", syncHexOutput);
+    hexInput.removeEventListener("select", syncHexOutput);
   };
 }
 

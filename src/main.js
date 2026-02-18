@@ -94,6 +94,18 @@ function renderHomeRoute() {
       </div>
       <canvas id="scribble-canvas" class="scribble-canvas" width="480" height="220" aria-label="Scribble drawing area"></canvas>
     </section>
+    <section class="hex-widget" aria-label="Hex converter">
+      <p class="hex-title">Matrix Hex Translator</p>
+      <label class="hex-label" for="hex-input">Type text</label>
+      <textarea
+        id="hex-input"
+        class="hex-input"
+        rows="4"
+        placeholder="Type anything and watch the hex stream…"
+      ></textarea>
+      <p class="hex-label">Hex output</p>
+      <output id="hex-output" class="hex-output" aria-live="polite">--</output>
+    </section>
     <a class="action" href="#/shows" aria-label="Open shows">View shows</a>
   `;
 
@@ -106,6 +118,8 @@ function renderHomeRoute() {
   const weatherMetrics = document.getElementById("weather-metrics");
   const scribbleCanvas = document.getElementById("scribble-canvas");
   const scribbleDownload = document.getElementById("scribble-download");
+  const hexInput = document.getElementById("hex-input");
+  const hexOutput = document.getElementById("hex-output");
 
   let currentSlide = 0;
 
@@ -258,12 +272,29 @@ function renderHomeRoute() {
     anchor.click();
   });
 
+  function toHexPairs(text) {
+    const bytes = new TextEncoder().encode(text);
+    if (!bytes.length) {
+      return "--";
+    }
+
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(" ");
+  }
+
+  function syncHexOutput() {
+    hexOutput.textContent = toHexPairs(hexInput.value);
+  }
+
+  hexInput.addEventListener("input", syncHexOutput);
+  syncHexOutput();
+
   return () => {
     window.clearInterval(intervalId);
     scribbleCanvas.removeEventListener("pointerdown", startDrawing);
     scribbleCanvas.removeEventListener("pointermove", draw);
     scribbleCanvas.removeEventListener("pointerup", stopDrawing);
     scribbleCanvas.removeEventListener("pointerleave", stopDrawing);
+    hexInput.removeEventListener("input", syncHexOutput);
   };
 }
 

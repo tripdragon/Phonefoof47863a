@@ -106,6 +106,61 @@ function renderHomeRoute() {
       <p class="hex-label">Hex output</p>
       <output id="hex-output" class="hex-output" aria-live="polite">--</output>
     </section>
+    <section class="logic-widget" aria-label="Logic gate simulator">
+      <div class="logic-header">
+        <p class="logic-title">Logic Gate Lab</p>
+        <span class="logic-subtitle">Toggle inputs, pick a gate, and see the result instantly.</span>
+      </div>
+      <div class="logic-controls" role="group" aria-label="Logic inputs">
+        <label class="logic-toggle" for="logic-input-a">
+          <span>Input A</span>
+          <input id="logic-input-a" type="checkbox" />
+        </label>
+        <label class="logic-toggle" for="logic-input-b">
+          <span>Input B</span>
+          <input id="logic-input-b" type="checkbox" />
+        </label>
+      </div>
+      <div class="logic-gates" role="radiogroup" aria-label="Choose gate">
+        <button type="button" class="logic-gate" data-gate="AND" aria-pressed="true">AND</button>
+        <button type="button" class="logic-gate" data-gate="OR" aria-pressed="false">OR</button>
+        <button type="button" class="logic-gate" data-gate="XOR" aria-pressed="false">XOR</button>
+        <button type="button" class="logic-gate" data-gate="NAND" aria-pressed="false">NAND</button>
+        <button type="button" class="logic-gate" data-gate="NOR" aria-pressed="false">NOR</button>
+        <button type="button" class="logic-gate" data-gate="XNOR" aria-pressed="false">XNOR</button>
+        <button type="button" class="logic-gate" data-gate="NOT_A" aria-pressed="false">NOT A</button>
+        <button type="button" class="logic-gate" data-gate="NOT_B" aria-pressed="false">NOT B</button>
+        <button type="button" class="logic-gate" data-gate="BUF_A" aria-pressed="false">BUFFER A</button>
+        <button type="button" class="logic-gate" data-gate="BUF_B" aria-pressed="false">BUFFER B</button>
+      </div>
+      <div class="logic-result" aria-live="polite">
+        <p class="logic-expression" id="logic-expression"></p>
+        <p class="logic-output" id="logic-output"></p>
+      </div>
+      <div class="logic-circuit" aria-label="Circuit display">
+        <svg viewBox="0 0 600 210" role="img" aria-label="Logic circuit visualization">
+          <text x="18" y="52" class="logic-svg-label">A</text>
+          <text x="18" y="152" class="logic-svg-label">B</text>
+          <line id="wire-a" class="logic-wire" x1="40" y1="48" x2="205" y2="48" />
+          <line id="wire-b" class="logic-wire" x1="40" y1="148" x2="205" y2="148" />
+          <rect x="205" y="28" width="185" height="140" rx="18" class="logic-gate-body" />
+          <text id="logic-circuit-gate" x="298" y="108" class="logic-svg-gate">AND</text>
+          <line id="wire-out" class="logic-wire" x1="390" y1="98" x2="500" y2="98" />
+          <circle id="logic-lamp" cx="536" cy="98" r="24" class="logic-lamp" />
+          <text x="524" y="104" class="logic-svg-lamp-text">OUT</text>
+        </svg>
+      </div>
+      <table class="truth-table" aria-label="Truth table">
+        <thead>
+          <tr>
+            <th scope="col">A</th>
+            <th scope="col">B</th>
+            <th scope="col">Result</th>
+          </tr>
+        </thead>
+        <tbody id="truth-table-body"></tbody>
+      </table>
+    </section>
     <a class="action" href="#/shows" aria-label="Open shows">View shows</a>
   `;
 
@@ -120,6 +175,17 @@ function renderHomeRoute() {
   const scribbleDownload = document.getElementById("scribble-download");
   const hexInput = document.getElementById("hex-input");
   const hexOutput = document.getElementById("hex-output");
+  const logicInputA = document.getElementById("logic-input-a");
+  const logicInputB = document.getElementById("logic-input-b");
+  const logicGateButtons = [...document.querySelectorAll(".logic-gate")];
+  const logicExpression = document.getElementById("logic-expression");
+  const logicOutput = document.getElementById("logic-output");
+  const truthTableBody = document.getElementById("truth-table-body");
+  const logicCircuitGate = document.getElementById("logic-circuit-gate");
+  const logicLamp = document.getElementById("logic-lamp");
+  const wireA = document.getElementById("wire-a");
+  const wireB = document.getElementById("wire-b");
+  const wireOut = document.getElementById("wire-out");
 
   let currentSlide = 0;
 
@@ -323,6 +389,105 @@ function renderHomeRoute() {
   hexInput.addEventListener("select", syncHexOutput);
   syncHexOutput();
 
+  const gateEvaluators = {
+    AND: (a, b) => a && b,
+    OR: (a, b) => a || b,
+    XOR: (a, b) => a !== b,
+    NAND: (a, b) => !(a && b),
+    NOR: (a, b) => !(a || b),
+    XNOR: (a, b) => a === b,
+    NOT_A: (a) => !a,
+    NOT_B: (_, b) => !b,
+    BUF_A: (a) => a,
+    BUF_B: (_, b) => b,
+  };
+
+  let activeGate = "AND";
+
+  function toBit(value) {
+    return value ? 1 : 0;
+  }
+
+  function renderTruthTable() {
+    const combinations = [
+      { a: false, b: false },
+      { a: false, b: true },
+      { a: true, b: false },
+      { a: true, b: true },
+    ];
+
+    const currentA = logicInputA.checked;
+    const currentB = logicInputB.checked;
+    truthTableBody.replaceChildren();
+
+    combinations.forEach(({ a, b }) => {
+      const row = document.createElement("tr");
+      row.classList.toggle("is-active", a === currentA && b === currentB);
+
+      const result = gateEvaluators[activeGate](a, b);
+
+      [toBit(a), toBit(b), toBit(result)].forEach((value) => {
+        const cell = document.createElement("td");
+        cell.textContent = String(value);
+        row.appendChild(cell);
+      });
+
+      truthTableBody.appendChild(row);
+    });
+  }
+
+  function gateExpression(gate, a, b) {
+    const formatter = {
+      NOT_A: `NOT(${toBit(a)})`,
+      NOT_B: `NOT(${toBit(b)})`,
+      BUF_A: `BUF(${toBit(a)})`,
+      BUF_B: `BUF(${toBit(b)})`,
+    };
+
+    return formatter[gate] || `${gate}(${toBit(a)}, ${toBit(b)})`;
+  }
+
+  function renderCircuit(a, b, result) {
+    logicCircuitGate.textContent = activeGate.replace("_", " ");
+    wireA.dataset.active = String(a);
+    wireB.dataset.active = String(b);
+    wireOut.dataset.active = String(result);
+    logicLamp.dataset.active = String(result);
+  }
+
+  function syncLogicResult() {
+    const a = logicInputA.checked;
+    const b = logicInputB.checked;
+    const result = gateEvaluators[activeGate](a, b);
+
+    logicExpression.textContent = gateExpression(activeGate, a, b);
+    logicOutput.textContent = `Result: ${toBit(result)}`;
+
+    logicGateButtons.forEach((button) => {
+      const isActive = button.dataset.gate === activeGate;
+      button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      button.classList.toggle("is-active", isActive);
+    });
+
+    renderCircuit(a, b, result);
+    renderTruthTable();
+  }
+
+  function handleGateSelection(event) {
+    const gate = event.currentTarget.dataset.gate;
+    if (!gate || !gateEvaluators[gate]) {
+      return;
+    }
+
+    activeGate = gate;
+    syncLogicResult();
+  }
+
+  logicInputA.addEventListener("change", syncLogicResult);
+  logicInputB.addEventListener("change", syncLogicResult);
+  logicGateButtons.forEach((button) => button.addEventListener("click", handleGateSelection));
+  syncLogicResult();
+
   return () => {
     window.clearInterval(intervalId);
     scribbleCanvas.removeEventListener("pointerdown", startDrawing);
@@ -333,6 +498,9 @@ function renderHomeRoute() {
     hexInput.removeEventListener("click", syncHexOutput);
     hexInput.removeEventListener("keyup", syncHexOutput);
     hexInput.removeEventListener("select", syncHexOutput);
+    logicInputA.removeEventListener("change", syncLogicResult);
+    logicInputB.removeEventListener("change", syncLogicResult);
+    logicGateButtons.forEach((button) => button.removeEventListener("click", handleGateSelection));
   };
 }
 

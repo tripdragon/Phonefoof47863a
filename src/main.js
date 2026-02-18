@@ -272,17 +272,40 @@ function renderHomeRoute() {
     anchor.click();
   });
 
-  function toHexPairs(text) {
-    const bytes = new TextEncoder().encode(text);
-    if (!bytes.length) {
-      return "--";
+  function toHexWordGroups(text) {
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    if (!words.length) {
+      return [];
     }
 
-    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(" ");
+    return words.map((word) => {
+      const bytes = new TextEncoder().encode(word);
+      return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(" ");
+    });
   }
 
   function syncHexOutput() {
-    hexOutput.textContent = toHexPairs(hexInput.value);
+    const groups = toHexWordGroups(hexInput.value);
+    hexOutput.replaceChildren();
+
+    if (!groups.length) {
+      hexOutput.textContent = "--";
+      return;
+    }
+
+    groups.forEach((group, index) => {
+      const groupSpan = document.createElement("span");
+      groupSpan.className = `hex-group ${index % 2 === 0 ? "is-primary" : "is-secondary"}`;
+      groupSpan.textContent = group;
+      hexOutput.appendChild(groupSpan);
+
+      if (index < groups.length - 1) {
+        const separator = document.createElement("span");
+        separator.className = "hex-group-separator";
+        separator.textContent = " | ";
+        hexOutput.appendChild(separator);
+      }
+    });
   }
 
   hexInput.addEventListener("input", syncHexOutput);

@@ -633,6 +633,11 @@ code {
   text-shadow: 0 0 8px rgba(103, 232, 249, 0.45);
 }
 
+.hex-group.is-active {
+  color: #facc15;
+  text-shadow: 0 0 10px rgba(250, 204, 21, 0.65);
+}
+
 .hex-group-separator {
   color: #4ade80;
   opacity: 0.75;

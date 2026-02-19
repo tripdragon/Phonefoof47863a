@@ -54,6 +54,38 @@ export function renderSuperneatDemoRoute(container) {
   groundPlane.position.y = -0.01;
   scene.add(groundPlane);
 
+  const mazeWallMaterial = new THREE.MeshStandardMaterial({ color: 0x1d4ed8 });
+  const wallHeight = 1.3;
+  const mazeWalls = [];
+
+  function addMazeWall(width, depth, x, z) {
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(width, wallHeight, depth), mazeWallMaterial);
+    wall.position.set(x, wallHeight / 2, z);
+    scene.add(wall);
+    mazeWalls.push({
+      mesh: wall,
+      halfWidth: width / 2,
+      halfDepth: depth / 2,
+    });
+  }
+
+  // Outer maze ring
+  addMazeWall(10.8, 0.5, 0, -5.4);
+  addMazeWall(10.8, 0.5, 0, 5.4);
+  addMazeWall(0.5, 10.8, -5.4, 0);
+  addMazeWall(0.5, 10.8, 5.4, 0);
+
+  // Inner passages
+  addMazeWall(0.5, 7.8, -2.7, 1.5);
+  addMazeWall(0.5, 6.2, -0.9, -1.8);
+  addMazeWall(0.5, 7.4, 0.9, 1.7);
+  addMazeWall(0.5, 6.4, 2.7, -1.6);
+  addMazeWall(2.6, 0.5, -3.7, -0.8);
+  addMazeWall(2.3, 0.5, -1.8, 3.1);
+  addMazeWall(2.4, 0.5, 0, -3.4);
+  addMazeWall(2.2, 0.5, 1.9, 0.2);
+  addMazeWall(2.2, 0.5, 3.4, 3.2);
+
   const keyMoveState = {
     up: false,
     down: false,
@@ -69,6 +101,7 @@ export function renderSuperneatDemoRoute(container) {
 
   const moveSpeed = 0.08;
   const boundary = 5.25;
+  const playerRadius = 0.6;
 
   let animationFrameId = null;
 
@@ -186,8 +219,21 @@ export function renderSuperneatDemoRoute(container) {
     if (moveX !== 0 || moveZ !== 0) {
       const nextX = pedestal.position.x + moveX * moveSpeed;
       const nextZ = pedestal.position.z + moveZ * moveSpeed;
-      pedestal.position.x = THREE.MathUtils.clamp(nextX, -boundary, boundary);
-      pedestal.position.z = THREE.MathUtils.clamp(nextZ, -boundary, boundary);
+
+      const clampedX = THREE.MathUtils.clamp(nextX, -boundary, boundary);
+      const clampedZ = THREE.MathUtils.clamp(nextZ, -boundary, boundary);
+
+      const collidesWithMaze = mazeWalls.some(({ mesh, halfWidth, halfDepth }) => {
+        const dx = Math.abs(clampedX - mesh.position.x);
+        const dz = Math.abs(clampedZ - mesh.position.z);
+        return dx < halfWidth + playerRadius && dz < halfDepth + playerRadius;
+      });
+
+      if (!collidesWithMaze) {
+        pedestal.position.x = clampedX;
+        pedestal.position.z = clampedZ;
+      }
+
       pedestal.rotation.y = Math.atan2(moveX, moveZ || 0.0001);
     }
 

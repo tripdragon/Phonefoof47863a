@@ -6,7 +6,8 @@ export function renderSuperneatDemoRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">SuperNeat playground</h1>
-    <p class="hero-subtitle">Use arrow keys or the joystick to move the cube player around the arena.</p>
+    <p class="hero-subtitle">Use arrow keys or the joystick to move through the maze and find the exit.</p>
+    <p class="hero-label" id="superneat-status">Find the exit at the top opening.</p>
     <div class="three-demo-canvas-wrap" id="superneat-demo-canvas" aria-label="SuperNeatLib three-dimensional demo">
       <div class="superneat-joystick" id="superneat-joystick" role="group" aria-label="Movement joystick">
         <div class="superneat-joystick-thumb" id="superneat-joystick-thumb" aria-hidden="true"></div>
@@ -17,6 +18,7 @@ export function renderSuperneatDemoRoute(container) {
   const canvasWrap = container.querySelector("#superneat-demo-canvas");
   const joystick = container.querySelector("#superneat-joystick");
   const joystickThumb = container.querySelector("#superneat-joystick-thumb");
+  const statusLabel = container.querySelector("#superneat-status");
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#e0f2fe");
@@ -43,16 +45,54 @@ export function renderSuperneatDemoRoute(container) {
   scene.add(groundHelper);
 
   const pedestal = Primitives.cube({ scale: 1.2, color: 0x6366f1 });
-  pedestal.position.set(0, 0.6, 0);
+  pedestal.position.set(0, 0.6, 4.3);
   scene.add(pedestal);
 
   const orb = Primitives.ball({ scale: 0.8, color: 0x0ea5e9 });
-  orb.position.set(0, 1.9, 0);
+  orb.position.set(0, 1.9, 4.3);
   scene.add(orb);
 
   const groundPlane = Primitives.plane({ scale: 12, color: 0xdbeafe });
   groundPlane.position.y = -0.01;
   scene.add(groundPlane);
+
+  const mazeWallMaterial = new THREE.MeshStandardMaterial({ color: 0x1d4ed8 });
+  const wallHeight = 1.3;
+  const mazeWalls = [];
+
+  function addMazeWall(width, depth, x, z) {
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(width, wallHeight, depth), mazeWallMaterial);
+    wall.position.set(x, wallHeight / 2, z);
+    scene.add(wall);
+    mazeWalls.push({
+      mesh: wall,
+      halfWidth: width / 2,
+      halfDepth: depth / 2,
+    });
+  }
+
+  // Outer maze border with an exit gap at the top center.
+  addMazeWall(4.4, 0.5, -3.1, -5.4);
+  addMazeWall(4.4, 0.5, 3.1, -5.4);
+  addMazeWall(10.8, 0.5, 0, 5.4);
+  addMazeWall(0.5, 10.8, -5.4, 0);
+  addMazeWall(0.5, 10.8, 5.4, 0);
+
+  // Larger inner maze (more walkable branches and turns).
+  addMazeWall(0.5, 8.2, -3.8, 0.8);
+  addMazeWall(0.5, 7.2, -2.2, -1.6);
+  addMazeWall(0.5, 8.4, -0.8, 1.1);
+  addMazeWall(0.5, 7.4, 0.8, -1.2);
+  addMazeWall(0.5, 8.0, 2.3, 0.5);
+  addMazeWall(0.5, 6.6, 3.8, -1.8);
+
+  addMazeWall(2.3, 0.5, -4.2, -2.8);
+  addMazeWall(2.1, 0.5, -3.1, 2.8);
+  addMazeWall(2.5, 0.5, -1.6, -4.0);
+  addMazeWall(2.0, 0.5, -0.1, 3.7);
+  addMazeWall(2.4, 0.5, 1.5, -2.9);
+  addMazeWall(2.1, 0.5, 3.2, 2.2);
+  addMazeWall(1.9, 0.5, 4.3, -4.0);
 
   const keyMoveState = {
     up: false,
@@ -68,9 +108,17 @@ export function renderSuperneatDemoRoute(container) {
   };
 
   const moveSpeed = 0.08;
-  const boundary = 5.25;
+  const boundary = 6.2;
+  const playerRadius = 0.6;
+  const exitZone = {
+    minX: -1.1,
+    maxX: 1.1,
+    minZ: -6.4,
+    maxZ: -5.35,
+  };
 
   let animationFrameId = null;
+  let hasExited = false;
 
   function onKeyDown(event) {
     const key = event.key.toLowerCase();
@@ -186,12 +234,41 @@ export function renderSuperneatDemoRoute(container) {
     if (moveX !== 0 || moveZ !== 0) {
       const nextX = pedestal.position.x + moveX * moveSpeed;
       const nextZ = pedestal.position.z + moveZ * moveSpeed;
-      pedestal.position.x = THREE.MathUtils.clamp(nextX, -boundary, boundary);
-      pedestal.position.z = THREE.MathUtils.clamp(nextZ, -boundary, boundary);
+
+      const clampedX = THREE.MathUtils.clamp(nextX, -boundary, boundary);
+      const clampedZ = THREE.MathUtils.clamp(nextZ, -boundary, boundary);
+
+      const collidesWithMaze = mazeWalls.some(({ mesh, halfWidth, halfDepth }) => {
+        const dx = Math.abs(clampedX - mesh.position.x);
+        const dz = Math.abs(clampedZ - mesh.position.z);
+        return dx < halfWidth + playerRadius && dz < halfDepth + playerRadius;
+      });
+
+      if (!collidesWithMaze) {
+        pedestal.position.x = clampedX;
+        pedestal.position.z = clampedZ;
+      }
+
       pedestal.rotation.y = Math.atan2(moveX, moveZ || 0.0001);
     }
 
-    orb.position.y = 1.9 + Math.sin(performance.now() * 0.0025) * 0.18;
+    const inExitZone =
+      pedestal.position.x >= exitZone.minX &&
+      pedestal.position.x <= exitZone.maxX &&
+      pedestal.position.z >= exitZone.minZ &&
+      pedestal.position.z <= exitZone.maxZ;
+
+    if (inExitZone && !hasExited) {
+      hasExited = true;
+      statusLabel.textContent = "You escaped the maze!";
+      pedestal.material.color.set(0x22c55e);
+    } else if (!inExitZone && hasExited) {
+      hasExited = false;
+      statusLabel.textContent = "Find the exit at the top opening.";
+      pedestal.material.color.set(0x6366f1);
+    }
+
+    orb.position.set(pedestal.position.x, 1.9 + Math.sin(performance.now() * 0.0025) * 0.18, pedestal.position.z);
     controls.update();
     renderer.render(scene, camera);
   }

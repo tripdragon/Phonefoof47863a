@@ -1,6 +1,7 @@
 import "./style.css";
 import "katex/dist/katex.min.css";
 import renderMathInElement from "katex/contrib/auto-render";
+import Chart from "chart.js/auto";
 import { renderShowsSection } from "./shows/controller";
 import { createShowsStore } from "./shows/store";
 import { renderThreeDemoRoute } from "./three-demo/scene";
@@ -57,6 +58,105 @@ function renderBotanyLatex(container) {
     delimiters: [{ left: "\\(", right: "\\)", display: false }],
     throwOnError: false,
   });
+}
+
+function renderBotanyPlots() {
+  const charts = [];
+  const sharedOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: false },
+    },
+    scales: {
+      x: {
+        grid: { color: "rgba(99, 102, 241, 0.15)" },
+        ticks: { color: "#4338ca", maxTicksLimit: 5, font: { size: 10 } },
+      },
+      y: {
+        grid: { color: "rgba(99, 102, 241, 0.15)" },
+        ticks: { color: "#4338ca", maxTicksLimit: 5, font: { size: 10 } },
+      },
+    },
+  };
+
+  const chartConfigs = [
+    {
+      id: "botany-plot-1",
+      type: "line",
+      labels: [0, 100, 250, 500, 750, 1000],
+      values: [0, 6.5, 13.2, 19.4, 22.3, 23.8],
+      label: "A(I)",
+    },
+    {
+      id: "botany-plot-2",
+      type: "line",
+      labels: [0, 2, 4, 6, 8, 10],
+      values: [2.0, 2.25, 2.53, 2.84, 3.19, 3.5],
+      label: "Biomass",
+    },
+    {
+      id: "botany-plot-3",
+      type: "bar",
+      labels: ["Plant A", "Plant B", "Plant C"],
+      values: [2.6, 3.0, 3.4],
+      label: "WUE",
+    },
+    {
+      id: "botany-plot-4",
+      type: "bar",
+      labels: ["Plot 1", "Plot 2", "Plot 3"],
+      values: [1.8, 3.0, 4.2],
+      label: "LAI",
+    },
+    {
+      id: "botany-plot-5",
+      type: "line",
+      labels: [0.5, 1.0, 1.5, 1.8, 2.2],
+      values: [0.18, 0.35, 0.53, 0.63, 0.77],
+      label: "Transpiration",
+    },
+    {
+      id: "botany-plot-6",
+      type: "line",
+      labels: [1, 2, 3, 4, 5],
+      values: [2, 6, 6, 12, 20],
+      label: "Cumulative GDD",
+    },
+  ];
+
+  chartConfigs.forEach(({ id, type, labels, values, label }) => {
+    const canvas = document.getElementById(id);
+    if (!canvas) {
+      return;
+    }
+
+    const chart = new Chart(canvas, {
+      type,
+      data: {
+        labels,
+        datasets: [
+          {
+            data: values,
+            label,
+            borderColor: "#4f46e5",
+            backgroundColor: "rgba(79, 70, 229, 0.24)",
+            borderWidth: 2,
+            fill: type === "line",
+            tension: 0.35,
+          },
+        ],
+      },
+      options: sharedOptions,
+    });
+
+    charts.push(chart);
+  });
+
+  return () => {
+    charts.forEach((chart) => chart.destroy());
+  };
 }
 
 function escapeHtml(value) {
@@ -595,6 +695,9 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(A(I) = A_{max}(1 - e^{-kI})\\)</span>
         </p>
+        <div class="botany-plot-wrap">
+          <canvas id="botany-plot-1" class="botany-plot" aria-label="Photosynthesis response chart" role="img"></canvas>
+        </div>
       </article>
 
       <article class="botany-card">
@@ -610,6 +713,9 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(RGR = \\frac{\\ln W_2 - \\ln W_1}{t_2 - t_1}\\)</span>
         </p>
+        <div class="botany-plot-wrap">
+          <canvas id="botany-plot-2" class="botany-plot" aria-label="Relative growth rate chart" role="img"></canvas>
+        </div>
       </article>
 
       <article class="botany-card">
@@ -625,6 +731,9 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(WUE = \\frac{A}{E}\\)</span>
         </p>
+        <div class="botany-plot-wrap">
+          <canvas id="botany-plot-3" class="botany-plot" aria-label="Water-use efficiency chart" role="img"></canvas>
+        </div>
       </article>
 
       <article class="botany-card">
@@ -640,6 +749,9 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(LAI = \\frac{\\text{total one-sided leaf area}}{\\text{ground area}}\\)</span>
         </p>
+        <div class="botany-plot-wrap">
+          <canvas id="botany-plot-4" class="botany-plot" aria-label="Leaf area index chart" role="img"></canvas>
+        </div>
       </article>
 
       <article class="botany-card">
@@ -656,6 +768,9 @@ function renderBotanyRoute() {
           LaTeX: <span class="botany-latex">\\(E = g_s \\times VPD\\)</span><br />
           Read as: E equals g sub s times V P D.
         </p>
+        <div class="botany-plot-wrap">
+          <canvas id="botany-plot-5" class="botany-plot" aria-label="Transpiration flux chart" role="img"></canvas>
+        </div>
       </article>
 
       <article class="botany-card">
@@ -671,6 +786,9 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(GDD = \\sum \\max(0, T_{mean} - T_{base})\\)</span>
         </p>
+        <div class="botany-plot-wrap">
+          <canvas id="botany-plot-6" class="botany-plot" aria-label="Growing degree days chart" role="img"></canvas>
+        </div>
       </article>
     </section>
 
@@ -681,6 +799,11 @@ function renderBotanyRoute() {
   `;
 
   renderBotanyLatex(routeContent);
+  const cleanupPlots = renderBotanyPlots();
+
+  return () => {
+    cleanupPlots();
+  };
 }
 
 function renderPianoRoute() {

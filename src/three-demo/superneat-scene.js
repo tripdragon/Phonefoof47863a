@@ -44,15 +44,25 @@ export function renderSuperneatDemoRoute(container) {
   const groundHelper = new THREE.GridHelper(16, 16, 0x3b82f6, 0x93c5fd);
   scene.add(groundHelper);
 
-  const pedestal = Primitives.cube({ scale: 1.2, color: 0x6366f1 });
-  pedestal.position.set(0, 0.6, 4.3);
+  const mazeScale = 4;
+  const scaleMazeValue = (value) => value * mazeScale;
+
+  groundHelper.scale.setScalar(mazeScale);
+
+  const pedestalScale = 1.1;
+  const pedestal = Primitives.cube({ scale: pedestalScale, color: 0xfacc15 });
+  pedestal.position.set(0, pedestalScale / 2, 0);
   scene.add(pedestal);
 
   const orb = Primitives.ball({ scale: 0.8, color: 0x0ea5e9 });
-  orb.position.set(0, 1.9, 4.3);
+  const orbOffset = {
+    x: -1,
+    y: 2.3,
+  };
+  orb.position.set(pedestal.position.x + orbOffset.x, orbOffset.y, pedestal.position.z);
   scene.add(orb);
 
-  const groundPlane = Primitives.plane({ scale: 12, color: 0xdbeafe });
+  const groundPlane = Primitives.plane({ scale: 12 * mazeScale, color: 0xdbeafe });
   groundPlane.position.y = -0.01;
   scene.add(groundPlane);
 
@@ -61,13 +71,28 @@ export function renderSuperneatDemoRoute(container) {
   const mazeWalls = [];
 
   function addMazeWall(width, depth, x, z) {
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(width, wallHeight, depth), mazeWallMaterial);
-    wall.position.set(x, wallHeight / 2, z);
+    const scaledWidth = scaleMazeValue(width);
+    const scaledDepth = scaleMazeValue(depth);
+    const scaledX = scaleMazeValue(x);
+    const scaledZ = scaleMazeValue(z);
+
+    const clearSpaceWidth = pedestalScale * 4;
+    const clearSpaceHalfWidth = clearSpaceWidth / 2;
+    const overlapsStartClearSpace =
+      Math.abs(scaledX) < clearSpaceHalfWidth + scaledWidth / 2 &&
+      Math.abs(scaledZ) < clearSpaceHalfWidth + scaledDepth / 2;
+
+    if (overlapsStartClearSpace) {
+      return;
+    }
+
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(scaledWidth, wallHeight, scaledDepth), mazeWallMaterial);
+    wall.position.set(scaledX, wallHeight / 2, scaledZ);
     scene.add(wall);
     mazeWalls.push({
       mesh: wall,
-      halfWidth: width / 2,
-      halfDepth: depth / 2,
+      halfWidth: scaledWidth / 2,
+      halfDepth: scaledDepth / 2,
     });
   }
 
@@ -108,13 +133,13 @@ export function renderSuperneatDemoRoute(container) {
   };
 
   const moveSpeed = 0.08;
-  const boundary = 6.2;
+  const boundary = scaleMazeValue(6.2);
   const playerRadius = 0.6;
   const exitZone = {
-    minX: -1.1,
-    maxX: 1.1,
-    minZ: -6.4,
-    maxZ: -5.35,
+    minX: scaleMazeValue(-1.1),
+    maxX: scaleMazeValue(1.1),
+    minZ: scaleMazeValue(-6.4),
+    maxZ: scaleMazeValue(-5.35),
   };
 
   let animationFrameId = null;
@@ -268,7 +293,11 @@ export function renderSuperneatDemoRoute(container) {
       pedestal.material.color.set(0x6366f1);
     }
 
-    orb.position.set(pedestal.position.x, 1.9 + Math.sin(performance.now() * 0.0025) * 0.18, pedestal.position.z);
+    orb.position.set(
+      pedestal.position.x + orbOffset.x,
+      orbOffset.y + Math.sin(performance.now() * 0.0025) * 0.18,
+      pedestal.position.z,
+    );
     controls.update();
     renderer.render(scene, camera);
   }

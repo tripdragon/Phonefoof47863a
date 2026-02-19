@@ -653,7 +653,8 @@ function renderBotanyRoute() {
           E = 0.35 × 1.8 = <strong>0.63 (model units)</strong>
         </p>
         <p class="botany-math">
-          <span class="botany-latex">\\(E = g_s \\times VPD\\)</span>
+          LaTeX: <span class="botany-latex">\\(E = g_s \\times VPD\\)</span><br />
+          Read as: E equals g sub s times V P D.
         </p>
       </article>
 

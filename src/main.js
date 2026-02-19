@@ -1,4 +1,6 @@
 import "./style.css";
+import "katex/dist/katex.min.css";
+import renderMathInElement from "katex/contrib/auto-render";
 import { renderShowsSection } from "./shows/controller";
 import { createShowsStore } from "./shows/store";
 import { renderThreeDemoRoute } from "./three-demo/scene";
@@ -49,6 +51,13 @@ const slides = [
 
 const routeContent = document.getElementById("route-content");
 let activeRouteCleanup = null;
+
+function renderBotanyLatex(container) {
+  renderMathInElement(container, {
+    delimiters: [{ left: "\\(", right: "\\)", display: false }],
+    throwOnError: false,
+  });
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -583,6 +592,10 @@ function renderBotanyRoute() {
           Example: A<sub>max</sub> = 25 μmol CO₂ m⁻² s⁻¹, k = 0.003, I = 500 μmol photons m⁻² s⁻¹<br />
           A(500) = 25(1 - e<sup>-1.5</sup>) = 25(1 - 0.223) = 25 × 0.777 = <strong>19.4 μmol CO₂ m⁻² s⁻¹</strong>
         </p>
+        <p class="botany-math">
+          LaTeX: <span class="botany-latex">\\(A(I) = A_{max}(1 - e^{-kI})\\)</span><br />
+          Read as: A of I equals A max times open parenthesis one minus e to the power of negative kI close parenthesis.
+        </p>
       </article>
 
       <article class="botany-card">
@@ -594,6 +607,10 @@ function renderBotanyRoute() {
         <p class="botany-math">
           Example: W<sub>1</sub> = 2.0 g at day 0, W<sub>2</sub> = 3.5 g at day 10<br />
           RGR = (ln 3.5 - ln 2.0) / 10 = (1.253 - 0.693) / 10 = 0.560 / 10 = <strong>0.056 day⁻¹</strong>
+        </p>
+        <p class="botany-math">
+          LaTeX: <span class="botany-latex">\\(RGR = \\frac{\\ln W_2 - \\ln W_1}{t_2 - t_1}\\)</span><br />
+          Read as: R G R equals the natural log of W two minus the natural log of W one, divided by t two minus t one.
         </p>
       </article>
 
@@ -607,6 +624,10 @@ function renderBotanyRoute() {
           Example: A = 12 μmol CO₂ m⁻² s⁻¹, E = 4 mmol H₂O m⁻² s⁻¹<br />
           WUE = 12 / 4 = <strong>3 μmol CO₂ per mmol H₂O</strong>
         </p>
+        <p class="botany-math">
+          LaTeX: <span class="botany-latex">\\(WUE = \\frac{A}{E}\\)</span><br />
+          Read as: W U E equals A divided by E.
+        </p>
       </article>
 
       <article class="botany-card">
@@ -618,6 +639,10 @@ function renderBotanyRoute() {
         <p class="botany-math">
           Example: total leaf area = 18 m² over a 6 m² plot<br />
           LAI = 18 / 6 = <strong>3.0 m² leaf per m² ground</strong>
+        </p>
+        <p class="botany-math">
+          LaTeX: <span class="botany-latex">\\(LAI = \\frac{\\text{total one-sided leaf area}}{\\text{ground area}}\\)</span><br />
+          Read as: L A I equals total one-sided leaf area divided by ground area.
         </p>
       </article>
 
@@ -631,6 +656,10 @@ function renderBotanyRoute() {
           Example: g<sub>s</sub> = 0.35 mol m⁻² s⁻¹, VPD = 1.8 kPa<br />
           E = 0.35 × 1.8 = <strong>0.63 (model units)</strong>
         </p>
+        <p class="botany-math">
+          LaTeX: <span class="botany-latex">\\(E = g_s \\times VPD\\)</span><br />
+          Read as: E equals g sub s times V P D.
+        </p>
       </article>
 
       <article class="botany-card">
@@ -643,6 +672,10 @@ function renderBotanyRoute() {
           Example for 5 days, T<sub>base</sub> = 10°C, daily means = 12, 14, 9, 16, 18°C<br />
           GDD = (2 + 4 + 0 + 6 + 8) = <strong>20 degree-days</strong>
         </p>
+        <p class="botany-math">
+          LaTeX: <span class="botany-latex">\\(GDD = \\sum \\max(0, T_{mean} - T_{base})\\)</span><br />
+          Read as: G D D equals the sum of the maximum of zero and T mean minus T base.
+        </p>
       </article>
     </section>
 
@@ -651,6 +684,8 @@ function renderBotanyRoute() {
       <a class="action" href="#/shows" aria-label="Go to shows">Go to shows</a>
     </div>
   `;
+
+  renderBotanyLatex(routeContent);
 }
 
 function renderPianoRoute() {

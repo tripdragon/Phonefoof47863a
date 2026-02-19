@@ -567,7 +567,10 @@ function renderHomeRoute() {
         <tbody id="truth-table-body"></tbody>
       </table>
     </section>
-    <a class="action" href="#/shows" aria-label="Open shows">View shows</a>
+    <div class="action-group">
+      <a class="action" href="#/shows" aria-label="Open shows">View shows</a>
+      <a class="action" href="#/camera" aria-label="Open camera page">Open camera page</a>
+    </div>
   `;
 
   const heroKicker = document.getElementById("hero-kicker");

@@ -552,6 +552,26 @@ function renderBotanyRoute() {
       and estimate productivity. Below are worked examples used in plant physiology and ecology.
     </p>
 
+    <details class="botany-vars" aria-label="Botany variable explainers" open>
+      <summary>Variable explainers</summary>
+      <ul class="botany-vars-list">
+        <li><strong>A</strong>: photosynthetic assimilation rate</li>
+        <li><strong>I</strong>: incoming light intensity</li>
+        <li><strong>A<sub>max</sub></strong>: maximum assimilation at saturation</li>
+        <li><strong>k</strong>: light-response curvature constant</li>
+        <li><strong>W<sub>1</sub></strong>, <strong>W<sub>2</sub></strong>: biomass at <strong>t<sub>1</sub></strong> and <strong>t<sub>2</sub></strong></li>
+        <li><strong>RGR</strong>: relative growth rate</li>
+        <li><strong>E</strong>: transpiration rate</li>
+        <li><strong>WUE</strong>: water-use efficiency</li>
+        <li><strong>g<sub>s</sub></strong>: stomatal conductance</li>
+        <li><strong>VPD</strong>: vapor pressure deficit</li>
+        <li><strong>LAI</strong>: leaf area index</li>
+        <li><strong>T<sub>mean</sub></strong>: daily mean temperature</li>
+        <li><strong>T<sub>base</sub></strong>: base temperature threshold</li>
+        <li><strong>GDD</strong>: growing degree days</li>
+      </ul>
+    </details>
+
     <section class="botany-grid" aria-label="Botany examples">
       <article class="botany-card">
         <h2>1) Photosynthesis response to light</h2>

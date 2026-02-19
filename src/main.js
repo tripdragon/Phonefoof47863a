@@ -593,8 +593,7 @@ function renderBotanyRoute() {
           A(500) = 25(1 - e<sup>-1.5</sup>) = 25(1 - 0.223) = 25 × 0.777 = <strong>19.4 μmol CO₂ m⁻² s⁻¹</strong>
         </p>
         <p class="botany-math">
-          LaTeX: <span class="botany-latex">\\(A(I) = A_{max}(1 - e^{-kI})\\)</span><br />
-          Read as: A of I equals A max times open parenthesis one minus e to the power of negative kI close parenthesis.
+          <span class="botany-latex">\\(A(I) = A_{max}(1 - e^{-kI})\\)</span>
         </p>
       </article>
 
@@ -609,8 +608,7 @@ function renderBotanyRoute() {
           RGR = (ln 3.5 - ln 2.0) / 10 = (1.253 - 0.693) / 10 = 0.560 / 10 = <strong>0.056 day⁻¹</strong>
         </p>
         <p class="botany-math">
-          LaTeX: <span class="botany-latex">\\(RGR = \\frac{\\ln W_2 - \\ln W_1}{t_2 - t_1}\\)</span><br />
-          Read as: R G R equals the natural log of W two minus the natural log of W one, divided by t two minus t one.
+          <span class="botany-latex">\\(RGR = \\frac{\\ln W_2 - \\ln W_1}{t_2 - t_1}\\)</span>
         </p>
       </article>
 
@@ -625,8 +623,7 @@ function renderBotanyRoute() {
           WUE = 12 / 4 = <strong>3 μmol CO₂ per mmol H₂O</strong>
         </p>
         <p class="botany-math">
-          LaTeX: <span class="botany-latex">\\(WUE = \\frac{A}{E}\\)</span><br />
-          Read as: W U E equals A divided by E.
+          <span class="botany-latex">\\(WUE = \\frac{A}{E}\\)</span>
         </p>
       </article>
 
@@ -641,8 +638,7 @@ function renderBotanyRoute() {
           LAI = 18 / 6 = <strong>3.0 m² leaf per m² ground</strong>
         </p>
         <p class="botany-math">
-          LaTeX: <span class="botany-latex">\\(LAI = \\frac{\\text{total one-sided leaf area}}{\\text{ground area}}\\)</span><br />
-          Read as: L A I equals total one-sided leaf area divided by ground area.
+          <span class="botany-latex">\\(LAI = \\frac{\\text{total one-sided leaf area}}{\\text{ground area}}\\)</span>
         </p>
       </article>
 
@@ -673,8 +669,7 @@ function renderBotanyRoute() {
           GDD = (2 + 4 + 0 + 6 + 8) = <strong>20 degree-days</strong>
         </p>
         <p class="botany-math">
-          LaTeX: <span class="botany-latex">\\(GDD = \\sum \\max(0, T_{mean} - T_{base})\\)</span><br />
-          Read as: G D D equals the sum of the maximum of zero and T mean minus T base.
+          <span class="botany-latex">\\(GDD = \\sum \\max(0, T_{mean} - T_{base})\\)</span>
         </p>
       </article>
     </section>

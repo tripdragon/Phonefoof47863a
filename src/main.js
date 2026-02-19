@@ -2,6 +2,7 @@ import "./style.css";
 import { renderShowsSection } from "./shows/controller";
 import { createShowsStore } from "./shows/store";
 import { renderThreeDemoRoute } from "./three-demo/scene";
+import { renderSuperneatDemoRoute } from "./three-demo/superneat-scene";
 
 const appVersion = `v${__APP_VERSION__}`;
 
@@ -18,6 +19,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/shows" href="#/shows">Shows</a></li>
           <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
+          <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
         </ul>
       </nav>
       <div id="route-content"></div>
@@ -544,11 +546,16 @@ function renderThreeRoute() {
   return renderThreeDemoRoute(routeContent);
 }
 
+function renderThreeSuperneatRoute() {
+  return renderSuperneatDemoRoute(routeContent);
+}
+
 const routes = {
   "/": renderHomeRoute,
   "/shows": renderShowsRoute,
   "/shows-crud": renderShowsCrudRoute,
   "/three-demo": renderThreeRoute,
+  "/three-superneat": renderThreeSuperneatRoute,
 };
 
 function renderRoute() {

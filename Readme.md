@@ -14,7 +14,6 @@ Then open the URL shown in your terminal (typically <http://localhost:5173>).
 The demo pages are available at:
 - <http://localhost:5173/example-2.html>
 - <http://localhost:5173/threejs-demo.html>
-- <http://localhost:5173/threejs-dice-ball-demo.html>
 
 ## Build
 

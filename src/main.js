@@ -123,6 +123,8 @@ function renderBotanyInteractive() {
     }
   }
 
+
+
   function syncPairedInputs(scope) {
     scope.querySelectorAll("input[data-sync-key]").forEach((input) => {
       input.addEventListener("input", () => {
@@ -324,6 +326,134 @@ function renderCameraInteractive() {
     }
   }
 
+  function drawVisual(id, drawFn) {
+    const canvas = document.getElementById(id);
+    if (!canvas) {
+      return;
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+
+    const width = canvas.clientWidth || 320;
+    const height = canvas.clientHeight || 150;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    drawFn(ctx, width, height);
+  }
+
+  function drawFovVisual(fov) {
+    drawVisual("camera-visual-1", (ctx, width, height) => {
+      const centerX = width / 2;
+      const centerY = height - 16;
+      const radius = Math.min(width * 0.44, height * 0.9);
+      const halfAngle = (Math.min(Math.max(fov, 10), 170) * Math.PI) / 360;
+
+      ctx.fillStyle = "rgba(79, 70, 229, 0.18)";
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, radius, -Math.PI / 2 - halfAngle, -Math.PI / 2 + halfAngle);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = "#4338ca";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(centerX - Math.sin(halfAngle) * radius, centerY - Math.cos(halfAngle) * radius);
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(centerX + Math.sin(halfAngle) * radius, centerY - Math.cos(halfAngle) * radius);
+      ctx.stroke();
+
+      ctx.fillStyle = "#1e1b4b";
+      ctx.font = "600 12px system-ui";
+      ctx.fillText(`FOV ${fov.toFixed(1)}°`, 10, 18);
+    });
+  }
+
+  function drawApertureVisual(fNumber, shutter, iso) {
+    drawVisual("camera-visual-2", (ctx, width, height) => {
+      const normalizedAperture = Math.max(0.12, Math.min(0.95, 1 / fNumber));
+      const apertureRadius = normalizedAperture * Math.min(width, height) * 0.3;
+      const brightness = Math.min(1, (1 / (fNumber * fNumber)) * (shutter / 0.0167) * (iso / 100));
+      const glow = Math.round(55 + brightness * 200);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = `rgba(250, 204, 21, ${(0.2 + brightness * 0.7).toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, apertureRadius * 1.7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = `rgb(${glow}, ${glow}, ${glow})`;
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, apertureRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = "600 12px system-ui";
+      ctx.fillText(`f/${fNumber.toFixed(1)} • ${(shutter * 1000).toFixed(1)}ms • ISO ${iso.toFixed(0)}`, 10, 18);
+    });
+  }
+
+  function drawDofVisual(subjectDistance, nearMeters, farMeters) {
+    drawVisual("camera-visual-3", (ctx, width, height) => {
+      const maxDistance = Math.max(subjectDistance * 1.8, Number.isFinite(farMeters) ? farMeters * 1.1 : subjectDistance * 2.2, 6);
+      const toX = (meters) => 18 + (Math.min(meters, maxDistance) / maxDistance) * (width - 36);
+      const lineY = height * 0.65;
+
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(18, lineY);
+      ctx.lineTo(width - 18, lineY);
+      ctx.stroke();
+
+      const nearX = toX(nearMeters);
+      const subjectX = toX(subjectDistance);
+      const farX = Number.isFinite(farMeters) ? toX(farMeters) : width - 24;
+
+      ctx.fillStyle = "rgba(79, 70, 229, 0.25)";
+      ctx.fillRect(nearX, lineY - 18, Math.max(farX - nearX, 4), 36);
+
+      ctx.fillStyle = "#4f46e5";
+      ctx.beginPath();
+      ctx.arc(subjectX, lineY, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#1e1b4b";
+      ctx.font = "600 11px system-ui";
+      ctx.fillText(`Near ${nearMeters.toFixed(2)}m`, Math.max(10, nearX - 20), lineY - 24);
+      ctx.fillText(`Subject ${subjectDistance.toFixed(2)}m`, Math.max(10, subjectX - 28), lineY + 28);
+      ctx.fillText(Number.isFinite(farMeters) ? `Far ${farMeters.toFixed(2)}m` : "Far ∞", Math.max(10, farX - 20), lineY - 24);
+    });
+  }
+
+  function drawCropVisual(focalLength, equivalent) {
+    drawVisual("camera-visual-4", (ctx, width, height) => {
+      const maxValue = Math.max(equivalent, focalLength, 1);
+      const leftHeight = (focalLength / maxValue) * (height - 40);
+      const rightHeight = (equivalent / maxValue) * (height - 40);
+      const baseY = height - 18;
+
+      ctx.fillStyle = "rgba(79, 70, 229, 0.3)";
+      ctx.fillRect(width * 0.2, baseY - leftHeight, width * 0.18, leftHeight);
+
+      ctx.fillStyle = "rgba(79, 70, 229, 0.7)";
+      ctx.fillRect(width * 0.6, baseY - rightHeight, width * 0.18, rightHeight);
+
+      ctx.fillStyle = "#1e1b4b";
+      ctx.font = "600 12px system-ui";
+      ctx.fillText(`${focalLength.toFixed(0)}mm`, width * 0.18, baseY + 14);
+      ctx.fillText(`${equivalent.toFixed(0)}mm eq`, width * 0.56, baseY + 14);
+    });
+  }
   function syncPairedInputs(scope) {
     scope.querySelectorAll("input[data-sync-key]").forEach((input) => {
       input.addEventListener("input", () => {
@@ -360,6 +490,7 @@ function renderCameraInteractive() {
     }
 
     setResult("camera-result-1", `Horizontal FOV ≈ <strong>${fov.toFixed(1)}°</strong>`);
+    drawFovVisual(fov);
   }
 
   function updateAperture() {
@@ -381,6 +512,7 @@ function renderCameraInteractive() {
       "camera-result-2",
       `Relative light from aperture ≈ <strong>${relativeLight.toFixed(3)}</strong>; EV ≈ <strong>${exposureValue.toFixed(2)}</strong>`,
     );
+    drawApertureVisual(fNumber, shutter, iso);
   }
 
   function updateDof() {
@@ -413,6 +545,7 @@ function renderCameraInteractive() {
       "camera-result-3",
       `Near ≈ <strong>${(near / 1000).toFixed(2)} m</strong>, Far ≈ <strong>${farText}</strong>, DOF ≈ <strong>${dofText}</strong>`,
     );
+    drawDofVisual(subjectDistance, near / 1000, far === Infinity ? Infinity : far / 1000);
   }
 
   function updateCropFactor() {
@@ -426,6 +559,7 @@ function renderCameraInteractive() {
     }
 
     setResult("camera-result-4", `35mm equivalent focal length ≈ <strong>${equivalent.toFixed(1)} mm</strong>`);
+    drawCropVisual(focalLength, equivalent);
   }
 
   const actions = [
@@ -1218,6 +1352,10 @@ function renderCameraRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(FOV = 2\\arctan(\\frac{w}{2f})\\)</span>
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Learner visual</p>
+          <canvas id="camera-visual-1" class="camera-visual" aria-label="Field of view visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="camera-plot-1" class="botany-plot" aria-label="Field of view chart" role="img"></canvas>
         </div>
@@ -1247,6 +1385,10 @@ function renderCameraRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(EV = \\log_2(\\frac{N^2}{t}) - \\log_2(\\frac{ISO}{100})\\)</span>
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Learner visual</p>
+          <canvas id="camera-visual-2" class="camera-visual" aria-label="Exposure visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="camera-plot-2" class="botany-plot" aria-label="Aperture light chart" role="img"></canvas>
         </div>
@@ -1280,6 +1422,10 @@ function renderCameraRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(H = \\frac{f^2}{N \\cdot CoC} + f\\)</span>
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Learner visual</p>
+          <canvas id="camera-visual-3" class="camera-visual" aria-label="Depth of field visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="camera-plot-3" class="botany-plot" aria-label="Depth of field chart" role="img"></canvas>
         </div>
@@ -1305,6 +1451,10 @@ function renderCameraRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(f_{eq} = f \\times CF\\)</span>
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Learner visual</p>
+          <canvas id="camera-visual-4" class="camera-visual" aria-label="Crop factor visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="camera-plot-4" class="botany-plot" aria-label="Equivalent focal length chart" role="img"></canvas>
         </div>

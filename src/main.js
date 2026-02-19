@@ -23,6 +23,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/shows" href="#/shows">Shows</a></li>
           <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
           <li><a class="menu-link" data-route="/botany" href="#/botany">Botany</a></li>
+          <li><a class="menu-link" data-route="/camera" href="#/camera">Camera</a></li>
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
         </ul>
@@ -242,6 +243,196 @@ function renderBotanyInteractive() {
     ["botany-example-4", updateLai],
     ["botany-example-5", updateTranspiration],
     ["botany-example-6", updateGdd],
+  ];
+
+  actions.forEach(([formId, updateFn]) => {
+    const form = document.getElementById(formId);
+    if (!form) {
+      return;
+    }
+
+    syncPairedInputs(form);
+    form.addEventListener("input", updateFn);
+    form.addEventListener("submit", (event) => event.preventDefault());
+    updateFn();
+  });
+
+  return () => {
+    charts.forEach((chart) => chart.destroy());
+  };
+}
+
+function renderCameraInteractive() {
+  const charts = [];
+  const sharedOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: false },
+    },
+    scales: {
+      x: {
+        grid: { color: "rgba(99, 102, 241, 0.15)" },
+        ticks: { color: "#4338ca", maxTicksLimit: 5, font: { size: 10 } },
+      },
+      y: {
+        grid: { color: "rgba(99, 102, 241, 0.15)" },
+        ticks: { color: "#4338ca", maxTicksLimit: 5, font: { size: 10 } },
+      },
+    },
+  };
+
+  function makeChart(id, type, label, labels = []) {
+    const canvas = document.getElementById(id);
+    if (!canvas) {
+      return null;
+    }
+
+    const chart = new Chart(canvas, {
+      type,
+      data: {
+        labels,
+        datasets: [
+          {
+            data: [],
+            label,
+            borderColor: "#4f46e5",
+            backgroundColor: "rgba(79, 70, 229, 0.24)",
+            borderWidth: 2,
+            fill: type === "line",
+            tension: 0.35,
+          },
+        ],
+      },
+      options: sharedOptions,
+    });
+
+    charts.push(chart);
+    return chart;
+  }
+
+  function num(id) {
+    const value = Number(document.getElementById(id)?.value);
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  function setResult(id, content) {
+    const node = document.getElementById(id);
+    if (node) {
+      node.innerHTML = content;
+    }
+  }
+
+  function syncPairedInputs(scope) {
+    scope.querySelectorAll("input[data-sync-key]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const key = input.dataset.syncKey;
+        if (!key) {
+          return;
+        }
+
+        scope.querySelectorAll(`input[data-sync-key="${key}"]`).forEach((match) => {
+          if (match !== input) {
+            match.value = input.value;
+          }
+        });
+      });
+    });
+  }
+
+  const fovChart = makeChart("camera-plot-1", "line", "Horizontal FOV (deg)");
+  const exposureChart = makeChart("camera-plot-2", "line", "Relative Light");
+  const dofChart = makeChart("camera-plot-3", "line", "Depth of Field (m)");
+  const cropChart = makeChart("camera-plot-4", "bar", "Equivalent Focal Length", ["Native", "35mm Eq"]);
+
+  function updateFov() {
+    const sensorWidth = Math.max(num("fov-sensor-width"), 1);
+    const focalLength = Math.max(num("fov-focal-length"), 1);
+    const fov = (2 * Math.atan(sensorWidth / (2 * focalLength)) * 180) / Math.PI;
+    const labels = [14, 18, 24, 35, 50, 85];
+    const values = labels.map((focal) => (2 * Math.atan(sensorWidth / (2 * focal)) * 180) / Math.PI);
+
+    if (fovChart) {
+      fovChart.data.labels = labels;
+      fovChart.data.datasets[0].data = values;
+      fovChart.update();
+    }
+
+    setResult("camera-result-1", `Horizontal FOV ≈ <strong>${fov.toFixed(1)}°</strong>`);
+  }
+
+  function updateAperture() {
+    const fNumber = Math.max(num("aperture-f-number"), 0.7);
+    const shutter = Math.max(num("aperture-shutter"), 0.0005);
+    const iso = Math.max(num("aperture-iso"), 50);
+    const relativeLight = 1 / (fNumber * fNumber);
+    const exposureValue100 = Math.log2((fNumber * fNumber) / shutter);
+    const exposureValue = exposureValue100 - Math.log2(iso / 100);
+
+    if (exposureChart) {
+      const labels = [1.4, 2, 2.8, 4, 5.6, 8, 11, 16];
+      exposureChart.data.labels = labels;
+      exposureChart.data.datasets[0].data = labels.map((stop) => 1 / (stop * stop));
+      exposureChart.update();
+    }
+
+    setResult(
+      "camera-result-2",
+      `Relative light from aperture ≈ <strong>${relativeLight.toFixed(3)}</strong>; EV ≈ <strong>${exposureValue.toFixed(2)}</strong>`,
+    );
+  }
+
+  function updateDof() {
+    const focalLength = Math.max(num("dof-focal"), 1);
+    const fNumber = Math.max(num("dof-f-number"), 1);
+    const subjectDistance = Math.max(num("dof-distance"), 0.2);
+    const coc = Math.max(num("dof-coc"), 0.005);
+    const f = focalLength;
+    const s = subjectDistance * 1000;
+    const hyperfocal = (f * f) / (fNumber * coc) + f;
+    const near = (hyperfocal * s) / (hyperfocal + (s - f));
+    const far = hyperfocal > s ? (hyperfocal * s) / (hyperfocal - (s - f)) : Infinity;
+    const dof = far === Infinity ? Infinity : Math.max(far - near, 0);
+
+    if (dofChart) {
+      const labels = [1.4, 2, 2.8, 4, 5.6, 8, 11, 16];
+      dofChart.data.labels = labels;
+      dofChart.data.datasets[0].data = labels.map((stop) => {
+        const h = (f * f) / (stop * coc) + f;
+        const n = (h * s) / (h + (s - f));
+        const ff = h > s ? (h * s) / (h - (s - f)) : Infinity;
+        return ff === Infinity ? null : (ff - n) / 1000;
+      });
+      dofChart.update();
+    }
+
+    const farText = far === Infinity ? "∞" : `${(far / 1000).toFixed(2)} m`;
+    const dofText = dof === Infinity ? "∞" : `${(dof / 1000).toFixed(2)} m`;
+    setResult(
+      "camera-result-3",
+      `Near ≈ <strong>${(near / 1000).toFixed(2)} m</strong>, Far ≈ <strong>${farText}</strong>, DOF ≈ <strong>${dofText}</strong>`,
+    );
+  }
+
+  function updateCropFactor() {
+    const focalLength = Math.max(num("crop-focal"), 1);
+    const cropFactor = Math.max(num("crop-factor"), 0.5);
+    const equivalent = focalLength * cropFactor;
+
+    if (cropChart) {
+      cropChart.data.datasets[0].data = [focalLength, equivalent];
+      cropChart.update();
+    }
+
+    setResult("camera-result-4", `35mm equivalent focal length ≈ <strong>${equivalent.toFixed(1)} mm</strong>`);
+  }
+
+  const actions = [
+    ["camera-example-1", updateFov],
+    ["camera-example-2", updateAperture],
+    ["camera-example-3", updateDof],
+    ["camera-example-4", updateCropFactor],
   ];
 
   actions.forEach(([formId, updateFn]) => {
@@ -978,6 +1169,159 @@ function renderBotanyRoute() {
   };
 }
 
+function renderCameraRoute() {
+  routeContent.innerHTML = `
+    <p class="hero-label">Camera Optics</p>
+    <h1 class="hero-title">Camera + lens examples with explanations + math</h1>
+    <p class="hero-subtitle">
+      Like botany models, camera systems are easier to understand with equations. These worked examples cover field of
+      view, aperture, exposure, depth of field, and crop factor equivalence.
+    </p>
+
+    <details class="botany-vars" aria-label="Camera variable explainers" open>
+      <summary>Variable explainers</summary>
+      <ul class="botany-vars-list">
+        <li><strong>f</strong>: focal length (mm)</li>
+        <li><strong>w</strong>: sensor width (mm)</li>
+        <li><strong>FOV</strong>: field of view (degrees)</li>
+        <li><strong>N</strong>: f-number (aperture)</li>
+        <li><strong>t</strong>: shutter time (seconds)</li>
+        <li><strong>ISO</strong>: sensor gain sensitivity scale</li>
+        <li><strong>EV</strong>: exposure value</li>
+        <li><strong>CoC</strong>: circle of confusion (mm)</li>
+        <li><strong>H</strong>: hyperfocal distance</li>
+        <li><strong>CF</strong>: crop factor</li>
+      </ul>
+    </details>
+
+    <section class="botany-grid" aria-label="Camera examples">
+      <article class="botany-card">
+        <h2>1) Field of view from sensor + focal length</h2>
+        <p>
+          Horizontal field of view can be approximated by:
+          <strong>FOV = 2 \u00d7 arctan(w / (2f))</strong>.
+        </p>
+        <form class="botany-inputs" id="camera-example-1">
+          <label>Sensor width (mm)
+            <input id="fov-sensor-width" data-sync-key="fov-sensor-width" type="number" min="8" max="50" value="36" step="0.1" />
+            <input data-sync-key="fov-sensor-width" type="range" min="8" max="50" value="36" step="0.1" />
+          </label>
+          <label>Focal length (mm)
+            <input id="fov-focal-length" data-sync-key="fov-focal-length" type="number" min="8" max="200" value="35" step="1" />
+            <input data-sync-key="fov-focal-length" type="range" min="8" max="200" value="35" step="1" />
+          </label>
+        </form>
+        <p class="botany-math" id="camera-result-1"></p>
+        <p class="botany-math">
+          <span class="botany-latex">\\(FOV = 2\\arctan(\\frac{w}{2f})\\)</span>
+        </p>
+        <div class="botany-plot-wrap">
+          <canvas id="camera-plot-1" class="botany-plot" aria-label="Field of view chart" role="img"></canvas>
+        </div>
+      </article>
+
+      <article class="botany-card">
+        <h2>2) Aperture, light, and exposure value</h2>
+        <p>
+          Aperture controls light as <strong>relative light \u221d 1/N<sup>2</sup></strong>. Exposure value at ISO 100 is
+          <strong>EV<sub>100</sub> = log<sub>2</sub>(N<sup>2</sup>/t)</strong>.
+        </p>
+        <form class="botany-inputs" id="camera-example-2">
+          <label>f-number (N)
+            <input id="aperture-f-number" data-sync-key="aperture-f-number" type="number" min="1.2" max="16" value="2.8" step="0.1" />
+            <input data-sync-key="aperture-f-number" type="range" min="1.2" max="16" value="2.8" step="0.1" />
+          </label>
+          <label>Shutter time (s)
+            <input id="aperture-shutter" data-sync-key="aperture-shutter" type="number" min="0.001" max="1" value="0.0167" step="0.0005" />
+            <input data-sync-key="aperture-shutter" type="range" min="0.001" max="1" value="0.0167" step="0.0005" />
+          </label>
+          <label>ISO
+            <input id="aperture-iso" data-sync-key="aperture-iso" type="number" min="100" max="12800" value="400" step="100" />
+            <input data-sync-key="aperture-iso" type="range" min="100" max="12800" value="400" step="100" />
+          </label>
+        </form>
+        <p class="botany-math" id="camera-result-2"></p>
+        <p class="botany-math">
+          <span class="botany-latex">\\(EV = \\log_2(\\frac{N^2}{t}) - \\log_2(\\frac{ISO}{100})\\)</span>
+        </p>
+        <div class="botany-plot-wrap">
+          <canvas id="camera-plot-2" class="botany-plot" aria-label="Aperture light chart" role="img"></canvas>
+        </div>
+      </article>
+
+      <article class="botany-card">
+        <h2>3) Depth of field and hyperfocal intuition</h2>
+        <p>
+          A simple DOF model uses hyperfocal distance:
+          <strong>H = f<sup>2</sup> / (N \u00d7 CoC) + f</strong>.
+        </p>
+        <form class="botany-inputs" id="camera-example-3">
+          <label>Focal length (mm)
+            <input id="dof-focal" data-sync-key="dof-focal" type="number" min="14" max="200" value="50" step="1" />
+            <input data-sync-key="dof-focal" type="range" min="14" max="200" value="50" step="1" />
+          </label>
+          <label>f-number
+            <input id="dof-f-number" data-sync-key="dof-f-number" type="number" min="1.4" max="16" value="2.8" step="0.1" />
+            <input data-sync-key="dof-f-number" type="range" min="1.4" max="16" value="2.8" step="0.1" />
+          </label>
+          <label>Subject distance (m)
+            <input id="dof-distance" data-sync-key="dof-distance" type="number" min="0.5" max="30" value="3" step="0.1" />
+            <input data-sync-key="dof-distance" type="range" min="0.5" max="30" value="3" step="0.1" />
+          </label>
+          <label>CoC (mm)
+            <input id="dof-coc" data-sync-key="dof-coc" type="number" min="0.01" max="0.04" value="0.03" step="0.001" />
+            <input data-sync-key="dof-coc" type="range" min="0.01" max="0.04" value="0.03" step="0.001" />
+          </label>
+        </form>
+        <p class="botany-math" id="camera-result-3"></p>
+        <p class="botany-math">
+          <span class="botany-latex">\\(H = \\frac{f^2}{N \\cdot CoC} + f\\)</span>
+        </p>
+        <div class="botany-plot-wrap">
+          <canvas id="camera-plot-3" class="botany-plot" aria-label="Depth of field chart" role="img"></canvas>
+        </div>
+      </article>
+
+      <article class="botany-card">
+        <h2>4) Crop factor and equivalent focal length</h2>
+        <p>
+          Equivalent framing is estimated by:
+          <strong>f<sub>eq</sub> = f \u00d7 CF</strong>.
+        </p>
+        <form class="botany-inputs" id="camera-example-4">
+          <label>Lens focal length (mm)
+            <input id="crop-focal" data-sync-key="crop-focal" type="number" min="8" max="200" value="35" step="1" />
+            <input data-sync-key="crop-focal" type="range" min="8" max="200" value="35" step="1" />
+          </label>
+          <label>Crop factor
+            <input id="crop-factor" data-sync-key="crop-factor" type="number" min="0.7" max="2.7" value="1.5" step="0.1" />
+            <input data-sync-key="crop-factor" type="range" min="0.7" max="2.7" value="1.5" step="0.1" />
+          </label>
+        </form>
+        <p class="botany-math" id="camera-result-4"></p>
+        <p class="botany-math">
+          <span class="botany-latex">\\(f_{eq} = f \\times CF\\)</span>
+        </p>
+        <div class="botany-plot-wrap">
+          <canvas id="camera-plot-4" class="botany-plot" aria-label="Equivalent focal length chart" role="img"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <div class="hero-controls">
+      <a class="action" href="#/" aria-label="Go to home">Back home</a>
+      <a class="action" href="#/botany" aria-label="Go to botany">Go to botany</a>
+    </div>
+  `;
+
+  renderBotanyLatex(routeContent);
+  const cleanupPlots = renderCameraInteractive();
+
+  return () => {
+    cleanupPlots();
+  };
+}
+
 function renderPianoRoute() {
   routeContent.innerHTML = `
     <p class="hero-label">Piano Guide</p>
@@ -1073,6 +1417,7 @@ const routes = {
   "/shows": renderShowsRoute,
   "/shows-crud": renderShowsCrudRoute,
   "/botany": renderBotanyRoute,
+  "/camera": renderCameraRoute,
   "/piano": renderPianoRoute,
   "/three-demo": renderThreeRoute,
   "/three-superneat": renderThreeSuperneatRoute,

@@ -18,6 +18,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/" href="#/">Home</a></li>
           <li><a class="menu-link" data-route="/shows" href="#/shows">Shows</a></li>
           <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
+          <li><a class="menu-link" data-route="/botany" href="#/botany">Botany</a></li>
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
         </ul>
@@ -541,6 +542,96 @@ function renderShowsCrudRoute() {
   renderShowsSection(showsCrudContainer);
 }
 
+function renderBotanyRoute() {
+  routeContent.innerHTML = `
+    <p class="hero-label">Botany</p>
+    <h1 class="hero-title">Botany examples with explanations + math</h1>
+    <p class="hero-subtitle">
+      Botany uses quantitative models to explain how plants capture light, move water, allocate biomass,
+      and estimate productivity. Below are worked examples used in plant physiology and ecology.
+    </p>
+
+    <section class="botany-grid" aria-label="Botany examples">
+      <article class="botany-card">
+        <h2>1) Photosynthesis response to light</h2>
+        <p>
+          A saturating curve can describe photosynthesis at different light intensities:
+          <strong>A(I) = A<sub>max</sub>(1 - e<sup>-kI</sup>)</strong>.
+        </p>
+        <p class="botany-math">
+          Example: A<sub>max</sub> = 25 μmol CO₂ m⁻² s⁻¹, k = 0.003, I = 500 μmol photons m⁻² s⁻¹<br />
+          A(500) = 25(1 - e<sup>-1.5</sup>) = 25(1 - 0.223) = 25 × 0.777 = <strong>19.4 μmol CO₂ m⁻² s⁻¹</strong>
+        </p>
+      </article>
+
+      <article class="botany-card">
+        <h2>2) Relative growth rate (RGR)</h2>
+        <p>
+          RGR tracks biomass increase relative to current mass:
+          <strong>RGR = (ln W<sub>2</sub> - ln W<sub>1</sub>) / (t<sub>2</sub> - t<sub>1</sub>)</strong>.
+        </p>
+        <p class="botany-math">
+          Example: W<sub>1</sub> = 2.0 g at day 0, W<sub>2</sub> = 3.5 g at day 10<br />
+          RGR = (ln 3.5 - ln 2.0) / 10 = (1.253 - 0.693) / 10 = 0.560 / 10 = <strong>0.056 day⁻¹</strong>
+        </p>
+      </article>
+
+      <article class="botany-card">
+        <h2>3) Water-use efficiency (WUE)</h2>
+        <p>
+          WUE compares carbon gain to water loss:
+          <strong>WUE = A / E</strong>, where A is assimilation and E is transpiration.
+        </p>
+        <p class="botany-math">
+          Example: A = 12 μmol CO₂ m⁻² s⁻¹, E = 4 mmol H₂O m⁻² s⁻¹<br />
+          WUE = 12 / 4 = <strong>3 μmol CO₂ per mmol H₂O</strong>
+        </p>
+      </article>
+
+      <article class="botany-card">
+        <h2>4) Leaf area index (LAI)</h2>
+        <p>
+          LAI quantifies canopy leaf area per ground area:
+          <strong>LAI = (total one-sided leaf area) / (ground area)</strong>.
+        </p>
+        <p class="botany-math">
+          Example: total leaf area = 18 m² over a 6 m² plot<br />
+          LAI = 18 / 6 = <strong>3.0 m² leaf per m² ground</strong>
+        </p>
+      </article>
+
+      <article class="botany-card">
+        <h2>5) Transpiration flux from conductance gradient</h2>
+        <p>
+          A simplified flux model estimates transpiration as:
+          <strong>E = g<sub>s</sub> × VPD</strong>, where g<sub>s</sub> is stomatal conductance and VPD is vapor pressure deficit.
+        </p>
+        <p class="botany-math">
+          Example: g<sub>s</sub> = 0.35 mol m⁻² s⁻¹, VPD = 1.8 kPa<br />
+          E = 0.35 × 1.8 = <strong>0.63 (model units)</strong>
+        </p>
+      </article>
+
+      <article class="botany-card">
+        <h2>6) Thermal time (growing degree days)</h2>
+        <p>
+          Development can be modeled by thermal accumulation:
+          <strong>GDD = Σ max(0, T<sub>mean</sub> - T<sub>base</sub>)</strong>.
+        </p>
+        <p class="botany-math">
+          Example for 5 days, T<sub>base</sub> = 10°C, daily means = 12, 14, 9, 16, 18°C<br />
+          GDD = (2 + 4 + 0 + 6 + 8) = <strong>20 degree-days</strong>
+        </p>
+      </article>
+    </section>
+
+    <div class="hero-controls">
+      <a class="action" href="#/" aria-label="Go to home">Back home</a>
+      <a class="action" href="#/shows" aria-label="Go to shows">Go to shows</a>
+    </div>
+  `;
+}
+
 
 function renderThreeRoute() {
   return renderThreeDemoRoute(routeContent);
@@ -554,6 +645,7 @@ const routes = {
   "/": renderHomeRoute,
   "/shows": renderShowsRoute,
   "/shows-crud": renderShowsCrudRoute,
+  "/botany": renderBotanyRoute,
   "/three-demo": renderThreeRoute,
   "/three-superneat": renderThreeSuperneatRoute,
 };

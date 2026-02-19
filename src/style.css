@@ -874,3 +874,36 @@ code {
   background: #eef2ff;
   font-weight: 700;
 }
+
+
+.botany-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.botany-card {
+  border: 1px solid #dbe3f4;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 1rem;
+}
+
+.botany-card h2 {
+  margin: 0 0 0.5rem;
+  color: #312e81;
+  font-size: 1.1rem;
+}
+
+.botany-card p {
+  margin: 0.35rem 0;
+  color: #334155;
+}
+
+.botany-math {
+  font-family: "ui-monospace", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: #eef2ff;
+  border-radius: 10px;
+  padding: 0.7rem;
+  color: #1e1b4b;
+}

@@ -6,11 +6,18 @@ export function renderSuperneatDemoRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">SuperNeat playground</h1>
-    <p class="hero-subtitle">Orbit around a simple scene built with SuperNeatLib primitives, a ground helper, and soft lighting.</p>
-    <div class="three-demo-canvas-wrap" id="superneat-demo-canvas" aria-label="SuperNeatLib three-dimensional demo"></div>
+    <p class="hero-subtitle">Use arrow keys or the joystick to move the cube player around the arena.</p>
+    <div class="three-demo-canvas-wrap" id="superneat-demo-canvas" aria-label="SuperNeatLib three-dimensional demo">
+      <div class="superneat-joystick" id="superneat-joystick" role="group" aria-label="Movement joystick">
+        <div class="superneat-joystick-thumb" id="superneat-joystick-thumb" aria-hidden="true"></div>
+      </div>
+    </div>
   `;
 
   const canvasWrap = container.querySelector("#superneat-demo-canvas");
+  const joystick = container.querySelector("#superneat-joystick");
+  const joystickThumb = container.querySelector("#superneat-joystick-thumb");
+
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#e0f2fe");
 
@@ -47,7 +54,116 @@ export function renderSuperneatDemoRoute(container) {
   groundPlane.position.y = -0.01;
   scene.add(groundPlane);
 
+  const keyMoveState = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+  };
+
+  const joystickState = {
+    x: 0,
+    y: 0,
+    pointerId: null,
+  };
+
+  const moveSpeed = 0.08;
+  const boundary = 5.25;
+
   let animationFrameId = null;
+
+  function onKeyDown(event) {
+    const key = event.key.toLowerCase();
+
+    if (key === "arrowup" || key === "w") {
+      keyMoveState.up = true;
+    } else if (key === "arrowdown" || key === "s") {
+      keyMoveState.down = true;
+    } else if (key === "arrowleft" || key === "a") {
+      keyMoveState.left = true;
+    } else if (key === "arrowright" || key === "d") {
+      keyMoveState.right = true;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+  }
+
+  function onKeyUp(event) {
+    const key = event.key.toLowerCase();
+
+    if (key === "arrowup" || key === "w") {
+      keyMoveState.up = false;
+    } else if (key === "arrowdown" || key === "s") {
+      keyMoveState.down = false;
+    } else if (key === "arrowleft" || key === "a") {
+      keyMoveState.left = false;
+    } else if (key === "arrowright" || key === "d") {
+      keyMoveState.right = false;
+    }
+  }
+
+  function updateJoystickVisual() {
+    const bounds = joystick.getBoundingClientRect();
+    const thumbHalfSize = joystickThumb.offsetWidth / 2;
+    const travelRadius = bounds.width / 2 - thumbHalfSize - 4;
+    const x = joystickState.x * travelRadius;
+    const y = joystickState.y * travelRadius;
+    joystickThumb.style.transform = `translate(${x}px, ${y}px)`;
+  }
+
+  function setJoystickFromPointer(clientX, clientY) {
+    const bounds = joystick.getBoundingClientRect();
+    const centerX = bounds.left + bounds.width / 2;
+    const centerY = bounds.top + bounds.height / 2;
+    const dx = clientX - centerX;
+    const dy = clientY - centerY;
+
+    const thumbHalfSize = joystickThumb.offsetWidth / 2;
+    const maxDistance = bounds.width / 2 - thumbHalfSize - 4;
+    const distance = Math.hypot(dx, dy);
+    const clampedDistance = Math.min(distance, maxDistance);
+    const angle = Math.atan2(dy, dx);
+
+    const limitedDx = Math.cos(angle) * clampedDistance;
+    const limitedDy = Math.sin(angle) * clampedDistance;
+
+    joystickState.x = limitedDx / maxDistance;
+    joystickState.y = limitedDy / maxDistance;
+
+    updateJoystickVisual();
+  }
+
+  function resetJoystick() {
+    joystickState.x = 0;
+    joystickState.y = 0;
+    joystickState.pointerId = null;
+    updateJoystickVisual();
+  }
+
+  function onJoystickPointerDown(event) {
+    event.preventDefault();
+    joystickState.pointerId = event.pointerId;
+    joystick.setPointerCapture(event.pointerId);
+    setJoystickFromPointer(event.clientX, event.clientY);
+  }
+
+  function onJoystickPointerMove(event) {
+    if (joystickState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    setJoystickFromPointer(event.clientX, event.clientY);
+  }
+
+  function onJoystickPointerEnd(event) {
+    if (joystickState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    resetJoystick();
+  }
 
   function resizeRenderer() {
     const width = canvasWrap.clientWidth;
@@ -55,11 +171,26 @@ export function renderSuperneatDemoRoute(container) {
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
+    updateJoystickVisual();
   }
 
   function animate() {
     animationFrameId = window.requestAnimationFrame(animate);
-    pedestal.rotation.y += 0.01;
+
+    const keyboardX = Number(keyMoveState.right) - Number(keyMoveState.left);
+    const keyboardZ = Number(keyMoveState.down) - Number(keyMoveState.up);
+
+    const moveX = THREE.MathUtils.clamp(keyboardX + joystickState.x, -1, 1);
+    const moveZ = THREE.MathUtils.clamp(keyboardZ + joystickState.y, -1, 1);
+
+    if (moveX !== 0 || moveZ !== 0) {
+      const nextX = pedestal.position.x + moveX * moveSpeed;
+      const nextZ = pedestal.position.z + moveZ * moveSpeed;
+      pedestal.position.x = THREE.MathUtils.clamp(nextX, -boundary, boundary);
+      pedestal.position.z = THREE.MathUtils.clamp(nextZ, -boundary, boundary);
+      pedestal.rotation.y = Math.atan2(moveX, moveZ || 0.0001);
+    }
+
     orb.position.y = 1.9 + Math.sin(performance.now() * 0.0025) * 0.18;
     controls.update();
     renderer.render(scene, camera);
@@ -67,7 +198,15 @@ export function renderSuperneatDemoRoute(container) {
 
   resizeRenderer();
   animate();
+
   window.addEventListener("resize", resizeRenderer);
+  window.addEventListener("keydown", onKeyDown, { passive: false });
+  window.addEventListener("keyup", onKeyUp);
+
+  joystick.addEventListener("pointerdown", onJoystickPointerDown);
+  joystick.addEventListener("pointermove", onJoystickPointerMove);
+  joystick.addEventListener("pointerup", onJoystickPointerEnd);
+  joystick.addEventListener("pointercancel", onJoystickPointerEnd);
 
   return () => {
     if (animationFrameId !== null) {
@@ -75,6 +214,14 @@ export function renderSuperneatDemoRoute(container) {
     }
 
     window.removeEventListener("resize", resizeRenderer);
+    window.removeEventListener("keydown", onKeyDown);
+    window.removeEventListener("keyup", onKeyUp);
+
+    joystick.removeEventListener("pointerdown", onJoystickPointerDown);
+    joystick.removeEventListener("pointermove", onJoystickPointerMove);
+    joystick.removeEventListener("pointerup", onJoystickPointerEnd);
+    joystick.removeEventListener("pointercancel", onJoystickPointerEnd);
+
     controls.dispose();
     renderer.dispose();
     canvasWrap.innerHTML = "";

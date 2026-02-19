@@ -60,7 +60,7 @@ function renderBotanyLatex(container) {
   });
 }
 
-function renderBotanyPlots() {
+function renderBotanyInteractive() {
   const charts = [];
   const sharedOptions = {
     responsive: true,
@@ -81,55 +81,10 @@ function renderBotanyPlots() {
     },
   };
 
-  const chartConfigs = [
-    {
-      id: "botany-plot-1",
-      type: "line",
-      labels: [0, 100, 250, 500, 750, 1000],
-      values: [0, 6.5, 13.2, 19.4, 22.3, 23.8],
-      label: "A(I)",
-    },
-    {
-      id: "botany-plot-2",
-      type: "line",
-      labels: [0, 2, 4, 6, 8, 10],
-      values: [2.0, 2.25, 2.53, 2.84, 3.19, 3.5],
-      label: "Biomass",
-    },
-    {
-      id: "botany-plot-3",
-      type: "bar",
-      labels: ["Plant A", "Plant B", "Plant C"],
-      values: [2.6, 3.0, 3.4],
-      label: "WUE",
-    },
-    {
-      id: "botany-plot-4",
-      type: "bar",
-      labels: ["Plot 1", "Plot 2", "Plot 3"],
-      values: [1.8, 3.0, 4.2],
-      label: "LAI",
-    },
-    {
-      id: "botany-plot-5",
-      type: "line",
-      labels: [0.5, 1.0, 1.5, 1.8, 2.2],
-      values: [0.18, 0.35, 0.53, 0.63, 0.77],
-      label: "Transpiration",
-    },
-    {
-      id: "botany-plot-6",
-      type: "line",
-      labels: [1, 2, 3, 4, 5],
-      values: [2, 6, 6, 12, 20],
-      label: "Cumulative GDD",
-    },
-  ];
-
-  chartConfigs.forEach(({ id, type, labels, values, label }) => {
+  function makeChart(id, type, label, labels = []) {
     const canvas = document.getElementById(id);
     if (!canvas) {
-      return;
+      return null;
     }
 
     const chart = new Chart(canvas, {
@@ -138,7 +93,7 @@ function renderBotanyPlots() {
         labels,
         datasets: [
           {
-            data: values,
+            data: [],
             label,
             borderColor: "#4f46e5",
             backgroundColor: "rgba(79, 70, 229, 0.24)",
@@ -152,6 +107,153 @@ function renderBotanyPlots() {
     });
 
     charts.push(chart);
+    return chart;
+  }
+
+  function num(id) {
+    const value = Number(document.getElementById(id)?.value);
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  function setResult(id, content) {
+    const node = document.getElementById(id);
+    if (node) {
+      node.innerHTML = content;
+    }
+  }
+
+  function syncPairedInputs(scope) {
+    scope.querySelectorAll("input[data-sync-key]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const key = input.dataset.syncKey;
+        if (!key) {
+          return;
+        }
+
+        scope.querySelectorAll(`input[data-sync-key="${key}"]`).forEach((match) => {
+          if (match !== input) {
+            match.value = input.value;
+          }
+        });
+      });
+    });
+  }
+
+  const photoChart = makeChart("botany-plot-1", "line", "A(I)");
+  const rgrChart = makeChart("botany-plot-2", "line", "Biomass");
+  const wueChart = makeChart("botany-plot-3", "bar", "WUE", ["Plant A", "Plant B", "Plant C"]);
+  const laiChart = makeChart("botany-plot-4", "bar", "LAI", ["Plot 1", "Plot 2", "Plot 3"]);
+  const transpirationChart = makeChart("botany-plot-5", "line", "Transpiration");
+  const gddChart = makeChart("botany-plot-6", "line", "Cumulative GDD");
+
+  function updatePhotosynthesis() {
+    const aMax = num("photo-amax");
+    const k = num("photo-k");
+    const iTarget = num("photo-i");
+    const labels = [0, 100, 250, 500, 750, 1000];
+    const values = labels.map((light) => aMax * (1 - Math.exp(-k * light)));
+    const result = aMax * (1 - Math.exp(-k * iTarget));
+
+    if (photoChart) {
+      photoChart.data.labels = labels;
+      photoChart.data.datasets[0].data = values;
+      photoChart.update();
+    }
+
+    setResult("botany-result-1", `A(${iTarget}) = <strong>${result.toFixed(2)} μmol CO₂ m⁻² s⁻¹</strong>`);
+  }
+
+  function updateRgr() {
+    const w1 = Math.max(num("rgr-w1"), 0.001);
+    const w2 = Math.max(num("rgr-w2"), 0.001);
+    const t1 = num("rgr-t1");
+    const t2 = num("rgr-t2");
+    const totalDays = Math.max(t2 - t1, 1);
+    const rgr = (Math.log(w2) - Math.log(w1)) / totalDays;
+    const points = Math.min(Math.max(Math.round(totalDays), 2), 20);
+    const labels = Array.from({ length: points + 1 }, (_, index) => t1 + index * (totalDays / points));
+    const values = labels.map((day) => w1 * Math.exp(rgr * (day - t1)));
+
+    if (rgrChart) {
+      rgrChart.data.labels = labels.map((value) => value.toFixed(1));
+      rgrChart.data.datasets[0].data = values;
+      rgrChart.update();
+    }
+
+    setResult("botany-result-2", `RGR = <strong>${rgr.toFixed(4)} day⁻¹</strong> over ${totalDays.toFixed(1)} days`);
+  }
+
+  function updateWue() {
+    const a = num("wue-a");
+    const e = Math.max(num("wue-e"), 0.001);
+    const wue = a / e;
+    if (wueChart) {
+      wueChart.data.datasets[0].data = [Math.max(wue - 0.4, 0), wue, wue + 0.4];
+      wueChart.update();
+    }
+    setResult("botany-result-3", `WUE = <strong>${wue.toFixed(2)} μmol CO₂ per mmol H₂O</strong>`);
+  }
+
+  function updateLai() {
+    const leafArea = num("lai-leaf-area");
+    const groundArea = Math.max(num("lai-ground-area"), 0.001);
+    const lai = leafArea / groundArea;
+    if (laiChart) {
+      laiChart.data.datasets[0].data = [Math.max(lai - 1.2, 0), lai, lai + 1.2];
+      laiChart.update();
+    }
+    setResult("botany-result-4", `LAI = <strong>${lai.toFixed(2)} m² leaf per m² ground</strong>`);
+  }
+
+  function updateTranspiration() {
+    const gs = num("transpiration-gs");
+    const vpd = num("transpiration-vpd");
+    const e = gs * vpd;
+    const labels = [0.5, 1.0, 1.5, 2.0, 2.5];
+    const values = labels.map((value) => gs * value);
+    if (transpirationChart) {
+      transpirationChart.data.labels = labels;
+      transpirationChart.data.datasets[0].data = values;
+      transpirationChart.update();
+    }
+    setResult("botany-result-5", `E = <strong>${e.toFixed(2)}</strong> at VPD = ${vpd.toFixed(2)} kPa`);
+  }
+
+  function updateGdd() {
+    const baseTemp = num("gdd-base");
+    const dailyTemps = [1, 2, 3, 4, 5].map((index) => num(`gdd-day-${index}`));
+    let cumulative = 0;
+    const cumulativeValues = dailyTemps.map((temp) => {
+      cumulative += Math.max(0, temp - baseTemp);
+      return cumulative;
+    });
+    if (gddChart) {
+      gddChart.data.labels = [1, 2, 3, 4, 5];
+      gddChart.data.datasets[0].data = cumulativeValues;
+      gddChart.update();
+    }
+    setResult("botany-result-6", `Total GDD = <strong>${cumulative.toFixed(2)} degree-days</strong>`);
+  }
+
+  const actions = [
+    ["botany-example-1", updatePhotosynthesis],
+    ["botany-example-2", updateRgr],
+    ["botany-example-3", updateWue],
+    ["botany-example-4", updateLai],
+    ["botany-example-5", updateTranspiration],
+    ["botany-example-6", updateGdd],
+  ];
+
+  actions.forEach(([formId, updateFn]) => {
+    const form = document.getElementById(formId);
+    if (!form) {
+      return;
+    }
+
+    syncPairedInputs(form);
+    form.addEventListener("input", updateFn);
+    form.addEventListener("submit", (event) => event.preventDefault());
+    updateFn();
   });
 
   return () => {
@@ -688,10 +790,21 @@ function renderBotanyRoute() {
           A saturating curve can describe photosynthesis at different light intensities:
           <strong>A(I) = A<sub>max</sub>(1 - e<sup>-kI</sup>)</strong>.
         </p>
-        <p class="botany-math">
-          Example: A<sub>max</sub> = 25 μmol CO₂ m⁻² s⁻¹, k = 0.003, I = 500 μmol photons m⁻² s⁻¹<br />
-          A(500) = 25(1 - e<sup>-1.5</sup>) = 25(1 - 0.223) = 25 × 0.777 = <strong>19.4 μmol CO₂ m⁻² s⁻¹</strong>
-        </p>
+        <form class="botany-inputs" id="botany-example-1">
+          <label>A<sub>max</sub>
+            <input id="photo-amax" data-sync-key="photo-amax" type="number" min="0" max="60" value="25" step="0.1" />
+            <input data-sync-key="photo-amax" type="range" min="0" max="60" value="25" step="0.1" />
+          </label>
+          <label>k
+            <input id="photo-k" data-sync-key="photo-k" type="number" min="0" max="0.02" value="0.003" step="0.0001" />
+            <input data-sync-key="photo-k" type="range" min="0" max="0.02" value="0.003" step="0.0001" />
+          </label>
+          <label>I target
+            <input id="photo-i" data-sync-key="photo-i" type="number" min="0" max="1200" value="500" step="10" />
+            <input data-sync-key="photo-i" type="range" min="0" max="1200" value="500" step="10" />
+          </label>
+        </form>
+        <p class="botany-math" id="botany-result-1"></p>
         <p class="botany-math">
           <span class="botany-latex">\\(A(I) = A_{max}(1 - e^{-kI})\\)</span>
         </p>
@@ -706,10 +819,25 @@ function renderBotanyRoute() {
           RGR tracks biomass increase relative to current mass:
           <strong>RGR = (ln W<sub>2</sub> - ln W<sub>1</sub>) / (t<sub>2</sub> - t<sub>1</sub>)</strong>.
         </p>
-        <p class="botany-math">
-          Example: W<sub>1</sub> = 2.0 g at day 0, W<sub>2</sub> = 3.5 g at day 10<br />
-          RGR = (ln 3.5 - ln 2.0) / 10 = (1.253 - 0.693) / 10 = 0.560 / 10 = <strong>0.056 day⁻¹</strong>
-        </p>
+        <form class="botany-inputs" id="botany-example-2">
+          <label>W<sub>1</sub> (g)
+            <input id="rgr-w1" data-sync-key="rgr-w1" type="number" min="0.1" max="20" value="2" step="0.1" />
+            <input data-sync-key="rgr-w1" type="range" min="0.1" max="20" value="2" step="0.1" />
+          </label>
+          <label>W<sub>2</sub> (g)
+            <input id="rgr-w2" data-sync-key="rgr-w2" type="number" min="0.1" max="30" value="3.5" step="0.1" />
+            <input data-sync-key="rgr-w2" type="range" min="0.1" max="30" value="3.5" step="0.1" />
+          </label>
+          <label>t<sub>1</sub> (days)
+            <input id="rgr-t1" data-sync-key="rgr-t1" type="number" min="0" max="30" value="0" step="1" />
+            <input data-sync-key="rgr-t1" type="range" min="0" max="30" value="0" step="1" />
+          </label>
+          <label>t<sub>2</sub> (days)
+            <input id="rgr-t2" data-sync-key="rgr-t2" type="number" min="1" max="60" value="10" step="1" />
+            <input data-sync-key="rgr-t2" type="range" min="1" max="60" value="10" step="1" />
+          </label>
+        </form>
+        <p class="botany-math" id="botany-result-2"></p>
         <p class="botany-math">
           <span class="botany-latex">\\(RGR = \\frac{\\ln W_2 - \\ln W_1}{t_2 - t_1}\\)</span>
         </p>
@@ -724,10 +852,17 @@ function renderBotanyRoute() {
           WUE compares carbon gain to water loss:
           <strong>WUE = A / E</strong>, where A is assimilation and E is transpiration.
         </p>
-        <p class="botany-math">
-          Example: A = 12 μmol CO₂ m⁻² s⁻¹, E = 4 mmol H₂O m⁻² s⁻¹<br />
-          WUE = 12 / 4 = <strong>3 μmol CO₂ per mmol H₂O</strong>
-        </p>
+        <form class="botany-inputs" id="botany-example-3">
+          <label>A
+            <input id="wue-a" data-sync-key="wue-a" type="number" min="0" max="40" value="12" step="0.1" />
+            <input data-sync-key="wue-a" type="range" min="0" max="40" value="12" step="0.1" />
+          </label>
+          <label>E
+            <input id="wue-e" data-sync-key="wue-e" type="number" min="0.1" max="12" value="4" step="0.1" />
+            <input data-sync-key="wue-e" type="range" min="0.1" max="12" value="4" step="0.1" />
+          </label>
+        </form>
+        <p class="botany-math" id="botany-result-3"></p>
         <p class="botany-math">
           <span class="botany-latex">\\(WUE = \\frac{A}{E}\\)</span>
         </p>
@@ -742,10 +877,17 @@ function renderBotanyRoute() {
           LAI quantifies canopy leaf area per ground area:
           <strong>LAI = (total one-sided leaf area) / (ground area)</strong>.
         </p>
-        <p class="botany-math">
-          Example: total leaf area = 18 m² over a 6 m² plot<br />
-          LAI = 18 / 6 = <strong>3.0 m² leaf per m² ground</strong>
-        </p>
+        <form class="botany-inputs" id="botany-example-4">
+          <label>Leaf area (m²)
+            <input id="lai-leaf-area" data-sync-key="lai-leaf-area" type="number" min="0" max="80" value="18" step="0.1" />
+            <input data-sync-key="lai-leaf-area" type="range" min="0" max="80" value="18" step="0.1" />
+          </label>
+          <label>Ground area (m²)
+            <input id="lai-ground-area" data-sync-key="lai-ground-area" type="number" min="0.5" max="25" value="6" step="0.1" />
+            <input data-sync-key="lai-ground-area" type="range" min="0.5" max="25" value="6" step="0.1" />
+          </label>
+        </form>
+        <p class="botany-math" id="botany-result-4"></p>
         <p class="botany-math">
           <span class="botany-latex">\\(LAI = \\frac{\\text{total one-sided leaf area}}{\\text{ground area}}\\)</span>
         </p>
@@ -760,10 +902,17 @@ function renderBotanyRoute() {
           A simplified flux model estimates transpiration as:
           <strong>E = g<sub>s</sub> × VPD</strong>, where g<sub>s</sub> is stomatal conductance and VPD is vapor pressure deficit.
         </p>
-        <p class="botany-math">
-          Example: g<sub>s</sub> = 0.35 mol m⁻² s⁻¹, VPD = 1.8 kPa<br />
-          E = 0.35 × 1.8 = <strong>0.63 (model units)</strong>
-        </p>
+        <form class="botany-inputs" id="botany-example-5">
+          <label>g<sub>s</sub>
+            <input id="transpiration-gs" data-sync-key="transpiration-gs" type="number" min="0" max="1.2" value="0.35" step="0.01" />
+            <input data-sync-key="transpiration-gs" type="range" min="0" max="1.2" value="0.35" step="0.01" />
+          </label>
+          <label>VPD
+            <input id="transpiration-vpd" data-sync-key="transpiration-vpd" type="number" min="0" max="4" value="1.8" step="0.1" />
+            <input data-sync-key="transpiration-vpd" type="range" min="0" max="4" value="1.8" step="0.1" />
+          </label>
+        </form>
+        <p class="botany-math" id="botany-result-5"></p>
         <p class="botany-math">
           LaTeX: <span class="botany-latex">\\(E = g_s \\times VPD\\)</span><br />
           Read as: E equals g sub s times V P D.
@@ -779,10 +928,33 @@ function renderBotanyRoute() {
           Development can be modeled by thermal accumulation:
           <strong>GDD = Σ max(0, T<sub>mean</sub> - T<sub>base</sub>)</strong>.
         </p>
-        <p class="botany-math">
-          Example for 5 days, T<sub>base</sub> = 10°C, daily means = 12, 14, 9, 16, 18°C<br />
-          GDD = (2 + 4 + 0 + 6 + 8) = <strong>20 degree-days</strong>
-        </p>
+        <form class="botany-inputs" id="botany-example-6">
+          <label>T<sub>base</sub>
+            <input id="gdd-base" data-sync-key="gdd-base" type="number" min="0" max="25" value="10" step="0.5" />
+            <input data-sync-key="gdd-base" type="range" min="0" max="25" value="10" step="0.5" />
+          </label>
+          <label>Day 1
+            <input id="gdd-day-1" data-sync-key="gdd-day-1" type="number" min="-5" max="40" value="12" step="0.5" />
+            <input data-sync-key="gdd-day-1" type="range" min="-5" max="40" value="12" step="0.5" />
+          </label>
+          <label>Day 2
+            <input id="gdd-day-2" data-sync-key="gdd-day-2" type="number" min="-5" max="40" value="14" step="0.5" />
+            <input data-sync-key="gdd-day-2" type="range" min="-5" max="40" value="14" step="0.5" />
+          </label>
+          <label>Day 3
+            <input id="gdd-day-3" data-sync-key="gdd-day-3" type="number" min="-5" max="40" value="9" step="0.5" />
+            <input data-sync-key="gdd-day-3" type="range" min="-5" max="40" value="9" step="0.5" />
+          </label>
+          <label>Day 4
+            <input id="gdd-day-4" data-sync-key="gdd-day-4" type="number" min="-5" max="40" value="16" step="0.5" />
+            <input data-sync-key="gdd-day-4" type="range" min="-5" max="40" value="16" step="0.5" />
+          </label>
+          <label>Day 5
+            <input id="gdd-day-5" data-sync-key="gdd-day-5" type="number" min="-5" max="40" value="18" step="0.5" />
+            <input data-sync-key="gdd-day-5" type="range" min="-5" max="40" value="18" step="0.5" />
+          </label>
+        </form>
+        <p class="botany-math" id="botany-result-6"></p>
         <p class="botany-math">
           <span class="botany-latex">\\(GDD = \\sum \\max(0, T_{mean} - T_{base})\\)</span>
         </p>
@@ -799,7 +971,7 @@ function renderBotanyRoute() {
   `;
 
   renderBotanyLatex(routeContent);
-  const cleanupPlots = renderBotanyPlots();
+  const cleanupPlots = renderBotanyInteractive();
 
   return () => {
     cleanupPlots();

@@ -16,6 +16,7 @@ document.querySelector("#app").innerHTML = `
         </div>
         <ul class="menu-list">
           <li><a class="menu-link" data-route="/" href="#/">Home</a></li>
+          <li><a class="menu-link" data-route="/piano" href="#/piano">Piano</a></li>
           <li><a class="menu-link" data-route="/shows" href="#/shows">Shows</a></li>
           <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
           <li><a class="menu-link" data-route="/botany" href="#/botany">Botany</a></li>
@@ -632,6 +633,87 @@ function renderBotanyRoute() {
   `;
 }
 
+function renderPianoRoute() {
+  routeContent.innerHTML = `
+    <p class="hero-label">Piano Guide</p>
+    <h1 class="hero-title">How to Play Piano</h1>
+    <p class="hero-subtitle">
+      Learn the fundamentals with a visual keyboard, hand-position tips, and beginner-friendly note patterns you can
+      practice right away.
+    </p>
+
+    <section class="piano-layout" aria-label="How to play piano examples">
+      <article class="piano-card">
+        <h2>1) Know the keyboard pattern</h2>
+        <p>
+          Piano keys repeat in groups of 12 notes. White keys are natural notes (C, D, E, F, G, A, B) and black keys
+          are sharps/flats. Find any group of <strong>two black keys</strong>; the white key immediately to the left is
+          <strong>C</strong>.
+        </p>
+        <div class="piano-keys" role="img" aria-label="Piano key pattern showing C major notes and black keys">
+          <span class="white-key is-highlight">C</span>
+          <span class="white-key">D</span>
+          <span class="white-key">E</span>
+          <span class="white-key">F</span>
+          <span class="white-key">G</span>
+          <span class="white-key">A</span>
+          <span class="white-key">B</span>
+          <span class="black-key black-1">C#</span>
+          <span class="black-key black-2">D#</span>
+          <span class="black-key black-4">F#</span>
+          <span class="black-key black-5">G#</span>
+          <span class="black-key black-6">A#</span>
+        </div>
+      </article>
+
+      <article class="piano-card">
+        <h2>2) Start with finger numbers</h2>
+        <p>
+          Use finger numbers instead of note names while learning: <strong>1 = thumb</strong> through
+          <strong>5 = pinky</strong>. Place your right-hand thumb on middle C and curve your fingers naturally.
+        </p>
+        <ol>
+          <li>Right hand C position: 1(C), 2(D), 3(E), 4(F), 5(G).</li>
+          <li>Play slowly with a steady pulse: one note per beat.</li>
+          <li>Keep your wrist relaxed and avoid flattening fingers.</li>
+        </ol>
+      </article>
+
+      <article class="piano-card">
+        <h2>3) Practice a C major scale</h2>
+        <p>
+          Scale notes: <strong>C - D - E - F - G - A - B - C</strong>. On the way up, tuck your thumb under after
+          finger 3.
+        </p>
+        <p class="piano-pattern">
+          Right hand fingering: <strong>1 2 3 1 2 3 4 5</strong><br />
+          Left hand fingering: <strong>5 4 3 2 1 3 2 1</strong>
+        </p>
+      </article>
+
+      <article class="piano-card">
+        <h2>4) Build your first chords</h2>
+        <p>
+          A major triad uses <strong>root + third + fifth</strong>. Start with these three common chords:
+        </p>
+        <ul class="piano-chords">
+          <li><strong>C major:</strong> C - E - G</li>
+          <li><strong>F major:</strong> F - A - C</li>
+          <li><strong>G major:</strong> G - B - D</li>
+        </ul>
+        <p>
+          Try this progression slowly: <strong>C | F | G | C</strong>. Hold each chord for 4 counts.
+        </p>
+      </article>
+    </section>
+
+    <div class="hero-controls">
+      <a class="action" href="#/" aria-label="Go to home">Back home</a>
+      <a class="action" href="#/shows" aria-label="Go to shows">Go to shows</a>
+    </div>
+  `;
+}
+
 
 function renderThreeRoute() {
   return renderThreeDemoRoute(routeContent);
@@ -646,6 +728,7 @@ const routes = {
   "/shows": renderShowsRoute,
   "/shows-crud": renderShowsCrudRoute,
   "/botany": renderBotanyRoute,
+  "/piano": renderPianoRoute,
   "/three-demo": renderThreeRoute,
   "/three-superneat": renderThreeSuperneatRoute,
 };

@@ -937,6 +937,34 @@ code {
   color: #1e1b4b;
 }
 
+.botany-inputs {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.45rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.botany-inputs label {
+  display: grid;
+  gap: 0.2rem;
+  color: #1f2937;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.botany-inputs input[type="number"] {
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  padding: 0.36rem 0.45rem;
+  background: #fff;
+  color: #1e1b4b;
+}
+
+.botany-inputs input[type="range"] {
+  width: 100%;
+  accent-color: #4f46e5;
+}
+
 .botany-plot-wrap {
   margin-top: 0.65rem;
   border: 1px solid #c7d2fe;

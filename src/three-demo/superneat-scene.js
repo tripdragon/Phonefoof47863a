@@ -3,6 +3,19 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Primitives, AxisHelperWithLetters } from "superneatlib";
 import { APP as _o } from "superneatlib";
 
+function createTopWindowLogger(message) {
+  const logBanner = document.createElement("output");
+  logBanner.id = "superneat-top-log";
+  logBanner.className = "superneat-top-log";
+  logBanner.setAttribute("aria-live", "polite");
+  logBanner.textContent = `Log: ${String(message)}`;
+  document.body.appendChild(logBanner);
+
+  return (nextMessage) => {
+    logBanner.textContent = `Log: ${String(nextMessage)}`;
+  };
+}
+
 export function renderSuperneatDemoRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
@@ -25,6 +38,7 @@ export function renderSuperneatDemoRoute(container) {
   const localJoystick = container.querySelector("#superneat-joystick-local");
   const localJoystickThumb = container.querySelector("#superneat-joystick-local-thumb");
   const statusLabel = container.querySelector("#superneat-status");
+  const updateTopLog = createTopWindowLogger("SuperNeat demo ready");
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#e0f2fe");
@@ -66,7 +80,7 @@ export function renderSuperneatDemoRoute(container) {
   nose.rotation.x = Math.PI / 2;
   nose.position.set(0, pedestalScale * 0.08, pedestalScale / 2 + 0.28);
   pedestal.add(nose);
-console.log(_o);
+  updateTopLog(_o?.version ?? "SuperNeatLib loaded");
   //const axis = new AxisHelperWithLetters({store:_o, size:2});
   // pedestal.add(axis);
   
@@ -335,10 +349,12 @@ console.log(_o);
     if (inExitZone && !hasExited) {
       hasExited = true;
       statusLabel.textContent = "You escaped the maze!";
+      updateTopLog("You escaped the maze!");
       pedestal.material.color.set(0x22c55e);
     } else if (!inExitZone && hasExited) {
       hasExited = false;
       statusLabel.textContent = "Find the exit at the top opening.";
+      updateTopLog("Back in maze");
       pedestal.material.color.set(0x6366f1);
     }
 
@@ -375,5 +391,10 @@ console.log(_o);
     controls.dispose();
     renderer.dispose();
     canvasWrap.innerHTML = "";
+
+    const topLog = document.querySelector("#superneat-top-log");
+    if (topLog) {
+      topLog.remove();
+    }
   };
 }

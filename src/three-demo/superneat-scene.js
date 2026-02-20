@@ -67,7 +67,7 @@ export function renderSuperneatDemoRoute(container) {
   nose.position.set(0, pedestalScale * 0.08, pedestalScale / 2 + 0.28);
   pedestal.add(nose);
 
-  const axis = new AxisHelperWithLetters({store:store, size:2});
+  const axis = new AxisHelperWithLetters({store:_o, size:2});
   // pedestal.add(axis);
   
   scene.add(pedestal);

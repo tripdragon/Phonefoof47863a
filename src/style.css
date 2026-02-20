@@ -991,6 +991,14 @@ code {
   background: #f8fafc;
 }
 
+.botany-visual {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  background: #f0fdf4;
+}
+
 .botany-plot-wrap {
   margin-top: 0.65rem;
   border: 1px solid #c7d2fe;

@@ -9,15 +9,20 @@ export function renderSuperneatDemoRoute(container) {
     <p class="hero-subtitle">Use arrow keys or the joystick to move through the maze and find the exit.</p>
     <p class="hero-label" id="superneat-status">Find the exit at the top opening.</p>
     <div class="three-demo-canvas-wrap" id="superneat-demo-canvas" aria-label="SuperNeatLib three-dimensional demo">
-      <div class="superneat-joystick" id="superneat-joystick" role="group" aria-label="Movement joystick">
-        <div class="superneat-joystick-thumb" id="superneat-joystick-thumb" aria-hidden="true"></div>
+      <div class="superneat-joystick" id="superneat-joystick-world" role="group" aria-label="World movement joystick">
+        <div class="superneat-joystick-thumb" id="superneat-joystick-world-thumb" aria-hidden="true"></div>
+      </div>
+      <div class="superneat-joystick superneat-joystick-right" id="superneat-joystick-local" role="group" aria-label="Local movement joystick">
+        <div class="superneat-joystick-thumb" id="superneat-joystick-local-thumb" aria-hidden="true"></div>
       </div>
     </div>
   `;
 
   const canvasWrap = container.querySelector("#superneat-demo-canvas");
-  const joystick = container.querySelector("#superneat-joystick");
-  const joystickThumb = container.querySelector("#superneat-joystick-thumb");
+  const worldJoystick = container.querySelector("#superneat-joystick-world");
+  const worldJoystickThumb = container.querySelector("#superneat-joystick-world-thumb");
+  const localJoystick = container.querySelector("#superneat-joystick-local");
+  const localJoystickThumb = container.querySelector("#superneat-joystick-local-thumb");
   const statusLabel = container.querySelector("#superneat-status");
 
   const scene = new THREE.Scene();
@@ -138,11 +143,14 @@ export function renderSuperneatDemoRoute(container) {
     right: false,
   };
 
-  const joystickState = {
+  const createJoystickState = () => ({
     x: 0,
     y: 0,
     pointerId: null,
-  };
+  });
+
+  const worldJoystickState = createJoystickState();
+  const localJoystickState = createJoystickState();
 
   const moveSpeed = 0.08;
   const boundary = scaleMazeValue(6.2);
@@ -189,7 +197,7 @@ export function renderSuperneatDemoRoute(container) {
     }
   }
 
-  function updateJoystickVisual() {
+  function updateJoystickVisual(joystick, joystickThumb, joystickState) {
     const bounds = joystick.getBoundingClientRect();
     const thumbHalfSize = joystickThumb.offsetWidth / 2;
     const travelRadius = bounds.width / 2 - thumbHalfSize - 4;
@@ -198,7 +206,7 @@ export function renderSuperneatDemoRoute(container) {
     joystickThumb.style.transform = `translate(${x}px, ${y}px)`;
   }
 
-  function setJoystickFromPointer(clientX, clientY) {
+  function setJoystickFromPointer(clientX, clientY, joystick, joystickThumb, joystickState) {
     const bounds = joystick.getBoundingClientRect();
     const centerX = bounds.left + bounds.width / 2;
     const centerY = bounds.top + bounds.height / 2;
@@ -217,37 +225,51 @@ export function renderSuperneatDemoRoute(container) {
     joystickState.x = limitedDx / maxDistance;
     joystickState.y = limitedDy / maxDistance;
 
-    updateJoystickVisual();
+    updateJoystickVisual(joystick, joystickThumb, joystickState);
   }
 
-  function resetJoystick() {
+  function resetJoystick(joystick, joystickThumb, joystickState) {
     joystickState.x = 0;
     joystickState.y = 0;
     joystickState.pointerId = null;
-    updateJoystickVisual();
+    updateJoystickVisual(joystick, joystickThumb, joystickState);
   }
 
-  function onJoystickPointerDown(event) {
-    event.preventDefault();
-    joystickState.pointerId = event.pointerId;
-    joystick.setPointerCapture(event.pointerId);
-    setJoystickFromPointer(event.clientX, event.clientY);
-  }
+  function bindJoystick(joystick, joystickThumb, joystickState) {
+    const onPointerDown = (event) => {
+      event.preventDefault();
+      joystickState.pointerId = event.pointerId;
+      joystick.setPointerCapture(event.pointerId);
+      setJoystickFromPointer(event.clientX, event.clientY, joystick, joystickThumb, joystickState);
+    };
 
-  function onJoystickPointerMove(event) {
-    if (joystickState.pointerId !== event.pointerId) {
-      return;
-    }
+    const onPointerMove = (event) => {
+      if (joystickState.pointerId !== event.pointerId) {
+        return;
+      }
 
-    setJoystickFromPointer(event.clientX, event.clientY);
-  }
+      setJoystickFromPointer(event.clientX, event.clientY, joystick, joystickThumb, joystickState);
+    };
 
-  function onJoystickPointerEnd(event) {
-    if (joystickState.pointerId !== event.pointerId) {
-      return;
-    }
+    const onPointerEnd = (event) => {
+      if (joystickState.pointerId !== event.pointerId) {
+        return;
+      }
 
-    resetJoystick();
+      resetJoystick(joystick, joystickThumb, joystickState);
+    };
+
+    joystick.addEventListener("pointerdown", onPointerDown);
+    joystick.addEventListener("pointermove", onPointerMove);
+    joystick.addEventListener("pointerup", onPointerEnd);
+    joystick.addEventListener("pointercancel", onPointerEnd);
+
+    return () => {
+      joystick.removeEventListener("pointerdown", onPointerDown);
+      joystick.removeEventListener("pointermove", onPointerMove);
+      joystick.removeEventListener("pointerup", onPointerEnd);
+      joystick.removeEventListener("pointercancel", onPointerEnd);
+    };
   }
 
   function resizeRenderer() {
@@ -256,7 +278,8 @@ export function renderSuperneatDemoRoute(container) {
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    updateJoystickVisual();
+    updateJoystickVisual(worldJoystick, worldJoystickThumb, worldJoystickState);
+    updateJoystickVisual(localJoystick, localJoystickThumb, localJoystickState);
   }
 
   function animate() {
@@ -265,8 +288,21 @@ export function renderSuperneatDemoRoute(container) {
     const keyboardX = Number(keyMoveState.right) - Number(keyMoveState.left);
     const keyboardZ = Number(keyMoveState.down) - Number(keyMoveState.up);
 
-    const moveX = THREE.MathUtils.clamp(keyboardX + joystickState.x, -1, 1);
-    const moveZ = THREE.MathUtils.clamp(keyboardZ + joystickState.y, -1, 1);
+    const worldMoveX = worldJoystickState.x;
+    const worldMoveZ = worldJoystickState.y;
+
+    const localInputX = localJoystickState.x;
+    const localInputForward = -localJoystickState.y;
+    const facingAngle = pedestal.rotation.y;
+    const localMoveX =
+      localInputX * Math.cos(facingAngle) +
+      localInputForward * Math.sin(facingAngle);
+    const localMoveZ =
+      -localInputX * Math.sin(facingAngle) +
+      localInputForward * Math.cos(facingAngle);
+
+    const moveX = THREE.MathUtils.clamp(keyboardX + worldMoveX + localMoveX, -1, 1);
+    const moveZ = THREE.MathUtils.clamp(keyboardZ + worldMoveZ + localMoveZ, -1, 1);
 
     if (moveX !== 0 || moveZ !== 0) {
       const nextX = pedestal.position.x + moveX * moveSpeed;
@@ -315,16 +351,13 @@ export function renderSuperneatDemoRoute(container) {
   }
 
   resizeRenderer();
+  const unbindWorldJoystick = bindJoystick(worldJoystick, worldJoystickThumb, worldJoystickState);
+  const unbindLocalJoystick = bindJoystick(localJoystick, localJoystickThumb, localJoystickState);
   animate();
 
   window.addEventListener("resize", resizeRenderer);
   window.addEventListener("keydown", onKeyDown, { passive: false });
   window.addEventListener("keyup", onKeyUp);
-
-  joystick.addEventListener("pointerdown", onJoystickPointerDown);
-  joystick.addEventListener("pointermove", onJoystickPointerMove);
-  joystick.addEventListener("pointerup", onJoystickPointerEnd);
-  joystick.addEventListener("pointercancel", onJoystickPointerEnd);
 
   return () => {
     if (animationFrameId !== null) {
@@ -335,10 +368,8 @@ export function renderSuperneatDemoRoute(container) {
     window.removeEventListener("keydown", onKeyDown);
     window.removeEventListener("keyup", onKeyUp);
 
-    joystick.removeEventListener("pointerdown", onJoystickPointerDown);
-    joystick.removeEventListener("pointermove", onJoystickPointerMove);
-    joystick.removeEventListener("pointerup", onJoystickPointerEnd);
-    joystick.removeEventListener("pointercancel", onJoystickPointerEnd);
+    unbindWorldJoystick();
+    unbindLocalJoystick();
 
     controls.dispose();
     renderer.dispose();

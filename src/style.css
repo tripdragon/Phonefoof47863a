@@ -578,6 +578,11 @@ code {
   z-index: 2;
 }
 
+.superneat-joystick-right {
+  left: auto;
+  right: 1rem;
+}
+
 .superneat-joystick-thumb {
   width: 44px;
   height: 44px;
@@ -596,6 +601,10 @@ code {
     height: 94px;
     left: 0.75rem;
     bottom: 0.75rem;
+  }
+
+  .superneat-joystick-right {
+    right: 0.75rem;
   }
 
   .superneat-joystick-thumb {

@@ -52,6 +52,15 @@ export function renderSuperneatDemoRoute(container) {
   const pedestalScale = 1.1;
   const pedestal = Primitives.cube({ scale: pedestalScale, color: 0xfacc15 });
   pedestal.position.set(0, pedestalScale / 2, 0);
+
+  const nose = new THREE.Mesh(
+    new THREE.ConeGeometry(0.22, 0.55, 16),
+    new THREE.MeshStandardMaterial({ color: 0xf97316 }),
+  );
+  nose.rotation.x = Math.PI / 2;
+  nose.position.set(0, pedestalScale * 0.08, pedestalScale / 2 + 0.28);
+  pedestal.add(nose);
+
   scene.add(pedestal);
 
   const orb = Primitives.ball({ scale: 0.8, color: 0x0ea5e9 });

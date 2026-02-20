@@ -123,6 +123,70 @@ function renderBotanyInteractive() {
     }
   }
 
+  function drawVisual(id, drawFn) {
+    const canvas = document.getElementById(id);
+    if (!canvas) {
+      return;
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+
+    const width = canvas.clientWidth || 320;
+    const height = canvas.clientHeight || 150;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    drawFn(ctx, width, height);
+  }
+
+  function drawPlantVisual(id, vitality, stemHeight = 0.72) {
+    drawVisual(id, (ctx, width, height) => {
+      const safeVitality = Math.min(1, Math.max(0, vitality));
+      const sky = ctx.createLinearGradient(0, 0, 0, height);
+      sky.addColorStop(0, "#ecfeff");
+      sky.addColorStop(1, "#f0fdf4");
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, width, height);
+
+      const groundY = height - 20;
+      ctx.fillStyle = "#bbf7d0";
+      ctx.fillRect(0, groundY, width, height - groundY);
+
+      const centerX = width / 2;
+      const stemTopY = Math.max(20, groundY - Math.max(35, stemHeight * (height - 45)));
+      ctx.strokeStyle = "#166534";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(centerX, groundY);
+      ctx.lineTo(centerX, stemTopY);
+      ctx.stroke();
+
+      const leafCount = Math.max(2, Math.round(2 + safeVitality * 8));
+      for (let i = 0; i < leafCount; i += 1) {
+        const side = i % 2 === 0 ? -1 : 1;
+        const progress = i / Math.max(leafCount - 1, 1);
+        const y = groundY - 18 - progress * (groundY - stemTopY - 12);
+        const size = 10 + safeVitality * 6;
+
+        ctx.fillStyle = `rgba(22, 163, 74, ${0.4 + safeVitality * 0.55})`;
+        ctx.beginPath();
+        ctx.ellipse(centerX + side * (14 + progress * 11), y, size * 0.8, size * 0.48, side * 0.65, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const flowerRadius = 3 + safeVitality * 6;
+      ctx.fillStyle = safeVitality > 0.7 ? "#facc15" : "#4ade80";
+      ctx.beginPath();
+      ctx.arc(centerX, stemTopY, flowerRadius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
 
 
   function syncPairedInputs(scope) {
@@ -163,6 +227,7 @@ function renderBotanyInteractive() {
       photoChart.update();
     }
 
+    drawPlantVisual("botany-visual-1", Math.min(result / Math.max(aMax, 1), 1), 0.72);
     setResult("botany-result-1", `A(${iTarget}) = <strong>${result.toFixed(2)} μmol CO₂ m⁻² s⁻¹</strong>`);
   }
 
@@ -183,6 +248,7 @@ function renderBotanyInteractive() {
       rgrChart.update();
     }
 
+    drawPlantVisual("botany-visual-2", Math.min(Math.max((rgr + 0.05) / 0.2, 0), 1), 0.78);
     setResult("botany-result-2", `RGR = <strong>${rgr.toFixed(4)} day⁻¹</strong> over ${totalDays.toFixed(1)} days`);
   }
 
@@ -194,6 +260,7 @@ function renderBotanyInteractive() {
       wueChart.data.datasets[0].data = [Math.max(wue - 0.4, 0), wue, wue + 0.4];
       wueChart.update();
     }
+    drawPlantVisual("botany-visual-3", Math.min(wue / 6, 1), 0.66);
     setResult("botany-result-3", `WUE = <strong>${wue.toFixed(2)} μmol CO₂ per mmol H₂O</strong>`);
   }
 
@@ -205,6 +272,7 @@ function renderBotanyInteractive() {
       laiChart.data.datasets[0].data = [Math.max(lai - 1.2, 0), lai, lai + 1.2];
       laiChart.update();
     }
+    drawPlantVisual("botany-visual-4", Math.min(lai / 6, 1), 0.7);
     setResult("botany-result-4", `LAI = <strong>${lai.toFixed(2)} m² leaf per m² ground</strong>`);
   }
 
@@ -219,6 +287,7 @@ function renderBotanyInteractive() {
       transpirationChart.data.datasets[0].data = values;
       transpirationChart.update();
     }
+    drawPlantVisual("botany-visual-5", Math.min(Math.max(1 - vpd / 4.2, 0), 1), 0.68);
     setResult("botany-result-5", `E = <strong>${e.toFixed(2)}</strong> at VPD = ${vpd.toFixed(2)} kPa`);
   }
 
@@ -235,7 +304,67 @@ function renderBotanyInteractive() {
       gddChart.data.datasets[0].data = cumulativeValues;
       gddChart.update();
     }
+    drawPlantVisual("botany-visual-6", Math.min(cumulative / 45, 1), 0.8);
     setResult("botany-result-6", `Total GDD = <strong>${cumulative.toFixed(2)} degree-days</strong>`);
+  }
+
+  function updateTreeVisual() {
+    const heightMeters = Math.max(num("tree-height"), 1);
+    const canopyRadius = Math.max(num("tree-canopy-radius"), 0.4);
+    const branchDensity = Math.max(num("tree-branch-density"), 1);
+    const leafCoverage = Math.max(num("tree-leaf-coverage"), 0.2);
+
+    const canopyVolume = ((4 / 3) * Math.PI * canopyRadius ** 3) / 2;
+    const trunkDbhCm = (heightMeters * canopyRadius * 3.4).toFixed(1);
+
+    drawVisual("botany-visual-7", (ctx, width, height) => {
+      const groundY = height - 18;
+      const trunkTopY = Math.max(24, groundY - heightMeters * 4.6);
+      const trunkWidth = Math.max(8, Math.min(22, heightMeters * 0.75));
+      const canopyCenterY = trunkTopY + 14;
+      const canopyRx = Math.max(32, Math.min(width * 0.32, canopyRadius * 16));
+      const canopyRy = Math.max(24, Math.min(height * 0.24, canopyRadius * 10));
+
+      ctx.fillStyle = "#bbf7d0";
+      ctx.fillRect(0, groundY, width, height - groundY);
+
+      ctx.fillStyle = "#a16207";
+      ctx.fillRect(width / 2 - trunkWidth / 2, trunkTopY, trunkWidth, groundY - trunkTopY);
+
+      for (let i = 0; i < branchDensity; i += 1) {
+        const offset = i - (branchDensity - 1) / 2;
+        const y = trunkTopY + 10 + i * 6;
+        const length = 18 + Math.abs(offset) * 6;
+
+        ctx.strokeStyle = "#78350f";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(width / 2, y);
+        ctx.lineTo(width / 2 + Math.sign(offset || 1) * length, y - 6 - Math.abs(offset) * 2);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = `rgba(22, 163, 74, ${Math.min(0.95, 0.3 + leafCoverage * 0.4)})`;
+      ctx.beginPath();
+      ctx.ellipse(width / 2, canopyCenterY, canopyRx, canopyRy, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const leafCount = Math.round(30 + leafCoverage * 35);
+      ctx.fillStyle = "rgba(34, 197, 94, 0.85)";
+      for (let i = 0; i < leafCount; i += 1) {
+        const angle = (i / leafCount) * Math.PI * 2;
+        const radiusX = canopyRx * (0.28 + ((i * 37) % 71) / 100);
+        const radiusY = canopyRy * (0.25 + ((i * 53) % 67) / 100);
+        const x = width / 2 + Math.cos(angle) * radiusX;
+        const y = canopyCenterY + Math.sin(angle) * radiusY;
+        ctx.fillRect(x, y, 2.5, 2.5);
+      }
+    });
+
+    setResult(
+      "botany-result-7",
+      `Estimated canopy volume <strong>${canopyVolume.toFixed(1)} m³</strong> · Approx trunk DBH <strong>${trunkDbhCm} cm</strong>`,
+    );
   }
 
   const actions = [
@@ -245,6 +374,7 @@ function renderBotanyInteractive() {
     ["botany-example-4", updateLai],
     ["botany-example-5", updateTranspiration],
     ["botany-example-6", updateGdd],
+    ["botany-example-7", updateTreeVisual],
   ];
 
   actions.forEach(([formId, updateFn]) => {
@@ -1136,6 +1266,10 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(A(I) = A_{max}(1 - e^{-kI})\\)</span>
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Live plant visual</p>
+          <canvas id="botany-visual-1" class="botany-visual" aria-label="Photosynthesis vitality visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="botany-plot-1" class="botany-plot" aria-label="Photosynthesis response chart" role="img"></canvas>
         </div>
@@ -1169,6 +1303,10 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(RGR = \\frac{\\ln W_2 - \\ln W_1}{t_2 - t_1}\\)</span>
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Live plant visual</p>
+          <canvas id="botany-visual-2" class="botany-visual" aria-label="Growth-stage visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="botany-plot-2" class="botany-plot" aria-label="Relative growth rate chart" role="img"></canvas>
         </div>
@@ -1194,6 +1332,10 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(WUE = \\frac{A}{E}\\)</span>
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Live plant visual</p>
+          <canvas id="botany-visual-3" class="botany-visual" aria-label="Water-use response visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="botany-plot-3" class="botany-plot" aria-label="Water-use efficiency chart" role="img"></canvas>
         </div>
@@ -1219,6 +1361,10 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(LAI = \\frac{\\text{total one-sided leaf area}}{\\text{ground area}}\\)</span>
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Live plant visual</p>
+          <canvas id="botany-visual-4" class="botany-visual" aria-label="Canopy density visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="botany-plot-4" class="botany-plot" aria-label="Leaf area index chart" role="img"></canvas>
         </div>
@@ -1245,6 +1391,10 @@ function renderBotanyRoute() {
           LaTeX: <span class="botany-latex">\\(E = g_s \\times VPD\\)</span><br />
           Read as: E equals g sub s times V P D.
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Live plant visual</p>
+          <canvas id="botany-visual-5" class="botany-visual" aria-label="Transpiration stress visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="botany-plot-5" class="botany-plot" aria-label="Transpiration flux chart" role="img"></canvas>
         </div>
@@ -1286,8 +1436,43 @@ function renderBotanyRoute() {
         <p class="botany-math">
           <span class="botany-latex">\\(GDD = \\sum \\max(0, T_{mean} - T_{base})\\)</span>
         </p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Live plant visual</p>
+          <canvas id="botany-visual-6" class="botany-visual" aria-label="Thermal development visual" role="img"></canvas>
+        </div>
         <div class="botany-plot-wrap">
           <canvas id="botany-plot-6" class="botany-plot" aria-label="Growing degree days chart" role="img"></canvas>
+        </div>
+      </article>
+
+      <article class="botany-card">
+        <h2>7) Live tree structure visual (plant-based)</h2>
+        <p>
+          This live sketch turns simple tree parameters into a plant-shaped canopy + trunk visualization,
+          with a rough canopy volume estimate for quick field intuition.
+        </p>
+        <form class="botany-inputs" id="botany-example-7">
+          <label>Tree height (m)
+            <input id="tree-height" data-sync-key="tree-height" type="number" min="1" max="40" value="9" step="0.5" />
+            <input data-sync-key="tree-height" type="range" min="1" max="40" value="9" step="0.5" />
+          </label>
+          <label>Canopy radius (m)
+            <input id="tree-canopy-radius" data-sync-key="tree-canopy-radius" type="number" min="0.5" max="12" value="3.2" step="0.1" />
+            <input data-sync-key="tree-canopy-radius" type="range" min="0.5" max="12" value="3.2" step="0.1" />
+          </label>
+          <label>Branch density
+            <input id="tree-branch-density" data-sync-key="tree-branch-density" type="number" min="1" max="9" value="5" step="1" />
+            <input data-sync-key="tree-branch-density" type="range" min="1" max="9" value="5" step="1" />
+          </label>
+          <label>Leaf coverage
+            <input id="tree-leaf-coverage" data-sync-key="tree-leaf-coverage" type="number" min="0.2" max="1" value="0.7" step="0.05" />
+            <input data-sync-key="tree-leaf-coverage" type="range" min="0.2" max="1" value="0.7" step="0.05" />
+          </label>
+        </form>
+        <p class="botany-math" id="botany-result-7"></p>
+        <div class="camera-visual-wrap">
+          <p class="camera-visual-label">Live tree canopy visual</p>
+          <canvas id="botany-visual-7" class="botany-visual" aria-label="Live tree structure visual" role="img"></canvas>
         </div>
       </article>
     </section>

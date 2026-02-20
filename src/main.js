@@ -24,6 +24,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
           <li><a class="menu-link" data-route="/botany" href="#/botany">Botany</a></li>
           <li><a class="menu-link" data-route="/camera" href="#/camera">Camera</a></li>
+          <li><a class="menu-link" data-route="/recursion-tree" href="#/recursion-tree">Recursion Tree</a></li>
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
         </ul>
@@ -1741,6 +1742,158 @@ function renderPianoRoute() {
   `;
 }
 
+function renderRecursionTreeRoute() {
+  routeContent.innerHTML = `
+    <p class="hero-label">Canvas Playground</p>
+    <h1 class="hero-title">Interactive Recursion Tree</h1>
+    <p class="hero-subtitle">
+      Use the sliders to shape a recursive branching tree. Every adjustment redraws the canvas immediately so you can
+      experiment with depth, branching angle, and scaling.
+    </p>
+
+    <section class="botany-grid" aria-label="Recursion tree controls and preview">
+      <article class="botany-card recursion-controls-card">
+        <h2>Tree controls</h2>
+        <p>Tune these values and watch the recursion tree update live.</p>
+        <form class="botany-inputs recursion-inputs" id="recursion-tree-form">
+          <label>Depth
+            <input id="tree-depth" data-sync-key="tree-depth" type="number" min="1" max="13" value="9" step="1" />
+            <input data-sync-key="tree-depth" type="range" min="1" max="13" value="9" step="1" />
+          </label>
+          <label>Branch angle (°)
+            <input id="tree-angle" data-sync-key="tree-angle" type="number" min="5" max="80" value="25" step="1" />
+            <input data-sync-key="tree-angle" type="range" min="5" max="80" value="25" step="1" />
+          </label>
+          <label>Length shrink factor
+            <input id="tree-scale" data-sync-key="tree-scale" type="number" min="0.55" max="0.85" value="0.72" step="0.01" />
+            <input data-sync-key="tree-scale" type="range" min="0.55" max="0.85" value="0.72" step="0.01" />
+          </label>
+          <label>Trunk length (px)
+            <input id="tree-length" data-sync-key="tree-length" type="number" min="40" max="190" value="110" step="1" />
+            <input data-sync-key="tree-length" type="range" min="40" max="190" value="110" step="1" />
+          </label>
+          <label>Line width (px)
+            <input id="tree-width" data-sync-key="tree-width" type="number" min="1" max="22" value="10" step="1" />
+            <input data-sync-key="tree-width" type="range" min="1" max="22" value="10" step="1" />
+          </label>
+        </form>
+        <p class="botany-math" id="recursion-tree-stats" aria-live="polite"></p>
+      </article>
+
+      <article class="botany-card">
+        <h2>Canvas render</h2>
+        <p>The tree starts from the bottom center and recursively branches left and right.</p>
+        <div class="camera-visual-wrap recursion-canvas-wrap">
+          <p class="camera-visual-label">2D canvas output</p>
+          <canvas id="recursion-tree-canvas" class="camera-visual recursion-canvas" aria-label="Recursion tree drawn on canvas" role="img"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <div class="hero-controls">
+      <a class="action" href="#/" aria-label="Go to home">Back home</a>
+      <a class="action" href="#/camera" aria-label="Go to camera">Go to camera</a>
+    </div>
+  `;
+
+  function num(id) {
+    const value = Number(document.getElementById(id)?.value);
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  function syncPairedInputs(scope) {
+    scope.querySelectorAll("input[data-sync-key]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const key = input.dataset.syncKey;
+        if (!key) {
+          return;
+        }
+
+        scope.querySelectorAll(`input[data-sync-key="${key}"]`).forEach((match) => {
+          if (match !== input) {
+            match.value = input.value;
+          }
+        });
+      });
+    });
+  }
+
+  function drawTree() {
+    const canvas = document.getElementById("recursion-tree-canvas");
+    const stats = document.getElementById("recursion-tree-stats");
+    if (!canvas) {
+      return;
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+
+    const depth = Math.max(1, Math.round(num("tree-depth")));
+    const angle = (Math.max(5, Math.min(80, num("tree-angle"))) * Math.PI) / 180;
+    const scale = Math.max(0.55, Math.min(0.85, num("tree-scale")));
+    const trunkLength = Math.max(40, num("tree-length"));
+    const lineWidth = Math.max(1, num("tree-width"));
+
+    const width = canvas.clientWidth || 360;
+    const height = canvas.clientHeight || 260;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+    const bg = ctx.createLinearGradient(0, 0, 0, height);
+    bg.addColorStop(0, "#eef2ff");
+    bg.addColorStop(1, "#f8fafc");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, width, height);
+
+    const branchesEstimate = 2 ** depth - 1;
+
+    function branch(x, y, len, currentAngle, level) {
+      if (level > depth || len < 1) {
+        return;
+      }
+
+      const progress = level / depth;
+      const x2 = x + Math.cos(currentAngle) * len;
+      const y2 = y + Math.sin(currentAngle) * len;
+
+      ctx.strokeStyle = `hsl(${Math.round(22 + progress * 105)} 58% ${Math.round(28 + progress * 18)}%)`;
+      ctx.lineWidth = Math.max(0.7, lineWidth * (1 - progress * 0.75));
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      branch(x2, y2, len * scale, currentAngle - angle, level + 1);
+      branch(x2, y2, len * scale, currentAngle + angle, level + 1);
+    }
+
+    branch(width / 2, height - 16, trunkLength, -Math.PI / 2, 1);
+
+    if (stats) {
+      stats.innerHTML = `Approx branches: <strong>${branchesEstimate.toLocaleString()}</strong> · Final segment length: <strong>${(trunkLength * scale ** (depth - 1)).toFixed(1)} px</strong>`;
+    }
+  }
+
+  const form = document.getElementById("recursion-tree-form");
+  if (form) {
+    syncPairedInputs(form);
+    form.addEventListener("input", drawTree);
+    form.addEventListener("submit", (event) => event.preventDefault());
+  }
+
+  window.addEventListener("resize", drawTree);
+  drawTree();
+
+  return () => {
+    window.removeEventListener("resize", drawTree);
+  };
+}
+
 
 function renderThreeRoute() {
   return renderThreeDemoRoute(routeContent);
@@ -1756,6 +1909,7 @@ const routes = {
   "/shows-crud": renderShowsCrudRoute,
   "/botany": renderBotanyRoute,
   "/camera": renderCameraRoute,
+  "/recursion-tree": renderRecursionTreeRoute,
   "/piano": renderPianoRoute,
   "/three-demo": renderThreeRoute,
   "/three-superneat": renderThreeSuperneatRoute,

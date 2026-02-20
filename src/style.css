@@ -1022,6 +1022,23 @@ code {
   height: 100%;
 }
 
+
+.recursion-controls-card {
+  align-content: start;
+}
+
+.recursion-inputs {
+  grid-template-columns: 1fr;
+}
+
+.recursion-canvas-wrap {
+  height: 430px;
+}
+
+.recursion-canvas {
+  height: calc(100% - 1.65rem);
+}
+
 .piano-layout {
   margin-top: 1rem;
   display: grid;

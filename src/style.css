@@ -596,6 +596,21 @@ code {
 }
 
 @media (max-width: 700px) {
+  .recursion-controls-card {
+    position: sticky;
+    top: 0.45rem;
+    z-index: 4;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+  }
+
+  .recursion-controls-card > p {
+    display: none;
+  }
+
+  .recursion-controls-card .recursion-slider-dropdown {
+    margin-top: 0.35rem;
+  }
+
   .superneat-joystick {
     width: 94px;
     height: 94px;
@@ -1029,6 +1044,47 @@ code {
 
 .recursion-inputs {
   grid-template-columns: 1fr;
+}
+
+.recursion-slider-dropdown {
+  margin-top: 0.55rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: clip;
+}
+
+.recursion-slider-dropdown summary {
+  list-style: none;
+  cursor: pointer;
+  font-weight: 700;
+  color: #312e81;
+  padding: 0.65rem 0.8rem;
+  background: #eef2ff;
+}
+
+.recursion-slider-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.recursion-slider-dropdown summary::after {
+  content: "▾";
+  float: right;
+}
+
+.recursion-slider-dropdown[open] summary::after {
+  content: "▴";
+}
+
+.recursion-slider-dropdown .recursion-inputs,
+.recursion-slider-dropdown .botany-math {
+  margin: 0;
+  padding: 0.8rem;
+}
+
+.recursion-slider-dropdown .botany-math {
+  border-radius: 0;
+  border-top: 1px solid #dbe3f4;
 }
 
 .recursion-canvas-wrap {

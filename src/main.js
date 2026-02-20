@@ -2,6 +2,7 @@ import "./style.css";
 import "katex/dist/katex.min.css";
 import renderMathInElement from "katex/contrib/auto-render";
 import Chart from "chart.js/auto";
+import nlp from "compromise";
 import { renderShowsSection } from "./shows/controller";
 import { createShowsStore } from "./shows/store";
 import { renderThreeDemoRoute } from "./three-demo/scene";
@@ -777,6 +778,23 @@ function renderHomeRoute() {
       <p class="hex-label">Hex output</p>
       <output id="hex-output" class="hex-output" aria-live="polite">--</output>
     </section>
+    <section class="sentence-widget" aria-label="Sentence structure analyzer">
+      <p class="sentence-title">Sentence Structure Analyzer</p>
+      <output id="sentence-output" class="sentence-output" aria-live="polite">
+        Submit a sentence to see clause and part-of-speech analysis.
+      </output>
+      <form id="sentence-form" class="sentence-form">
+        <label class="sentence-label" for="sentence-input">Sentence input</label>
+        <textarea
+          id="sentence-input"
+          class="sentence-input"
+          rows="4"
+          placeholder="Example: The curious cat quietly watched the birds from the window."
+          required
+        ></textarea>
+        <button type="submit" class="sentence-submit">Analyze sentence</button>
+      </form>
+    </section>
     <section class="logic-widget" aria-label="Logic gate simulator">
       <div class="logic-header">
         <p class="logic-title">Logic Gate Lab</p>
@@ -849,6 +867,9 @@ function renderHomeRoute() {
   const scribbleDownload = document.getElementById("scribble-download");
   const hexInput = document.getElementById("hex-input");
   const hexOutput = document.getElementById("hex-output");
+  const sentenceForm = document.getElementById("sentence-form");
+  const sentenceInput = document.getElementById("sentence-input");
+  const sentenceOutput = document.getElementById("sentence-output");
   const logicInputA = document.getElementById("logic-input-a");
   const logicInputB = document.getElementById("logic-input-b");
   const logicGateButtons = [...document.querySelectorAll(".logic-gate")];
@@ -1063,6 +1084,51 @@ function renderHomeRoute() {
   hexInput.addEventListener("select", syncHexOutput);
   syncHexOutput();
 
+  function analyzeSentenceStructure(sentence) {
+    const doc = nlp(sentence);
+    const clauses = doc.clauses().out("array");
+    const terms = doc.terms().json({ offset: false });
+    const normalizedTerms = terms.flatMap((item) => item.terms ?? []);
+    const subject = doc.subjects().out("text") || "not clearly detected";
+    const verb = doc.verbs().toInfinitive().out("text") || "not clearly detected";
+    const nounCount = doc.nouns().out("array").length;
+    const verbCount = doc.verbs().out("array").length;
+    const adjectiveCount = doc.adjectives().out("array").length;
+
+    const highlightedTokens = normalizedTerms
+      .map((term) => {
+        const tags = Object.keys(term.tags ?? {});
+        const topTags = tags.slice(0, 2).join(", ") || "Unknown";
+        return `<li><strong>${escapeHtml(term.text)}</strong> — ${escapeHtml(topTags)}</li>`;
+      })
+      .join("");
+
+    return `
+      <p><strong>Detected clauses:</strong> ${clauses.length || 1}</p>
+      <p><strong>Likely subject:</strong> ${escapeHtml(subject)}</p>
+      <p><strong>Main verb(s):</strong> ${escapeHtml(verb)}</p>
+      <p><strong>Parts of speech mix:</strong> nouns ${nounCount}, verbs ${verbCount}, adjectives ${adjectiveCount}</p>
+      <details>
+        <summary>Token breakdown</summary>
+        <ul class="sentence-token-list">${highlightedTokens || "<li>No tokens detected.</li>"}</ul>
+      </details>
+    `;
+  }
+
+  function handleSentenceSubmit(event) {
+    event.preventDefault();
+    const text = sentenceInput.value.trim();
+
+    if (!text) {
+      sentenceOutput.innerHTML = "<p>Please enter a sentence first.</p>";
+      return;
+    }
+
+    sentenceOutput.innerHTML = analyzeSentenceStructure(text);
+  }
+
+  sentenceForm.addEventListener("submit", handleSentenceSubmit);
+
   const gateEvaluators = {
     AND: (a, b) => a && b,
     OR: (a, b) => a || b,
@@ -1172,6 +1238,7 @@ function renderHomeRoute() {
     hexInput.removeEventListener("click", syncHexOutput);
     hexInput.removeEventListener("keyup", syncHexOutput);
     hexInput.removeEventListener("select", syncHexOutput);
+    sentenceForm.removeEventListener("submit", handleSentenceSubmit);
     logicInputA.removeEventListener("change", syncLogicResult);
     logicInputB.removeEventListener("change", syncLogicResult);
     logicGateButtons.forEach((button) => button.removeEventListener("click", handleGateSelection));

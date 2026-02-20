@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Primitives, AxisHelperWithLetters } from "superneatlib";
+import { Primitives } from "superneatlib";
 
 export function renderSuperneatDemoRoute(container) {
   container.innerHTML = `
@@ -60,9 +60,6 @@ export function renderSuperneatDemoRoute(container) {
   nose.rotation.x = Math.PI / 2;
   nose.position.set(0, pedestalScale * 0.08, pedestalScale / 2 + 0.28);
   pedestal.add(nose);
-
-  const axis = new AxisHelperWithLetters({size:2});
-  pedestal.add(axis);
 
   scene.add(pedestal);
 

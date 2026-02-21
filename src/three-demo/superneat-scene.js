@@ -81,7 +81,7 @@ export function renderSuperneatDemoRoute(container) {
   nose.position.set(0, pedestalScale * 0.08, pedestalScale / 2 + 0.28);
   pedestal.add(nose);
   updateTopLog(_o?.version ?? "SuperNeatLib loaded");
-  updateTopLog(_o);
+  updateTopLog(_o?.camera ?? "cam");
   
   //AxisHelperWithLetters
   //const axis = new AxisHelperWithLetters({store:_o, size:2});

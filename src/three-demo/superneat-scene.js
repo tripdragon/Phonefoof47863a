@@ -84,8 +84,9 @@ export function renderSuperneatDemoRoute(container) {
   updateTopLog(_o?.camera ?? "cam");
   
   //AxisHelperWithLetters
-  //const axis = new AxisHelperWithLetters({store:_o, size:2});
-  // pedestal.add(axis);
+  _o.camera = camera;
+  const axis = new AxisHelperWithLetters({store:_o, size:2});
+  pedestal.add(axis);
   
   scene.add(pedestal);
 

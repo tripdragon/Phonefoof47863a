@@ -26,9 +26,9 @@ export function renderSuperneatDemoRoute(container) {
       <div class="superneat-joystick" id="superneat-joystick-world" role="group" aria-label="World movement joystick">
         <div class="superneat-joystick-thumb" id="superneat-joystick-world-thumb" aria-hidden="true"></div>
       </div>
-      <div class="superneat-joystick superneat-joystick-right" id="superneat-joystick-local" role="group" aria-label="Local movement joystick">
-        <div class="superneat-joystick-thumb" id="superneat-joystick-local-thumb" aria-hidden="true"></div>
-      </div>
+      //<div class="superneat-joystick superneat-joystick-right" id="superneat-joystick-local" role="group" aria-label="Local movement joystick">
+        //<div class="superneat-joystick-thumb" id="superneat-joystick-local-thumb" aria-hidden="true"></div>
+      //</div>
     </div>
   `;
 

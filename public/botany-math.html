@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Botany × Mathematics</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a14;
+    --paper: #f5f0e8;
+    --moss: #3d5a3e;
+    --sage: #7a9e7e;
+    --ochre: #c8943a;
+    --cream: #faf6ed;
+    --rust: #8b4513;
+    --mist: #e8ede3;
+    --gold: #d4a843;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Libre Baskerville', serif;
+    overflow-x: hidden;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    background: var(--ink);
+    overflow: hidden;
+    padding: 4rem 2rem;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    opacity: 0.12;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='%23f5f0e8'%3E%3Cellipse cx='300' cy='300' rx='2' ry='280' transform='rotate(0 300 300)'/%3E%3Cellipse cx='300' cy='300' rx='2' ry='280' transform='rotate(20 300 300)'/%3E%3Cellipse cx='300' cy='300' rx='2' ry='280' transform='rotate(40 300 300)'/%3E%3Cellipse cx='300' cy='300' rx='2' ry='280' transform='rotate(60 300 300)'/%3E%3Cellipse cx='300' cy='300' rx='2' ry='280' transform='rotate(80 300 300)'/%3E%3Cellipse cx='300' cy='300' rx='2' ry='280' transform='rotate(100 300 300)'/%3E%3Cellipse cx='300' cy='300' rx='2' ry='280' transform='rotate(120 300 300)'/%3E%3Cellipse cx='300' cy='300' rx='2' ry='280' transform='rotate(140 300 300)'/%3E%3Cellipse cx='300' cy='300' rx='2' ry='280' transform='rotate(160 300 300)'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 600px 600px;
+    background-position: center;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    color: var(--paper);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    position: relative;
+  }
+
+  .hero h1 em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .hero-sub {
+    font-family: 'DM Mono', monospace;
+    color: var(--sage);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 1.5rem;
+    position: relative;
+  }
+
+  .hero-desc {
+    color: #a0a090;
+    max-width: 560px;
+    margin-top: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.8;
+    position: relative;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--sage);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    animation: bob 2s ease-in-out infinite;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* Nav */
+  .nav {
+    background: var(--moss);
+    padding: 1rem 2rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+
+  .nav a {
+    color: var(--mist);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .nav a:hover { background: rgba(255,255,255,0.15); color: var(--gold); }
+
+  /* Sections */
+  .topic {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+    border-bottom: 1px solid #d4cfc0;
+  }
+
+  .topic-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .topic-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    color: var(--mist);
+    line-height: 1;
+    flex-shrink: 0;
+    position: relative;
+    top: -0.5rem;
+  }
+
+  .topic-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    color: var(--moss);
+    line-height: 1.1;
+  }
+
+  .topic-title em { color: var(--ochre); font-style: italic; }
+
+  .topic-desc {
+    color: #555;
+    line-height: 1.9;
+    margin-top: 0.8rem;
+    font-size: 0.95rem;
+    max-width: 680px;
+  }
+
+  /* Math display */
+  .math-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 700px) { .math-grid { grid-template-columns: 1fr; } }
+
+  .math-block {
+    background: var(--cream);
+    border: 1px solid #d4cfc0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .math-block-header {
+    background: var(--moss);
+    color: var(--mist);
+    padding: 0.6rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .math-block-header .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  .math-block pre {
+    padding: 1.2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    color: var(--ink);
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+
+  .math-block .latex-render {
+    padding: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--ink);
+    line-height: 2.2;
+    text-align: center;
+  }
+
+  /* Interactive */
+  .interactive {
+    background: var(--mist);
+    border: 1px solid #c8d4c0;
+    border-radius: 6px;
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+
+  .interactive h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--moss);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .interactive h3::before {
+    content: '◉';
+    color: var(--ochre);
+  }
+
+  .sliders {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .slider-group label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--moss);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+
+  .slider-group label span {
+    color: var(--ochre);
+    font-weight: 500;
+  }
+
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: #c0cdb8;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--moss);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  input[type=range]::-webkit-slider-thumb:hover { background: var(--ochre); }
+
+  canvas {
+    display: block;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    border-radius: 4px;
+    background: #1a1a14;
+  }
+
+  /* Inline math rendering (no MathJax, pure CSS/Unicode) */
+  .formula {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    text-align: center;
+    padding: 1rem;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+
+  .formula sub { font-size: 0.7em; font-style: normal; }
+  .formula sup { font-size: 0.7em; font-style: normal; }
+
+  .fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 0.2em;
+  }
+
+  .fraction .num { border-bottom: 1.5px solid currentColor; padding: 0 0.2em; }
+  .fraction .den { padding: 0 0.2em; }
+
+  /* Python highlighting */
+  .py-kw { color: #c678dd; }
+  .py-fn { color: #61afef; }
+  .py-str { color: #98c379; }
+  .py-num { color: #d19a66; }
+  .py-cm { color: #5c6370; font-style: italic; }
+  .py-op { color: #56b6c2; }
+
+  footer {
+    background: var(--ink);
+    color: #555;
+    text-align: center;
+    padding: 3rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <p class="hero-sub" style="position:relative">The Mathematics of Living Plants</p>
+  <h1>Botany &amp; <em>Mathematics</em></h1>
+  <p class="hero-desc">Explore the elegant equations that govern plant growth, energy, and form — with interactive visualisations you can shape in real time.</p>
+  <div class="scroll-hint">↓ scroll to explore ↓</div>
+</section>
+
+<nav class="nav">
+  <a href="#photosynthesis">Photosynthesis</a>
+  <a href="#fibonacci">Phyllotaxis</a>
+  <a href="#transpiration">Transpiration</a>
+  <a href="#logistic">Population Growth</a>
+  <a href="#diffusion">Diffusion</a>
+  <a href="#allometry">Allometry</a>
+</nav>
+
+<!-- ═══════════════ 1. PHOTOSYNTHESIS ═══════════════ -->
+<section class="topic" id="photosynthesis">
+  <div class="topic-header">
+    <div class="topic-num">01</div>
+    <div>
+      <div class="topic-title"><em>Photosynthesis</em> & Light Response</div>
+      <p class="topic-desc">The rate of photosynthesis increases with light intensity until it saturates. The Michaelis-Menten (or rectangular hyperbola) model describes this light-response curve, relating net photosynthesis to incident photon flux density.</p>
+    </div>
+  </div>
+
+  <div class="math-grid">
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>LaTeX Formula</div>
+      <div class="latex-render formula">
+        <em>A</em> = <span class="fraction"><span class="num"><em>A</em><sub>max</sub> · <em>I</em></span><span class="den"><em>K</em><sub>m</sub> + <em>I</em></span></span> − <em>R</em><sub>d</sub>
+        <br><small style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#888;font-style:normal">where I = photon flux density, K_m = half-saturation constant</small>
+      </div>
+    </div>
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>Python</div>
+      <pre><span class="py-kw">import</span> numpy <span class="py-kw">as</span> np
+<span class="py-kw">import</span> matplotlib.pyplot <span class="py-kw">as</span> plt
+
+<span class="py-cm"># Light-response curve (Michaelis-Menten)</span>
+<span class="py-fn">def</span> <span class="py-fn">photosynthesis</span>(I, A_max, K_m, R_d):
+    <span class="py-kw">return</span> (A_max * I) / (K_m + I) - R_d
+
+I = np.linspace(<span class="py-num">0</span>, <span class="py-num">2000</span>, <span class="py-num">500</span>)  <span class="py-cm"># µmol/m²/s</span>
+A = photosynthesis(I, A_max=<span class="py-num">30</span>, K_m=<span class="py-num">200</span>, R_d=<span class="py-num">2</span>)
+plt.plot(I, A)
+plt.xlabel(<span class="py-str">'Light (µmol m⁻² s⁻¹)'</span>)
+plt.ylabel(<span class="py-str">'Net Photosynthesis (µmol CO₂ m⁻² s⁻¹)'</span>)
+plt.show()</pre>
+    </div>
+  </div>
+
+  <div class="interactive">
+    <h3>Interactive Light-Response Curve</h3>
+    <div class="sliders">
+      <div class="slider-group">
+        <label>A_max (max photosynthesis) <span id="ps_amax_val">30</span></label>
+        <input type="range" id="ps_amax" min="5" max="60" value="30" step="1">
+      </div>
+      <div class="slider-group">
+        <label>K_m (half-saturation) <span id="ps_km_val">200</span></label>
+        <input type="range" id="ps_km" min="20" max="800" value="200" step="10">
+      </div>
+      <div class="slider-group">
+        <label>R_d (dark respiration) <span id="ps_rd_val">2</span></label>
+        <input type="range" id="ps_rd" min="0" max="10" value="2" step="0.2">
+      </div>
+    </div>
+    <canvas id="ps_canvas" width="700" height="300"></canvas>
+  </div>
+</section>
+
+<!-- ═══════════════ 2. PHYLLOTAXIS ═══════════════ -->
+<section class="topic" id="fibonacci">
+  <div class="topic-header">
+    <div class="topic-num">02</div>
+    <div>
+      <div class="topic-title">Phyllotaxis &amp; the <em>Golden Angle</em></div>
+      <p class="topic-desc">Plants pack seeds, florets, and leaves using the golden angle (≈137.508°), a consequence of the golden ratio φ = (1+√5)/2. This maximises packing efficiency and light capture. The polar coordinates of the n-th primordium follow a simple spiral rule.</p>
+    </div>
+  </div>
+
+  <div class="math-grid">
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>LaTeX Formula</div>
+      <div class="latex-render formula">
+        <em>r</em><sub>n</sub> = <em>c</em>√<em>n</em> &nbsp;,&nbsp; θ<sub>n</sub> = <em>n</em> · α
+        <br>α = 2π(1 − <span class="fraction"><span class="num">1</span><span class="den">φ</span></span>) ≈ 137.508°
+        <br><small style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#888;font-style:normal">φ = (1+√5)/2 ≈ 1.618 (golden ratio)</small>
+      </div>
+    </div>
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>Python</div>
+      <pre><span class="py-kw">import</span> numpy <span class="py-kw">as</span> np
+<span class="py-kw">import</span> matplotlib.pyplot <span class="py-kw">as</span> plt
+
+phi = (<span class="py-num">1</span> + np.sqrt(<span class="py-num">5</span>)) / <span class="py-num">2</span>
+alpha = <span class="py-num">2</span> * np.pi * (<span class="py-num">1</span> - <span class="py-num">1</span>/phi)  <span class="py-cm"># golden angle</span>
+
+n = np.arange(<span class="py-num">1</span>, <span class="py-num">500</span>)
+r = np.sqrt(n)
+theta = n * alpha
+
+x = r * np.cos(theta)
+y = r * np.sin(theta)
+
+plt.scatter(x, y, s=<span class="py-num">15</span>, c=n, cmap=<span class="py-str">'YlGn'</span>)
+plt.axis(<span class="py-str">'equal'</span>)
+plt.title(<span class="py-str">'Sunflower Phyllotaxis'</span>)
+plt.show()</pre>
+    </div>
+  </div>
+
+  <div class="interactive">
+    <h3>Interactive Phyllotaxis Spiral</h3>
+    <div class="sliders">
+      <div class="slider-group">
+        <label>Number of seeds (n) <span id="ph_n_val">400</span></label>
+        <input type="range" id="ph_n" min="20" max="1000" value="400" step="10">
+      </div>
+      <div class="slider-group">
+        <label>Angle offset (°) <span id="ph_angle_val">137.5</span></label>
+        <input type="range" id="ph_angle" min="120" max="155" value="137.508" step="0.001">
+      </div>
+      <div class="slider-group">
+        <label>Seed size <span id="ph_size_val">4</span></label>
+        <input type="range" id="ph_size" min="1" max="10" value="4" step="0.5">
+      </div>
+    </div>
+    <canvas id="ph_canvas" width="700" height="450"></canvas>
+  </div>
+</section>
+
+<!-- ═══════════════ 3. TRANSPIRATION ═══════════════ -->
+<section class="topic" id="transpiration">
+  <div class="topic-header">
+    <div class="topic-num">03</div>
+    <div>
+      <div class="topic-title"><em>Transpiration</em> & Stomatal Conductance</div>
+      <p class="topic-desc">Water loss from leaves is governed by the vapour pressure deficit (VPD) between leaf and air, and the stomatal conductance. The Penman-Monteith equation is the gold standard, but the simpler Ohm's law analogy shows the core relationship.</p>
+    </div>
+  </div>
+
+  <div class="math-grid">
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>LaTeX Formula</div>
+      <div class="latex-render formula">
+        <em>E</em> = <em>g</em><sub>s</sub> · (e<sub>i</sub> − e<sub>a</sub>) &nbsp;=&nbsp; <em>g</em><sub>s</sub> · VPD
+        <br><br>
+        <em>g</em><sub>s</sub> = <em>g</em><sub>max</sub> · <span class="fraction"><span class="num">1</span><span class="den">1 + (<span style="font-style:italic">D</span>/<em>D</em><sub>0</sub>)<sup>β</sup></span></span>
+        <br><small style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#888;font-style:normal">g_s = stomatal conductance, VPD = vapour pressure deficit</small>
+      </div>
+    </div>
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>Python</div>
+      <pre><span class="py-kw">import</span> numpy <span class="py-kw">as</span> np
+
+<span class="py-cm"># Stomatal conductance model (Ball-Woodrow-Berry variant)</span>
+<span class="py-fn">def</span> <span class="py-fn">g_stomatal</span>(D, g_max=<span class="py-num">0.4</span>, D0=<span class="py-num">1.5</span>, beta=<span class="py-num">1.5</span>):
+    <span class="py-kw">return</span> g_max / (<span class="py-num">1</span> + (D / D0)**beta)
+
+<span class="py-fn">def</span> <span class="py-fn">transpiration</span>(D, g_max, D0, beta):
+    g = g_stomatal(D, g_max, D0, beta)
+    <span class="py-kw">return</span> g * D  <span class="py-cm"># E = g_s × VPD</span>
+
+VPD = np.linspace(<span class="py-num">0</span>, <span class="py-num">6</span>, <span class="py-num">300</span>)  <span class="py-cm"># kPa</span>
+E = transpiration(VPD, <span class="py-num">0.4</span>, <span class="py-num">1.5</span>, <span class="py-num">1.5</span>)</pre>
+    </div>
+  </div>
+
+  <div class="interactive">
+    <h3>Interactive Transpiration vs VPD</h3>
+    <div class="sliders">
+      <div class="slider-group">
+        <label>g_max (max conductance) <span id="tr_gmax_val">0.40</span></label>
+        <input type="range" id="tr_gmax" min="0.05" max="1.0" value="0.4" step="0.01">
+      </div>
+      <div class="slider-group">
+        <label>D₀ (half-saturation VPD) <span id="tr_d0_val">1.5</span></label>
+        <input type="range" id="tr_d0" min="0.2" max="5.0" value="1.5" step="0.1">
+      </div>
+      <div class="slider-group">
+        <label>β (shape exponent) <span id="tr_beta_val">1.5</span></label>
+        <input type="range" id="tr_beta" min="0.3" max="4.0" value="1.5" step="0.1">
+      </div>
+    </div>
+    <canvas id="tr_canvas" width="700" height="300"></canvas>
+  </div>
+</section>
+
+<!-- ═══════════════ 4. LOGISTIC GROWTH ═══════════════ -->
+<section class="topic" id="logistic">
+  <div class="topic-header">
+    <div class="topic-num">04</div>
+    <div>
+      <div class="topic-title">Logistic <em>Population Growth</em></div>
+      <p class="topic-desc">Plant populations grow exponentially when resources are abundant, but slow as carrying capacity K is approached. The logistic model adds a density-dependent brake to the exponential growth rate r, giving the classic S-shaped curve.</p>
+    </div>
+  </div>
+
+  <div class="math-grid">
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>LaTeX Formula</div>
+      <div class="latex-render formula">
+        <span class="fraction"><span class="num">d<em>N</em></span><span class="den">d<em>t</em></span></span> = <em>r</em><em>N</em><span style="font-style:normal">(</span>1 − <span class="fraction"><span class="num"><em>N</em></span><span class="den"><em>K</em></span></span><span style="font-style:normal">)</span>
+        <br><br>
+        <em>N</em>(<em>t</em>) = <span class="fraction"><span class="num"><em>K</em></span><span class="den">1 + <em>A</em>e<sup>−<em>rt</em></sup></span></span>
+        <br><small style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#888;font-style:normal">r = intrinsic growth rate, K = carrying capacity</small>
+      </div>
+    </div>
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>Python</div>
+      <pre><span class="py-kw">import</span> numpy <span class="py-kw">as</span> np
+<span class="py-kw">from</span> scipy.integrate <span class="py-kw">import</span> solve_ivp
+
+<span class="py-fn">def</span> <span class="py-fn">logistic</span>(t, N, r, K):
+    <span class="py-kw">return</span> [r * N[<span class="py-num">0</span>] * (<span class="py-num">1</span> - N[<span class="py-num">0</span>] / K)]
+
+sol = solve_ivp(
+    logistic, [<span class="py-num">0</span>, <span class="py-num">50</span>], [<span class="py-num">10</span>],
+    args=(<span class="py-num">0.3</span>, <span class="py-num">500</span>),
+    dense_output=<span class="py-kw">True</span>
+)
+t = np.linspace(<span class="py-num">0</span>, <span class="py-num">50</span>, <span class="py-num">300</span>)
+N = sol.sol(t)[<span class="py-num">0</span>]  <span class="py-cm"># population over time</span></pre>
+    </div>
+  </div>
+
+  <div class="interactive">
+    <h3>Interactive Logistic Growth Curve</h3>
+    <div class="sliders">
+      <div class="slider-group">
+        <label>r (intrinsic growth rate) <span id="lg_r_val">0.30</span></label>
+        <input type="range" id="lg_r" min="0.02" max="1.5" value="0.3" step="0.01">
+      </div>
+      <div class="slider-group">
+        <label>K (carrying capacity) <span id="lg_k_val">500</span></label>
+        <input type="range" id="lg_k" min="50" max="2000" value="500" step="10">
+      </div>
+      <div class="slider-group">
+        <label>N₀ (initial population) <span id="lg_n0_val">10</span></label>
+        <input type="range" id="lg_n0" min="1" max="200" value="10" step="1">
+      </div>
+    </div>
+    <canvas id="lg_canvas" width="700" height="300"></canvas>
+  </div>
+</section>
+
+<!-- ═══════════════ 5. DIFFUSION ═══════════════ -->
+<section class="topic" id="diffusion">
+  <div class="topic-header">
+    <div class="topic-num">05</div>
+    <div>
+      <div class="topic-title">Nutrient <em>Diffusion</em> in Soil</div>
+      <p class="topic-desc">Ions (phosphate, nitrate) move through soil to root surfaces by diffusion, described by Fick's second law. The concentration profile as a function of distance and time is given by a Gaussian spreading solution.</p>
+    </div>
+  </div>
+
+  <div class="math-grid">
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>LaTeX Formula</div>
+      <div class="latex-render formula">
+        <span class="fraction"><span class="num">∂<em>C</em></span><span class="den">∂<em>t</em></span></span> = <em>D</em> <span class="fraction"><span class="num">∂²<em>C</em></span><span class="den">∂<em>x</em>²</span></span>
+        <br><br>
+        <em>C</em>(<em>x</em>,<em>t</em>) = <span class="fraction"><span class="num"><em>C</em><sub>0</sub></span><span class="den">√(4π<em>Dt</em>)</span></span> e<sup>−<em>x</em>²/4<em>Dt</em></sup>
+        <br><small style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#888;font-style:normal">D = diffusion coefficient (m²/s), C₀ = initial amount</small>
+      </div>
+    </div>
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>Python</div>
+      <pre><span class="py-kw">import</span> numpy <span class="py-kw">as</span> np
+
+<span class="py-fn">def</span> <span class="py-fn">diffusion_profile</span>(x, t, D, C0=<span class="py-num">1.0</span>):
+    <span class="py-cm"># Gaussian spreading from point source</span>
+    <span class="py-kw">if</span> t == <span class="py-num">0</span>: <span class="py-kw">return</span> np.zeros_like(x)
+    sigma2 = <span class="py-num">2</span> * D * t
+    <span class="py-kw">return</span> C0 / np.sqrt(np.pi * sigma2) \
+           * np.exp(-x**<span class="py-num">2</span> / sigma2)
+
+x = np.linspace(-<span class="py-num">0.1</span>, <span class="py-num">0.1</span>, <span class="py-num">500</span>)  <span class="py-cm"># metres</span>
+<span class="py-kw">for</span> t <span class="py-kw">in</span> [<span class="py-num">100</span>, <span class="py-num">500</span>, <span class="py-num">2000</span>]:
+    C = diffusion_profile(x, t, D=<span class="py-num">1e-9</span>)</pre>
+    </div>
+  </div>
+
+  <div class="interactive">
+    <h3>Interactive Diffusion Profile</h3>
+    <div class="sliders">
+      <div class="slider-group">
+        <label>Time (s) <span id="df_t_val">500</span></label>
+        <input type="range" id="df_t" min="10" max="5000" value="500" step="10">
+      </div>
+      <div class="slider-group">
+        <label>D × 10⁻⁹ (m²/s) <span id="df_d_val">1.0</span></label>
+        <input type="range" id="df_d" min="0.1" max="10.0" value="1.0" step="0.1">
+      </div>
+      <div class="slider-group">
+        <label>C₀ (initial amount) <span id="df_c0_val">1.0</span></label>
+        <input type="range" id="df_c0" min="0.1" max="5.0" value="1.0" step="0.1">
+      </div>
+    </div>
+    <canvas id="df_canvas" width="700" height="300"></canvas>
+  </div>
+</section>
+
+<!-- ═══════════════ 6. ALLOMETRY ═══════════════ -->
+<section class="topic" id="allometry">
+  <div class="topic-header">
+    <div class="topic-num">06</div>
+    <div>
+      <div class="topic-title">Allometric <em>Scaling</em></div>
+      <p class="topic-desc">Tree dimensions — height, crown area, trunk diameter, leaf area — scale with each other as power laws. These allometric relationships arise from metabolic constraints (West-Brown-Enquist theory) and allow ecologists to estimate biomass from simple measurements.</p>
+    </div>
+  </div>
+
+  <div class="math-grid">
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>LaTeX Formula</div>
+      <div class="latex-render formula">
+        <em>Y</em> = <em>a</em> · <em>X</em><sup>b</sup>
+        <br><br>
+        log(<em>Y</em>) = log(<em>a</em>) + <em>b</em>·log(<em>X</em>)
+        <br><br>
+        <em>H</em> = <em>a</em> · <em>D</em><sup>2/3</sup> &nbsp;,&nbsp; <em>M</em> ∝ <em>D</em><sup>8/3</sup>
+        <br><small style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#888;font-style:normal">H = height, D = trunk diameter, M = above-ground biomass</small>
+      </div>
+    </div>
+    <div class="math-block">
+      <div class="math-block-header"><div class="dot"></div>Python</div>
+      <pre><span class="py-kw">import</span> numpy <span class="py-kw">as</span> np
+
+<span class="py-cm"># Allometric height-diameter relationship</span>
+<span class="py-fn">def</span> <span class="py-fn">height</span>(D, a=<span class="py-num">5.0</span>, b=<span class="py-num">0.667</span>):
+    <span class="py-kw">return</span> a * D**b
+
+<span class="py-fn">def</span> <span class="py-fn">biomass</span>(D, k=<span class="py-num">0.15</span>, b=<span class="py-num">2.67</span>):
+    <span class="py-kw">return</span> k * D**b  <span class="py-cm"># above-ground biomass (kg)</span>
+
+D = np.linspace(<span class="py-num">0.01</span>, <span class="py-num">1.0</span>, <span class="py-num">300</span>)  <span class="py-cm"># trunk diameter (m)</span>
+H = height(D)
+M = biomass(D)
+
+<span class="py-cm"># Linearise via log-log</span>
+log_D = np.log(D)
+log_M = np.log(M)</pre>
+    </div>
+  </div>
+
+  <div class="interactive">
+    <h3>Interactive Allometric Scaling</h3>
+    <div class="sliders">
+      <div class="slider-group">
+        <label>Height coefficient a <span id="al_a_val">5.0</span></label>
+        <input type="range" id="al_a" min="0.5" max="20" value="5.0" step="0.1">
+      </div>
+      <div class="slider-group">
+        <label>Height exponent b <span id="al_b_val">0.67</span></label>
+        <input type="range" id="al_b" min="0.1" max="1.5" value="0.667" step="0.01">
+      </div>
+      <div class="slider-group">
+        <label>Biomass coeff k <span id="al_k_val">0.15</span></label>
+        <input type="range" id="al_k" min="0.01" max="1.0" value="0.15" step="0.01">
+      </div>
+    </div>
+    <canvas id="al_canvas" width="700" height="350"></canvas>
+  </div>
+</section>
+
+<footer>
+  Botany × Mathematics — Interactive Reference &nbsp;·&nbsp; Built with Canvas API &nbsp;·&nbsp; No external dependencies
+</footer>
+
+<script>
+// ════════════════════════════════════════════
+// UTILITY
+// ════════════════════════════════════════════
+const COLORS = {
+  green: '#7a9e7e', brightGreen: '#a8d5a2', gold: '#d4a843',
+  orange: '#e8963a', blue: '#7ab0d4', pink: '#d48aaa',
+  bg: '#1a1a14', grid: '#2a2a1e', axis: '#5a5a44', label: '#a0a090', white: '#f5f0e8'
+};
+
+function linspace(a, b, n) {
+  const arr = [];
+  for (let i = 0; i < n; i++) arr.push(a + (b - a) * i / (n - 1));
+  return arr;
+}
+
+function drawGrid(ctx, w, h, xMin, xMax, yMin, yMax, xLabel, yLabel, nTicks=5) {
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = COLORS.bg;
+  ctx.fillRect(0, 0, w, h);
+
+  const pad = { l: 60, r: 20, t: 20, b: 50 };
+  const pw = w - pad.l - pad.r;
+  const ph = h - pad.t - pad.b;
+
+  function toX(v) { return pad.l + (v - xMin) / (xMax - xMin) * pw; }
+  function toY(v) { return pad.t + (1 - (v - yMin) / (yMax - yMin)) * ph; }
+
+  // Grid lines
+  ctx.strokeStyle = COLORS.grid;
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= nTicks; i++) {
+    const xv = xMin + (xMax - xMin) * i / nTicks;
+    const yv = yMin + (yMax - yMin) * i / nTicks;
+    ctx.beginPath(); ctx.moveTo(toX(xv), pad.t); ctx.lineTo(toX(xv), pad.t + ph); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad.l, toY(yv)); ctx.lineTo(pad.l + pw, toY(yv)); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = COLORS.axis;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + ph); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t + ph); ctx.lineTo(pad.l + pw, pad.t + ph); ctx.stroke();
+
+  // Tick labels
+  ctx.fillStyle = COLORS.label;
+  ctx.font = '11px DM Mono, monospace';
+  ctx.textAlign = 'center';
+  for (let i = 0; i <= nTicks; i++) {
+    const xv = xMin + (xMax - xMin) * i / nTicks;
+    const yv = yMin + (yMax - yMin) * i / nTicks;
+    ctx.fillText(xv.toFixed(xv < 1 ? 1 : 0), toX(xv), pad.t + ph + 18);
+    ctx.textAlign = 'right';
+    ctx.fillText(yv.toFixed(yv < 1 ? 2 : 0), pad.l - 8, toY(yv) + 4);
+    ctx.textAlign = 'center';
+  }
+
+  // Axis labels
+  ctx.fillStyle = COLORS.label;
+  ctx.font = '12px Libre Baskerville, serif';
+  ctx.fillText(xLabel, pad.l + pw / 2, h - 8);
+  ctx.save();
+  ctx.translate(14, pad.t + ph / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(yLabel, 0, 0);
+  ctx.restore();
+
+  return { toX, toY, pad, pw, ph };
+}
+
+function drawLine(ctx, xs, ys, toX, toY, color, width=2.5) {
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineJoin = 'round';
+  for (let i = 0; i < xs.length; i++) {
+    const x = toX(xs[i]), y = toY(ys[i]);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+// ════════════════════════════════════════════
+// 1. PHOTOSYNTHESIS
+// ════════════════════════════════════════════
+function drawPhotosynthesis() {
+  const A_max = +document.getElementById('ps_amax').value;
+  const K_m = +document.getElementById('ps_km').value;
+  const R_d = +document.getElementById('ps_rd').value;
+  document.getElementById('ps_amax_val').textContent = A_max;
+  document.getElementById('ps_km_val').textContent = K_m;
+  document.getElementById('ps_rd_val').textContent = R_d.toFixed(1);
+
+  const canvas = document.getElementById('ps_canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  const I = linspace(0, 2000, 400);
+  const A = I.map(v => (A_max * v) / (K_m + v) - R_d);
+
+  const yMax = Math.max(...A) * 1.15;
+  const yMin = Math.min(-R_d * 1.5, -3);
+
+  const { toX, toY } = drawGrid(ctx, w, h, 0, 2000, yMin, yMax, 'Light (µmol m⁻² s⁻¹)', 'Net Photosynthesis');
+
+  // Zero line
+  ctx.strokeStyle = COLORS.axis;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(toX(0), toY(0)); ctx.lineTo(toX(2000), toY(0)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Fill under curve
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(0));
+  I.forEach((v, i) => ctx.lineTo(toX(v), toY(A[i])));
+  ctx.lineTo(toX(2000), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(122,158,126,0.18)';
+  ctx.fill();
+
+  drawLine(ctx, I, A, toX, toY, COLORS.green);
+
+  // Saturation point (LCP & A_max annotation)
+  const LCP_I = I.find(v => (A_max * v) / (K_m + v) - R_d >= 0) || 0;
+  ctx.fillStyle = COLORS.gold;
+  ctx.font = '11px DM Mono, monospace';
+  ctx.fillText(`A_max ≈ ${(A_max - R_d).toFixed(1)}`, toX(1800), toY(A_max - R_d) - 8);
+}
+
+['ps_amax', 'ps_km', 'ps_rd'].forEach(id => document.getElementById(id).addEventListener('input', drawPhotosynthesis));
+
+// ════════════════════════════════════════════
+// 2. PHYLLOTAXIS
+// ════════════════════════════════════════════
+function drawPhyllotaxis() {
+  const n = +document.getElementById('ph_n').value;
+  const angleDeg = +document.getElementById('ph_angle').value;
+  const sz = +document.getElementById('ph_size').value;
+  document.getElementById('ph_n_val').textContent = n;
+  document.getElementById('ph_angle_val').textContent = angleDeg.toFixed(3);
+  document.getElementById('ph_size_val').textContent = sz.toFixed(1);
+
+  const canvas = document.getElementById('ph_canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = COLORS.bg;
+  ctx.fillRect(0, 0, w, h);
+
+  const cx = w / 2, cy = h / 2;
+  const alpha = angleDeg * Math.PI / 180;
+  const scale = Math.min(w, h) / 2 / (Math.sqrt(n) + 1) * 0.9;
+
+  for (let i = 1; i <= n; i++) {
+    const r = Math.sqrt(i) * scale;
+    const theta = i * alpha;
+    const x = cx + r * Math.cos(theta);
+    const y = cy + r * Math.sin(theta);
+
+    const t = i / n;
+    const r_col = Math.round(40 + t * 80);
+    const g_col = Math.round(80 + t * 100);
+    const b_col = Math.round(40 + t * 40);
+
+    ctx.beginPath();
+    ctx.arc(x, y, sz * (0.5 + 0.5 * (1 - t)), 0, Math.PI * 2);
+    ctx.fillStyle = `rgb(${r_col},${g_col},${b_col})`;
+    ctx.fill();
+  }
+
+  // Label
+  ctx.fillStyle = COLORS.gold;
+  ctx.font = '12px DM Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(`α = ${angleDeg.toFixed(3)}°  |  n = ${n} seeds`, w / 2, h - 12);
+}
+
+['ph_n', 'ph_angle', 'ph_size'].forEach(id => document.getElementById(id).addEventListener('input', drawPhyllotaxis));
+
+// ════════════════════════════════════════════
+// 3. TRANSPIRATION
+// ════════════════════════════════════════════
+function drawTranspiration() {
+  const g_max = +document.getElementById('tr_gmax').value;
+  const D0 = +document.getElementById('tr_d0').value;
+  const beta = +document.getElementById('tr_beta').value;
+  document.getElementById('tr_gmax_val').textContent = g_max.toFixed(2);
+  document.getElementById('tr_d0_val').textContent = D0.toFixed(1);
+  document.getElementById('tr_beta_val').textContent = beta.toFixed(1);
+
+  const canvas = document.getElementById('tr_canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  const VPD = linspace(0, 6, 400);
+  const gs = VPD.map(D => g_max / (1 + Math.pow(D / D0, beta)));
+  const E  = VPD.map((D, i) => gs[i] * D);
+
+  const { toX, toY } = drawGrid(ctx, w, h, 0, 6, 0, Math.max(...E) * 1.15, 'VPD (kPa)', 'Transpiration (mmol m⁻² s⁻¹)');
+
+  // gs shaded area
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(0));
+  VPD.forEach((v, i) => ctx.lineTo(toX(v), toY(gs[i] * (Math.max(...E) / Math.max(...gs)) * 0.95)));
+  ctx.lineTo(toX(6), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(212,168,67,0.1)';
+  ctx.fill();
+
+  drawLine(ctx, VPD, gs.map(g => g * (Math.max(...E) / Math.max(...gs)) * 0.95), toX, toY, COLORS.gold, 1.5);
+  drawLine(ctx, VPD, E, toX, toY, COLORS.green);
+
+  ctx.fillStyle = COLORS.green;
+  ctx.font = '11px DM Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('E (transpiration)', toX(0.2), toY(E[50]) - 8);
+  ctx.fillStyle = COLORS.gold;
+  ctx.fillText('g_s (conductance)', toX(0.2), toY(gs[20] * (Math.max(...E) / Math.max(...gs)) * 0.95) - 8);
+}
+
+['tr_gmax', 'tr_d0', 'tr_beta'].forEach(id => document.getElementById(id).addEventListener('input', drawTranspiration));
+
+// ════════════════════════════════════════════
+// 4. LOGISTIC GROWTH
+// ════════════════════════════════════════════
+function drawLogistic() {
+  const r = +document.getElementById('lg_r').value;
+  const K = +document.getElementById('lg_k').value;
+  const N0 = +document.getElementById('lg_n0').value;
+  document.getElementById('lg_r_val').textContent = r.toFixed(2);
+  document.getElementById('lg_k_val').textContent = K;
+  document.getElementById('lg_n0_val').textContent = N0;
+
+  const canvas = document.getElementById('lg_canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  const T = 80;
+  const dt = 0.1;
+  const ts = [], Ns = [];
+  let N = N0;
+  for (let t = 0; t <= T; t += dt) {
+    ts.push(t);
+    Ns.push(N);
+    N += r * N * (1 - N / K) * dt;
+  }
+
+  const { toX, toY } = drawGrid(ctx, w, h, 0, T, 0, K * 1.08, 'Time (years)', 'Population N');
+
+  // K dashed line
+  ctx.strokeStyle = COLORS.orange;
+  ctx.setLineDash([6, 4]);
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(toX(0), toY(K)); ctx.lineTo(toX(T), toY(K)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = COLORS.orange;
+  ctx.font = '11px DM Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(`K = ${K}`, toX(2), toY(K) - 6);
+
+  // Fill
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(0));
+  ts.forEach((t, i) => ctx.lineTo(toX(t), toY(Ns[i])));
+  ctx.lineTo(toX(T), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(122,158,126,0.15)';
+  ctx.fill();
+
+  drawLine(ctx, ts, Ns, toX, toY, COLORS.green);
+
+  // Inflection
+  const mid = Ns.findIndex(v => v >= K / 2);
+  if (mid > 0) {
+    ctx.beginPath();
+    ctx.arc(toX(ts[mid]), toY(Ns[mid]), 5, 0, Math.PI * 2);
+    ctx.fillStyle = COLORS.gold;
+    ctx.fill();
+    ctx.fillText('inflection', toX(ts[mid]) + 8, toY(Ns[mid]) - 6);
+  }
+}
+
+['lg_r', 'lg_k', 'lg_n0'].forEach(id => document.getElementById(id).addEventListener('input', drawLogistic));
+
+// ════════════════════════════════════════════
+// 5. DIFFUSION
+// ════════════════════════════════════════════
+function drawDiffusion() {
+  const t = +document.getElementById('df_t').value;
+  const D = +document.getElementById('df_d').value * 1e-9;
+  const C0 = +document.getElementById('df_c0').value;
+  document.getElementById('df_t_val').textContent = t;
+  document.getElementById('df_d_val').textContent = (+document.getElementById('df_d').value).toFixed(1);
+  document.getElementById('df_c0_val').textContent = C0.toFixed(1);
+
+  const canvas = document.getElementById('df_canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  const xArr = linspace(-0.1, 0.1, 500);
+  function profile(t_val) {
+    if (t_val <= 0) return xArr.map(() => 0);
+    const sigma2 = 2 * D * t_val;
+    return xArr.map(x => C0 / Math.sqrt(Math.PI * sigma2) * Math.exp(-x * x / sigma2));
+  }
+
+  const C_now = profile(t);
+  const C_half = profile(t * 0.4);
+  const C_early = profile(t * 0.1);
+  const yMax = Math.max(...C_now, ...C_half, ...C_early) * 1.15 || 1;
+
+  const { toX, toY } = drawGrid(ctx, w, h, -0.1, 0.1, 0, yMax, 'Distance x (m)', 'Concentration C (mol/m³)');
+
+  // Multiple time snapshots
+  drawLine(ctx, xArr, C_early, toX, toY, '#3d5a3e', 1.5);
+  drawLine(ctx, xArr, C_half, toX, toY, COLORS.gold, 1.8);
+
+  ctx.beginPath();
+  ctx.moveTo(toX(xArr[0]), toY(C_now[0]));
+  xArr.forEach((x, i) => ctx.lineTo(toX(x), toY(C_now[i])));
+  ctx.lineTo(toX(xArr[xArr.length-1]), toY(0));
+  ctx.lineTo(toX(xArr[0]), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(122,158,126,0.2)';
+  ctx.fill();
+  drawLine(ctx, xArr, C_now, toX, toY, COLORS.green);
+
+  ctx.font = '11px DM Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#3d5a3e';
+  ctx.fillText(`t = ${(t*0.1).toFixed(0)}s`, toX(-0.095), toY(Math.max(...C_early)) - 6);
+  ctx.fillStyle = COLORS.gold;
+  ctx.fillText(`t = ${(t*0.4).toFixed(0)}s`, toX(0.01), toY(Math.max(...C_half)) - 6);
+  ctx.fillStyle = COLORS.green;
+  ctx.fillText(`t = ${t}s`, toX(0.02), toY(Math.max(...C_now)) - 6);
+}
+
+['df_t', 'df_d', 'df_c0'].forEach(id => document.getElementById(id).addEventListener('input', drawDiffusion));
+
+// ════════════════════════════════════════════
+// 6. ALLOMETRY
+// ════════════════════════════════════════════
+function drawAllometry() {
+  const a = +document.getElementById('al_a').value;
+  const b = +document.getElementById('al_b').value;
+  const k = +document.getElementById('al_k').value;
+  document.getElementById('al_a_val').textContent = a.toFixed(1);
+  document.getElementById('al_b_val').textContent = b.toFixed(2);
+  document.getElementById('al_k_val').textContent = k.toFixed(2);
+
+  const canvas = document.getElementById('al_canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = COLORS.bg;
+  ctx.fillRect(0, 0, w, h);
+
+  const D = linspace(0.01, 1.0, 300);
+  const H = D.map(d => a * Math.pow(d, b));
+  const M = D.map(d => k * Math.pow(d, 2.67));
+
+  // LEFT: H vs D
+  const pL = { l: 60, r: w/2 - 20, t: 30, b: 50 };
+  const pwL = pL.r - pL.l;
+  const phL = h - pL.t - pL.b;
+  const xMax = 1.0, hMax = Math.max(...H) * 1.1;
+  function toXL(v) { return pL.l + (v / xMax) * pwL; }
+  function toYL(v) { return pL.t + (1 - v / hMax) * phL; }
+
+  // grid L
+  ctx.strokeStyle = COLORS.grid; ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    ctx.beginPath(); ctx.moveTo(toXL(i*0.2), pL.t); ctx.lineTo(toXL(i*0.2), pL.t+phL); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pL.l, toYL(hMax*i/5)); ctx.lineTo(pL.l+pwL, toYL(hMax*i/5)); ctx.stroke();
+  }
+  ctx.strokeStyle = COLORS.axis; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pL.l, pL.t); ctx.lineTo(pL.l, pL.t+phL); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pL.l, pL.t+phL); ctx.lineTo(pL.l+pwL, pL.t+phL); ctx.stroke();
+
+  ctx.beginPath();
+  D.forEach((d, i) => {
+    const x = toXL(d), y = toYL(H[i]);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = COLORS.green; ctx.lineWidth = 2.5; ctx.stroke();
+
+  ctx.fillStyle = COLORS.label; ctx.font = '11px DM Mono, monospace'; ctx.textAlign = 'center';
+  ctx.fillText('Diameter (m)', pL.l + pwL/2, h - 8);
+  ctx.save(); ctx.translate(14, pL.t + phL/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Height (m)', 0, 0); ctx.restore();
+  ctx.fillStyle = COLORS.green; ctx.font = '12px Playfair Display, serif'; ctx.fontStyle = 'italic';
+  ctx.fillText('Height–Diameter', pL.l + pwL/2, pL.t - 8);
+  ctx.fillStyle = COLORS.label; ctx.font = '11px DM Mono, monospace';
+  for (let i = 0; i <= 5; i++) {
+    ctx.fillText((i*0.2).toFixed(1), toXL(i*0.2), pL.t+phL+16);
+    ctx.textAlign = 'right';
+    ctx.fillText((hMax*i/5).toFixed(0), pL.l-6, toYL(hMax*i/5)+4);
+    ctx.textAlign = 'center';
+  }
+
+  // RIGHT: log-log biomass
+  const pR = { l: w/2 + 20, r: w - 20, t: 30, b: 50 };
+  const pwR = pR.r - pR.l;
+  const phR = h - pR.t - pR.b;
+  const logD = D.map(d => Math.log10(d));
+  const logM = M.map(m => Math.log10(m));
+  const xMinR = Math.min(...logD), xMaxR = Math.max(...logD);
+  const yMinR = Math.min(...logM), yMaxR = Math.max(...logM) * 1.05;
+  function toXR(v) { return pR.l + (v - xMinR) / (xMaxR - xMinR) * pwR; }
+  function toYR(v) { return pR.t + (1 - (v - yMinR) / (yMaxR - yMinR)) * phR; }
+
+  ctx.strokeStyle = COLORS.grid; ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const xv = xMinR + (xMaxR-xMinR)*i/5;
+    const yv = yMinR + (yMaxR-yMinR)*i/5;
+    ctx.beginPath(); ctx.moveTo(toXR(xv), pR.t); ctx.lineTo(toXR(xv), pR.t+phR); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pR.l, toYR(yv)); ctx.lineTo(pR.l+pwR, toYR(yv)); ctx.stroke();
+  }
+  ctx.strokeStyle = COLORS.axis; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pR.l, pR.t); ctx.lineTo(pR.l, pR.t+phR); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pR.l, pR.t+phR); ctx.lineTo(pR.l+pwR, pR.t+phR); ctx.stroke();
+
+  ctx.beginPath();
+  logD.forEach((d, i) => {
+    const x = toXR(d), y = toYR(logM[i]);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = COLORS.orange; ctx.lineWidth = 2.5; ctx.stroke();
+
+  ctx.fillStyle = COLORS.label; ctx.font = '11px DM Mono, monospace'; ctx.textAlign = 'center';
+  ctx.fillText('log₁₀ Diameter', pR.l + pwR/2, h - 8);
+  ctx.save(); ctx.translate(pR.l - 40, pR.t + phR/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('log₁₀ Biomass (kg)', 0, 0); ctx.restore();
+  ctx.fillStyle = COLORS.orange; ctx.font = '12px Playfair Display, serif';
+  ctx.fillText('Log–Log Biomass', pR.l + pwR/2, pR.t - 8);
+  ctx.fillStyle = COLORS.label; ctx.font = '11px DM Mono, monospace';
+  for (let i = 0; i <= 5; i++) {
+    const xv = xMinR + (xMaxR-xMinR)*i/5;
+    const yv = yMinR + (yMaxR-yMinR)*i/5;
+    ctx.fillText(xv.toFixed(1), toXR(xv), pR.t+phR+16);
+    ctx.textAlign = 'right';
+    ctx.fillText(yv.toFixed(1), pR.l-6, toYR(yv)+4);
+    ctx.textAlign = 'center';
+  }
+}
+
+['al_a', 'al_b', 'al_k'].forEach(id => document.getElementById(id).addEventListener('input', drawAllometry));
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+drawPhotosynthesis();
+drawPhyllotaxis();
+drawTranspiration();
+drawLogistic();
+drawDiffusion();
+drawAllometry();
+</script>
+</body>
+</html>

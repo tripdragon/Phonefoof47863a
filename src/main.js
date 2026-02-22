@@ -16,6 +16,7 @@ document.querySelector("#app").innerHTML = `
       <nav class="menu" aria-label="Primary">
         <div class="brand-wrap">
           <span class="brand">Phonefoof</span>
+          <p>exploring ai while bored at job on a phone. using Openai which is <em>ok</em> and claude which is much better at starter designs</p>
           <span class="version" aria-label="Application version">${appVersion}</span>
         </div>
         <ul class="menu-list">

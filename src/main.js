@@ -32,6 +32,16 @@ document.querySelector("#app").innerHTML = `
       </nav>
       <div id="route-content"></div>
     </section>
+    <section class="hero-showcase" aria-label="Product highlight">
+      <div class="hero-showcase__content">
+        <p class="hero-showcase__kicker">Always on, always synced</p>
+        <h2 class="hero-showcase__title">A better command center for every conversation.</h2>
+        <p class="hero-showcase__subtitle">
+          From real-time call monitoring to actionable summaries, Phonefoof keeps your whole team aligned with clarity and style.
+        </p>
+      </div>
+      <div class="hero-showcase__glow" aria-hidden="true"></div>
+    </section>
   </main>
 `;
 

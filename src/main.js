@@ -33,6 +33,7 @@ document.querySelector("#app").innerHTML = `
 <li><a class="menu-link" data-route="/learn-univers_1" href="learn-univers_1.html">learn uni 1</a></li>
 <li><a class="menu-link" data-route="/claude-game-1" href="claude-game-1.html">claude game 1</a></li>
 
+<li><a class="menu-link" data-route="/claude-botany-math" href="claude-botany-math.html">claude botany 1</a></li>
 
           
         </ul>

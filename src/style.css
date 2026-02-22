@@ -1299,3 +1299,71 @@ code {
   display: grid;
   gap: 0.25rem;
 }
+
+.hero-showcase {
+  width: 100vw;
+  margin-top: clamp(2rem, 6vw, 4rem);
+  margin-inline: calc(50% - 50vw);
+  padding: clamp(3rem, 8vw, 6rem) clamp(1.25rem, 6vw, 4rem);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.25), transparent 40%),
+    radial-gradient(circle at 80% 0%, rgba(56, 189, 248, 0.25), transparent 35%),
+    linear-gradient(135deg, #1e1b4b 0%, #312e81 38%, #0f172a 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-showcase__content {
+  position: relative;
+  z-index: 1;
+  width: min(960px, 100%);
+  margin: 0 auto;
+}
+
+.hero-showcase__kicker {
+  margin: 0 0 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #c4b5fd;
+}
+
+.hero-showcase__title {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.7rem);
+  line-height: 1.04;
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+.hero-showcase__subtitle {
+  margin: 1rem 0 0;
+  max-width: 56ch;
+  font-size: clamp(1rem, 2.4vw, 1.3rem);
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.hero-showcase__glow {
+  position: absolute;
+  right: 8%;
+  top: 50%;
+  width: min(320px, 45vw);
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(196, 181, 253, 0.95), rgba(125, 211, 252, 0.12) 45%, transparent 70%);
+  filter: blur(0.5px);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .hero-showcase__glow {
+    right: -12%;
+    width: 58vw;
+    opacity: 0.6;
+  }
+}

@@ -29,6 +29,9 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
 <li><a class="menu-link" data-route="/bunnyblast-full" href="bunnyblast-full.html">claude1</a></li>
+<li><a class="menu-link" data-route="/learn-univers_1" href="learn-univers_1.html">learn uni 1</a></li>
+<li><a class="menu-link" data-route="/claude-game-1" href="claude-game-1.html">claude game 1</a></li>
+
 
           
         </ul>

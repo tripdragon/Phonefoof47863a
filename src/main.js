@@ -28,6 +28,9 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/recursion-tree" href="#/recursion-tree">Recursion Tree</a></li>
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
+<li><a class="menu-link" data-route="/bunnyblast-full" href="#/bunnyblast-full.html">claude1</a></li>
+
+          
         </ul>
       </nav>
       <div id="route-content"></div>

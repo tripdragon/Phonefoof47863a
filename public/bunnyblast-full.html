@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BunnyBlast — Carrot-Powered to the Stars</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #FF6B1A;
+  --carrot: #F4A232;
+  --cream: #FFF8E7;
+  --sky: #0B1E3D;
+  --deep: #050D1F;
+  --mint: #4DFFA4;
+  --pink: #FF4D8F;
+  --star: #FFE566;
+  --lavender: #B48FFF;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--deep);
+  font-family: 'Nunito', sans-serif;
+  overflow-x: hidden;
+  color: var(--cream);
+  cursor: none;
+}
+
+/* ========================
+   CURSOR
+======================== */
+.cursor {
+  width: 16px; height: 16px;
+  background: var(--carrot);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 99999;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s;
+}
+.cursor.big { width: 40px; height: 40px; background: var(--mint); }
+
+/* ========================
+   SCROLL REVEAL
+======================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.75);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+.delay-1 { transition-delay: 0.1s !important; }
+.delay-2 { transition-delay: 0.2s !important; }
+.delay-3 { transition-delay: 0.3s !important; }
+.delay-4 { transition-delay: 0.4s !important; }
+.delay-5 { transition-delay: 0.5s !important; }
+
+/* ========================
+   NAV
+======================== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 18px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.3s, backdrop-filter 0.3s, padding 0.3s;
+}
+.nav.scrolled {
+  background: rgba(5,13,31,0.92);
+  backdrop-filter: blur(16px);
+  padding: 12px 60px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.nav-logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: 24px;
+  color: var(--cream);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo span { color: var(--orange); }
+.nav-links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+.nav-links a {
+  color: rgba(255,248,231,0.6);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  transition: color 0.2s;
+  cursor: none;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 0; right: 0;
+  height: 2px;
+  background: var(--carrot);
+  transform: scaleX(0);
+  transition: transform 0.2s;
+}
+.nav-links a:hover { color: var(--cream); }
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-cta {
+  background: rgba(255,107,26,0.15) !important;
+  border: 1.5px solid rgba(255,107,26,0.5) !important;
+  color: var(--carrot) !important;
+  padding: 8px 22px !important;
+  border-radius: 100px !important;
+  transition: all 0.2s !important;
+  cursor: none !important;
+}
+.nav-cta:hover { background: var(--orange) !important; color: white !important; }
+.nav-cta::after { display: none !important; }
+
+/* ========================
+   HERO
+======================== */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 65% 45%, #0e2a5c 0%, var(--deep) 68%);
+}
+.stars-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.star-dot {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);
+}
+@keyframes twinkle {
+  0%,100%{opacity:0.2;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.5)}
+}
+.nebula {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+.neb1{width:700px;height:450px;background:#6020d0;top:-150px;right:-100px;opacity:0.13;}
+.neb2{width:450px;height:450px;background:var(--orange);bottom:-80px;left:-80px;opacity:0.1;}
+.neb3{width:350px;height:350px;background:var(--mint);top:40%;left:38%;opacity:0.07;}
+
+.hero-inner {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  max-width: 1240px;
+  width: 100%;
+  padding: 120px 60px 80px;
+  gap: 40px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,107,26,0.12);
+  border: 1px solid rgba(255,107,26,0.35);
+  border-radius: 100px;
+  padding: 8px 20px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--carrot);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease both;
+}
+.badge-pulse {
+  width: 8px;height:8px;background:var(--mint);border-radius:50%;
+  animation: badgePulse 1.6s ease infinite;
+}
+@keyframes badgePulse {
+  0%,100%{box-shadow:0 0 0 0 rgba(77,255,164,0.5)}
+  50%{box-shadow:0 0 0 7px rgba(77,255,164,0)}
+}
+.hero-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(54px,7.5vw,96px);
+  line-height: 0.98;
+  color: var(--cream);
+  margin-bottom: 26px;
+  animation: fadeUp 0.6s ease 0.1s both;
+}
+.hero-title .accent { color: var(--orange); position: relative; display: inline-block; }
+.hero-title .accent::after {
+  content:'';position:absolute;bottom:6px;left:0;right:0;height:5px;
+  background:var(--carrot);border-radius:3px;transform:skewX(-4deg);
+}
+.hero-title .big {
+  display: block;
+  font-size: clamp(72px,10vw,126px);
+  color: var(--star);
+  letter-spacing: -3px;
+  text-shadow: 0 0 50px rgba(255,229,102,0.35);
+  line-height: 0.95;
+}
+.hero-sub {
+  font-size: 18px;
+  color: rgba(255,248,231,0.62);
+  line-height: 1.75;
+  max-width: 430px;
+  margin-bottom: 42px;
+  font-weight: 600;
+  animation: fadeUp 0.6s ease 0.2s both;
+}
+.hero-sub strong { color: var(--carrot); }
+.cta-row {
+  display:flex;gap:16px;flex-wrap:wrap;
+  animation: fadeUp 0.6s ease 0.3s both;
+}
+.btn-primary {
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--orange),var(--carrot));
+  color:white;font-family:'Fredoka One',cursive;font-size:18px;
+  padding:16px 34px;border-radius:100px;text-decoration:none;border:none;
+  cursor:none;position:relative;overflow:hidden;
+  box-shadow: 0 8px 36px rgba(255,107,26,0.4);
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.btn-primary:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 18px 50px rgba(255,107,26,0.55);}
+.btn-primary::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);
+  transition:left 0.45s;
+}
+.btn-primary:hover::before{left:100%;}
+.btn-ghost {
+  display:inline-flex;align-items:center;gap:10px;
+  background:transparent;color:var(--cream);
+  font-family:'Fredoka One',cursive;font-size:18px;
+  padding:15px 30px;border-radius:100px;
+  border:2px solid rgba(255,248,231,0.18);text-decoration:none;cursor:none;
+  backdrop-filter:blur(8px);transition:all 0.2s;
+}
+.btn-ghost:hover{border-color:var(--mint);color:var(--mint);transform:translateY(-2px);background:rgba(77,255,164,0.05);}
+.stats-row {
+  display:flex;gap:36px;margin-top:54px;
+  animation:fadeUp 0.6s ease 0.4s both;
+}
+.stat-num{font-family:'Fredoka One',cursive;font-size:32px;color:var(--cream);}
+.stat-num span{color:var(--carrot);}
+.stat-label{font-size:11px;color:rgba(255,248,231,0.4);font-weight:800;text-transform:uppercase;letter-spacing:0.09em;margin-top:2px;}
+.stat-sep{width:1px;background:rgba(255,248,231,0.08);align-self:stretch;}
+
+/* Rocket scene */
+.hero-visual {
+  position:relative;height:580px;
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeRight 0.9s ease 0.25s both;
+}
+.rocket-wrapper {
+  position:absolute;z-index:5;
+  animation:rocketBob 3.2s ease-in-out infinite;
+}
+@keyframes rocketBob{
+  0%,100%{transform:translateY(0) rotate(-14deg);}
+  50%{transform:translateY(-28px) rotate(-11deg);}
+}
+.scene-svg{width:340px;height:440px;}
+.planet-el {
+  position:absolute;bottom:30px;right:10px;
+  width:140px;height:140px;
+  background:radial-gradient(circle at 35% 35%,#4a8cff,#1a3a7a);
+  border-radius:50%;
+  box-shadow:0 0 50px rgba(74,140,255,0.35),inset -22px -18px 45px rgba(0,0,0,0.5);
+  animation:planetSpin 60s linear infinite;
+}
+.planet-el::after{
+  content:'';position:absolute;
+  width:185px;height:46px;
+  border:7px solid rgba(120,180,255,0.3);
+  border-radius:50%;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotateX(72deg);
+}
+@keyframes planetSpin{to{filter:hue-rotate(30deg);}}
+.moon-el {
+  position:absolute;top:40px;left:20px;
+  width:75px;height:75px;
+  background:radial-gradient(circle at 38% 38%,#ffe9b3,#c8a04a);
+  border-radius:50%;
+  box-shadow:0 0 30px rgba(255,233,179,0.25),inset -12px -10px 28px rgba(0,0,0,0.35);
+}
+.float-carrot {
+  position:absolute;font-size:var(--sz,26px);
+  animation:floatC var(--d,4s) ease-in-out infinite var(--dl,0s);
+  pointer-events:none;
+}
+@keyframes floatC{
+  0%,100%{transform:translateY(0) rotate(var(--r0,-12deg));opacity:0.55;}
+  50%{transform:translateY(-18px) rotate(var(--r1,12deg));opacity:0.95;}
+}
+.sparkle-el {
+  position:absolute;width:var(--sz,12px);height:var(--sz,12px);
+  animation:sparkA var(--d,2.2s) ease-in-out infinite var(--dl,0s);
+  pointer-events:none;
+}
+.sparkle-el::before,.sparkle-el::after{
+  content:'';position:absolute;background:var(--star);border-radius:2px;
+}
+.sparkle-el::before{width:100%;height:3px;top:50%;transform:translateY(-50%);}
+.sparkle-el::after{height:100%;width:3px;left:50%;transform:translateX(-50%);}
+@keyframes sparkA{
+  0%,100%{opacity:0;transform:scale(0) rotate(0deg);}
+  50%{opacity:1;transform:scale(1) rotate(45deg);}
+}
+.hero-scroll {
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:rgba(255,248,231,0.3);font-size:11px;font-weight:800;
+  text-transform:uppercase;letter-spacing:0.1em;
+  animation:fadeUp 1s ease 1.2s both;
+}
+.scroll-bar{width:1px;height:44px;background:linear-gradient(to bottom,transparent,rgba(255,248,231,0.3));animation:scrollB 1.6s ease-in-out infinite;}
+@keyframes scrollB{0%,100%{opacity:0.3;height:44px;}50%{opacity:1;height:22px;}}
+.hero-ribbon{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--carrot),var(--star),var(--mint),var(--pink),var(--orange));background-size:400%;animation:ribbonMove 4s linear infinite;}
+@keyframes ribbonMove{to{background-position:400% 0;}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(35px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeRight{from{opacity:0;transform:translateX(50px);}to{opacity:1;transform:translateX(0);}}
+
+/* ========================
+   PARALLAX BAND
+======================== */
+.ticker-band {
+  background: var(--orange);
+  overflow: hidden;
+  padding: 14px 0;
+  white-space: nowrap;
+  position: relative;
+  z-index: 10;
+}
+.ticker-track {
+  display: inline-flex;
+  gap: 0;
+  animation: tickerScroll 22s linear infinite;
+}
+.ticker-item {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  color: white;
+  padding: 0 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.ticker-sep { color: rgba(255,255,255,0.4); }
+@keyframes tickerScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ========================
+   MISSION SECTION
+======================== */
+.section {
+  position: relative;
+  overflow: hidden;
+}
+.mission {
+  padding: 130px 60px;
+  background: var(--deep);
+  position: relative;
+}
+.mission-bg-glow {
+  position:absolute;width:600px;height:600px;
+  background:radial-gradient(circle,rgba(244,162,50,0.07),transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.section-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--carrot);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-tag::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 2px;
+  background: var(--carrot);
+}
+.section-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(38px,5vw,64px);
+  line-height: 1.05;
+  color: var(--cream);
+  margin-bottom: 22px;
+}
+.section-title .c-orange { color: var(--orange); }
+.section-title .c-star { color: var(--star); }
+.section-title .c-mint { color: var(--mint); }
+.section-title .c-pink { color: var(--pink); }
+
+.mission-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.mission-text p {
+  font-size: 17px;
+  color: rgba(255,248,231,0.65);
+  line-height: 1.8;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+.mission-text p strong { color: var(--carrot); }
+
+.mission-visual {
+  position: relative;
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.orbit-ring {
+  position: absolute;
+  border: 2px dashed rgba(255,248,231,0.1);
+  border-radius: 50%;
+  animation: orbitSpin var(--d,20s) linear infinite var(--rev,'');
+}
+.orbit-dot {
+  position: absolute;
+  width: 28px;height:28px;
+  background: var(--orange);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 0 20px rgba(255,107,26,0.6);
+}
+@keyframes orbitSpin{to{transform:rotate(360deg);}}
+
+.carrot-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 36px;
+}
+.carrot-fact {
+  background: rgba(255,107,26,0.07);
+  border: 1px solid rgba(255,107,26,0.18);
+  border-radius: 16px;
+  padding: 22px;
+  transition: all 0.3s;
+}
+.carrot-fact:hover {
+  background: rgba(255,107,26,0.13);
+  border-color: rgba(255,107,26,0.4);
+  transform: translateY(-3px);
+}
+.fact-icon { font-size: 28px; margin-bottom: 10px; }
+.fact-title { font-family: 'Fredoka One', cursive; font-size: 18px; color: var(--cream); margin-bottom: 6px; }
+.fact-body { font-size: 13px; color: rgba(255,248,231,0.5); line-height: 1.6; font-weight: 600; }
+
+/* ========================
+   HOW IT WORKS
+======================== */
+.how {
+  padding: 130px 60px;
+  background: radial-gradient(ellipse at 50% 0%,rgba(11,30,61,0.9),var(--deep) 70%);
+}
+.how-inner { max-width: 1240px; margin: 0 auto; }
+.how-header { text-align: center; margin-bottom: 80px; }
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative;
+}
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 56px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--orange), var(--carrot), var(--star), transparent);
+  opacity: 0.4;
+}
+.step {
+  text-align: center;
+  padding: 0 24px;
+  position: relative;
+}
+.step-num {
+  width: 112px;height:112px;
+  background: rgba(255,107,26,0.1);
+  border: 2px solid rgba(255,107,26,0.25);
+  border-radius: 50%;
+  display: flex;align-items:center;justify-content:center;
+  margin: 0 auto 28px;
+  font-size: 40px;
+  position: relative;
+  transition: all 0.3s;
+}
+.step:hover .step-num {
+  background: rgba(255,107,26,0.2);
+  border-color: var(--orange);
+  box-shadow: 0 0 30px rgba(255,107,26,0.3);
+  transform: scale(1.08);
+}
+.step-num::after {
+  content: attr(data-n);
+  position: absolute;
+  top: -8px; right: -8px;
+  width: 28px;height:28px;
+  background: var(--orange);
+  border-radius: 50%;
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  color: white;
+  display: flex;align-items:center;justify-content:center;
+}
+.step-title { font-family: 'Fredoka One', cursive; font-size: 22px; color: var(--cream); margin-bottom: 12px; }
+.step-body { font-size: 14px; color: rgba(255,248,231,0.5); line-height: 1.7; font-weight: 600; }
+
+/* ========================
+   PARALLAX SCROLL SECTION (Captain Bio)
+======================== */
+.captain {
+  padding: 140px 60px;
+  background: #060F22;
+  position: relative;
+  overflow: hidden;
+}
+.captain-parallax-bg {
+  position: absolute;
+  inset: -100px;
+  background:
+    radial-gradient(ellipse at 20% 60%, rgba(180,143,255,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 30%, rgba(77,255,164,0.07) 0%, transparent 50%);
+  pointer-events: none;
+}
+.captain-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.captain-portrait {
+  position: relative;
+  height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.portrait-ring {
+  position: absolute;
+  width: 340px; height: 340px;
+  border: 2px solid rgba(77,255,164,0.15);
+  border-radius: 50%;
+  animation: rotateRing 25s linear infinite;
+}
+.portrait-ring-2 {
+  width: 290px; height: 290px;
+  border-style: dashed;
+  animation-direction: reverse;
+  animation-duration: 18s;
+  border-color: rgba(255,229,102,0.12);
+}
+@keyframes rotateRing { to { transform:rotate(360deg); } }
+.portrait-badge-orbit {
+  position:absolute;
+  width:40px;height:40px;
+  background:rgba(77,255,164,0.15);
+  border:1px solid rgba(77,255,164,0.35);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  top:30px;left:50%;transform:translateX(-50%);
+}
+
+.portrait-circle {
+  width: 240px; height: 240px;
+  background: radial-gradient(circle at 38% 38%, #2a3f60, #0d1d3a);
+  border-radius: 50%;
+  border: 3px solid rgba(77,255,164,0.25);
+  box-shadow: 0 0 60px rgba(77,255,164,0.12), 0 0 120px rgba(77,255,164,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+.portrait-circle svg { width: 200px; height: 200px; }
+.portrait-chip {
+  position: absolute;
+  background: rgba(5,13,31,0.85);
+  border: 1px solid rgba(255,248,231,0.1);
+  border-radius: 14px;
+  padding: 12px 18px;
+  backdrop-filter: blur(10px);
+  font-size: 13px;
+  font-weight: 700;
+}
+.chip1 { bottom: 80px; right: 0; color: var(--mint); border-color: rgba(77,255,164,0.25); }
+.chip1 span { color: rgba(255,248,231,0.5); font-size: 11px; display: block; }
+.chip2 { top: 90px; left: 0; color: var(--star); border-color: rgba(255,229,102,0.25); }
+.chip2 span { color: rgba(255,248,231,0.5); font-size: 11px; display: block; }
+
+.captain-text .bio-quote {
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px;
+  color: var(--mint);
+  line-height: 1.3;
+  margin-bottom: 28px;
+  position: relative;
+  padding-left: 24px;
+}
+.captain-text .bio-quote::before {
+  content: '"';
+  position: absolute;
+  left: 0; top: -6px;
+  font-size: 50px;
+  color: rgba(77,255,164,0.3);
+  line-height: 1;
+  font-family: Georgia, serif;
+}
+.captain-text p {
+  font-size: 16px;
+  color: rgba(255,248,231,0.6);
+  line-height: 1.85;
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 14px;
+  margin-top: 32px;
+}
+.stats-card {
+  background: rgba(77,255,164,0.05);
+  border: 1px solid rgba(77,255,164,0.15);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.stats-card:hover { background: rgba(77,255,164,0.1); transform: translateY(-4px); }
+.stats-card .n { font-family: 'Fredoka One', cursive; font-size: 26px; color: var(--mint); }
+.stats-card .l { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,248,231,0.4); margin-top: 4px; }
+
+/* ========================
+   FUEL TECH
+======================== */
+.fuel {
+  padding: 130px 60px;
+  background: var(--deep);
+  position: relative;
+}
+.fuel-header { max-width: 1240px; margin: 0 auto 80px; text-align: center; }
+.fuel-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 24px;
+}
+.fuel-card {
+  background: linear-gradient(145deg, rgba(255,107,26,0.05), rgba(255,107,26,0.02));
+  border: 1px solid rgba(255,107,26,0.15);
+  border-radius: 24px;
+  padding: 36px 30px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s;
+  cursor: none;
+}
+.fuel-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--orange), var(--carrot));
+  transform: scaleX(0);
+  transition: transform 0.4s;
+  transform-origin: left;
+}
+.fuel-card:hover::before { transform: scaleX(1); }
+.fuel-card:hover {
+  background: linear-gradient(145deg, rgba(255,107,26,0.1), rgba(255,107,26,0.04));
+  border-color: rgba(255,107,26,0.35);
+  transform: translateY(-8px);
+  box-shadow: 0 24px 60px rgba(255,107,26,0.15);
+}
+.fuel-icon { font-size: 48px; margin-bottom: 20px; }
+.fuel-card-title { font-family: 'Fredoka One', cursive; font-size: 24px; color: var(--cream); margin-bottom: 14px; }
+.fuel-card-body { font-size: 15px; color: rgba(255,248,231,0.55); line-height: 1.75; font-weight: 600; }
+.fuel-card-tag {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--carrot);
+  background: rgba(244,162,50,0.12);
+  border: 1px solid rgba(244,162,50,0.25);
+  padding: 5px 14px;
+  border-radius: 100px;
+}
+
+/* ========================
+   TESTIMONIALS
+======================== */
+.testimonials {
+  padding: 130px 60px;
+  background: #060F22;
+  position: relative;
+}
+.testi-inner { max-width: 1240px; margin: 0 auto; }
+.testi-header { text-align: center; margin-bottom: 70px; }
+.testi-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 24px;
+}
+.testi-card {
+  background: rgba(255,248,231,0.03);
+  border: 1px solid rgba(255,248,231,0.08);
+  border-radius: 24px;
+  padding: 36px;
+  position: relative;
+  transition: all 0.3s;
+}
+.testi-card:hover {
+  background: rgba(255,248,231,0.06);
+  border-color: rgba(255,248,231,0.15);
+  transform: translateY(-6px);
+}
+.testi-stars { font-size: 16px; margin-bottom: 20px; color: var(--star); letter-spacing: 2px; }
+.testi-body {
+  font-size: 15px;
+  color: rgba(255,248,231,0.7);
+  line-height: 1.8;
+  font-weight: 600;
+  font-style: italic;
+  margin-bottom: 28px;
+}
+.testi-author { display: flex; align-items: center; gap: 14px; }
+.testi-avatar {
+  width: 46px;height:46px;border-radius:50%;
+  background: var(--c, var(--orange));
+  display: flex;align-items:center;justify-content:center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.testi-name { font-family: 'Fredoka One', cursive; font-size: 17px; color: var(--cream); }
+.testi-role { font-size: 12px; color: rgba(255,248,231,0.4); font-weight: 700; }
+
+/* ========================
+   CTA SECTION
+======================== */
+.cta-section {
+  padding: 140px 60px;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 50%, #0f2550 0%, var(--deep) 70%);
+  text-align: center;
+}
+.cta-glow {
+  position: absolute;
+  width: 700px;height:700px;
+  background: radial-gradient(circle, rgba(255,107,26,0.15), transparent 65%);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events: none;
+}
+.cta-section .section-title { font-size: clamp(44px,6vw,80px); max-width: 700px; margin: 0 auto 26px; }
+.cta-section p { font-size: 18px; color: rgba(255,248,231,0.6); max-width: 500px; margin: 0 auto 48px; font-weight: 600; line-height: 1.75; }
+.cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.cta-floating-carrots { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.cta-floating-carrots span {
+  position: absolute;
+  font-size: var(--sz,30px);
+  animation: ctaCarrot var(--d,8s) linear infinite var(--dl,0s);
+  opacity: 0;
+}
+@keyframes ctaCarrot {
+  0% { opacity:0; transform:translateY(100vh) rotate(0deg); }
+  10% { opacity:0.6; }
+  90% { opacity:0.4; }
+  100% { opacity:0; transform:translateY(-200px) rotate(360deg); }
+}
+
+/* ========================
+   FOOTER
+======================== */
+footer {
+  background: #030910;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 60px;
+}
+.footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.footer-logo { font-family: 'Fredoka One', cursive; font-size: 22px; color: var(--cream); }
+.footer-logo span { color: var(--orange); }
+.footer-links { display: flex; gap: 28px; }
+.footer-links a { color: rgba(255,248,231,0.4); text-decoration: none; font-size: 14px; font-weight: 700; cursor: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--carrot); }
+.footer-copy { color: rgba(255,248,231,0.25); font-size: 13px; font-weight: 700; }
+
+/* ========================
+   PARALLAX HELPERS
+======================== */
+.parallax-layer { will-change: transform; }
+
+/* ========================
+   COUNTER NUMBERS
+======================== */
+.count-up { display: inline-block; }
+
+/* ========================
+   RESPONSIVE
+======================== */
+@media (max-width: 900px) {
+  .hero-inner, .mission-grid, .captain-grid { grid-template-columns: 1fr; padding: 100px 28px 60px; }
+  .steps { grid-template-columns: repeat(2,1fr); }
+  .steps::before { display: none; }
+  .fuel-grid, .testi-grid { grid-template-columns: 1fr; }
+  .nav { padding: 16px 28px; }
+  .nav.scrolled { padding: 12px 28px; }
+  .nav-links { display: none; }
+  .hero-visual { height: 380px; }
+  .captain-portrait { height: 340px; }
+  .mission, .how, .captain, .fuel, .testimonials, .cta-section { padding: 80px 28px; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- ======= NAV ======= -->
+<nav class="nav" id="mainNav">
+  <a href="#" class="nav-logo">🐰 Bunny<span>Blast</span></a>
+  <ul class="nav-links">
+    <li><a href="#mission">Mission</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#captain">Captain</a></li>
+    <li><a href="#fuel">Fuel Tech</a></li>
+    <li><a href="#launch" class="nav-cta">🚀 Launch Now</a></li>
+  </ul>
+</nav>
+
+<!-- ======= HERO ======= -->
+<section class="hero" id="home">
+  <div class="stars-layer" id="starsLayer"></div>
+  <div class="nebula neb1"></div>
+  <div class="nebula neb2"></div>
+  <div class="nebula neb3"></div>
+
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="badge"><div class="badge-pulse"></div>Carrot-Powered Space Agency</div>
+      <h1 class="hero-title">
+        One <span class="accent">Small Hop</span><br>
+        <span class="big">GIANT<br>BLAST</span>
+      </h1>
+      <p class="hero-sub">Meet <strong>Captain Fluffernaut</strong> — the bravest bunny in the cosmos, riding a rocket fueled by <strong>100% organic carrots</strong> into the infinite void. Gravity? Never heard of it.</p>
+      <div class="cta-row">
+        <a href="#launch" class="btn-primary">🚀 Ignite Launch</a>
+        <a href="#fuel" class="btn-ghost">🥕 See the Fuel</a>
+      </div>
+      <div class="stats-row">
+        <div>
+          <div class="stat-num"><span class="count-up" data-target="12847">0</span><span>+</span></div>
+          <div class="stat-label">Carrots Burned</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div>
+          <div class="stat-num"><span class="count-up" data-target="384400">0</span><span> km</span></div>
+          <div class="stat-label">To the Moon</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div>
+          <div class="stat-num">1<span>🐰</span></div>
+          <div class="stat-label">Very Brave Bunny</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual" id="heroVisual">
+      <div class="moon-el parallax-layer" id="moonEl"></div>
+      <div class="float-carrot parallax-layer" style="--sz:34px;--d:3.5s;--dl:0s;--r0:-15deg;--r1:8deg;top:55px;right:30px;">🥕</div>
+      <div class="float-carrot parallax-layer" style="--sz:20px;--d:4.2s;--dl:0.9s;--r0:10deg;--r1:-20deg;top:130px;left:5px;">🥕</div>
+      <div class="float-carrot" style="--sz:26px;--d:3.9s;--dl:1.7s;--r0:-5deg;--r1:18deg;bottom:130px;right:5px;">🥕</div>
+      <div class="sparkle-el" style="--sz:14px;--d:2.3s;--dl:0.4s;top:90px;right:95px;"></div>
+      <div class="sparkle-el" style="--sz:10px;--d:1.9s;--dl:1.2s;top:200px;left:40px;"></div>
+      <div class="sparkle-el" style="--sz:16px;--d:2.6s;--dl:0.8s;bottom:210px;right:55px;"></div>
+      <div class="sparkle-el" style="--sz:8px;--d:1.6s;--dl:2.1s;top:320px;right:140px;"></div>
+      <div class="planet-el parallax-layer" id="planetEl"></div>
+
+      <div class="rocket-wrapper" id="rocketWrapper">
+        <svg class="scene-svg" viewBox="0 0 340 440" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="flameG" x1="170" y1="345" x2="170" y2="400" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FFE566"/><stop offset="45%" stop-color="#FF6B1A"/><stop offset="100%" stop-color="transparent"/>
+            </linearGradient>
+            <linearGradient id="bodyG" x1="140" y1="90" x2="205" y2="345" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#EEF3FF"/><stop offset="100%" stop-color="#C2CCEA"/>
+            </linearGradient>
+            <radialGradient id="winG" cx="45%" cy="32%" r="65%">
+              <stop offset="0%" stop-color="#B8E4FF"/><stop offset="100%" stop-color="#246A9E"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Engine glow -->
+          <ellipse cx="170" cy="360" rx="32" ry="20" fill="rgba(255,107,26,0.28)">
+            <animate attributeName="rx" values="32;44;32" dur="0.4s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.28;0.55;0.28" dur="0.4s" repeatCount="indefinite"/>
+          </ellipse>
+
+          <!-- Flame -->
+          <path d="M156 342 Q161 368 150 395 Q163 376 170 383 Q177 376 190 395 Q179 368 184 342 Z" fill="url(#flameG)">
+            <animate attributeName="d" values="M156 342 Q161 368 150 395 Q163 376 170 383 Q177 376 190 395 Q179 368 184 342 Z;M153 342 Q158 372 144 400 Q163 380 170 390 Q177 380 196 400 Q182 372 187 342 Z;M156 342 Q161 368 150 395 Q163 376 170 383 Q177 376 190 395 Q179 368 184 342 Z" dur="0.22s" repeatCount="indefinite"/>
+          </path>
+
+          <!-- Exhaust particles -->
+          <circle cx="164" cy="352" r="4.5" fill="#F4A232"><animate attributeName="cy" values="352;388" dur="0.52s" repeatCount="indefinite" begin="0s"/><animate attributeName="opacity" values="1;0" dur="0.52s" repeatCount="indefinite" begin="0s"/></circle>
+          <circle cx="173" cy="358" r="3.5" fill="#FF6B1A"><animate attributeName="cy" values="358;396" dur="0.62s" repeatCount="indefinite" begin="0.18s"/><animate attributeName="opacity" values="1;0" dur="0.62s" repeatCount="indefinite" begin="0.18s"/></circle>
+          <circle cx="168" cy="362" r="5" fill="#FFE566"><animate attributeName="cy" values="362;402" dur="0.72s" repeatCount="indefinite" begin="0.35s"/><animate attributeName="opacity" values="1;0" dur="0.72s" repeatCount="indefinite" begin="0.35s"/></circle>
+
+          <!-- Rocket body -->
+          <path d="M140 328 L140 195 Q140 100 170 68 Q200 100 200 195 L200 328 Z" fill="url(#bodyG)"/>
+          <!-- Stripes -->
+          <rect x="140" y="272" width="60" height="20" fill="var(--orange)"/>
+          <rect x="140" y="210" width="60" height="14" fill="var(--carrot)" opacity="0.65"/>
+          <!-- Shine -->
+          <path d="M150 310 L150 200 Q150 128 165 98 Q168 92 170 89" stroke="rgba(255,255,255,0.5)" stroke-width="9" stroke-linecap="round" fill="none"/>
+          <!-- Carrot logo -->
+          <text x="170" y="258" text-anchor="middle" font-size="20">🥕</text>
+
+          <!-- Window -->
+          <circle cx="170" cy="175" r="24" fill="#18324e" stroke="#8BC8E8" stroke-width="3.5"/>
+          <circle cx="170" cy="175" r="19.5" fill="url(#winG)"/>
+          <ellipse cx="164" cy="167" rx="7" ry="5" fill="rgba(255,255,255,0.45)" transform="rotate(-20 164 167)"/>
+
+          <!-- Fins -->
+          <path d="M140 300 L106 346 L140 330 Z" fill="#C8D4EE"/>
+          <path d="M200 300 L234 346 L200 330 Z" fill="#C8D4EE"/>
+          <path d="M140 300 L112 340 L140 330 Z" fill="#B0BED8"/>
+          <path d="M200 300 L228 340 L200 330 Z" fill="#B0BED8"/>
+
+          <!-- Carrot boosters -->
+          <rect x="116" y="302" width="24" height="42" rx="12" fill="#F4A232"/>
+          <rect x="116" y="328" width="24" height="10" rx="5" fill="#FF6B1A"/>
+          <rect x="200" y="302" width="24" height="42" rx="12" fill="#F4A232"/>
+          <rect x="200" y="328" width="24" height="10" rx="5" fill="#FF6B1A"/>
+
+          <!-- Booster flames -->
+          <path d="M122 338 Q128 352 121 364 Q128 356 128 364 Q128 356 135 364 Q128 352 136 338 Z" fill="url(#flameG)" opacity="0.75">
+            <animate attributeName="opacity" values="0.75;0.35;0.75" dur="0.28s" repeatCount="indefinite"/>
+          </path>
+          <path d="M206 338 Q212 352 205 364 Q212 356 212 364 Q212 356 219 364 Q212 352 220 338 Z" fill="url(#flameG)" opacity="0.75">
+            <animate attributeName="opacity" values="0.35;0.85;0.35" dur="0.32s" repeatCount="indefinite"/>
+          </path>
+
+          <!-- BUNNY in window -->
+          <circle cx="170" cy="178" r="13" fill="#F5E8DA"/>
+          <ellipse cx="163" cy="163" rx="4.5" ry="10" fill="#F5E8DA"/>
+          <ellipse cx="163" cy="163" rx="2.8" ry="7.5" fill="#FFB5C8"/>
+          <ellipse cx="177" cy="163" rx="4.5" ry="10" fill="#F5E8DA"/>
+          <ellipse cx="177" cy="163" rx="2.8" ry="7.5" fill="#FFB5C8"/>
+          <circle cx="165" cy="177" r="2.8" fill="#2A1A2E"/>
+          <circle cx="175" cy="177" r="2.8" fill="#2A1A2E"/>
+          <circle cx="166" cy="176" r="1.1" fill="white"/>
+          <circle cx="176" cy="176" r="1.1" fill="white"/>
+          <ellipse cx="170" cy="182" rx="2.2" ry="1.6" fill="#FF8FAB"/>
+          <path d="M166.5 184.5 Q170 188 173.5 184.5" stroke="#8B4A5A" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+          <circle cx="170" cy="178" r="14.5" stroke="rgba(139,196,228,0.55)" stroke-width="2.2" fill="none"/>
+          <ellipse cx="163" cy="169" rx="4.5" ry="3.2" fill="rgba(255,255,255,0.22)" transform="rotate(-18 163 169)"/>
+          <text x="183" y="192" font-size="13" transform="rotate(35 183 192)" opacity="0.85">🥕</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-bar"></div>
+    Scroll to explore
+  </div>
+  <div class="hero-ribbon"></div>
+</section>
+
+<!-- ======= TICKER ======= -->
+<div class="ticker-band">
+  <div class="ticker-track" id="ticker">
+    <span class="ticker-item">🥕 Carrot-Powered <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">🐰 Bunny in Space <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">🚀 Launching to the Stars <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">🌕 Moon Bound <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">🥕 Zero-Emission Orbit <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">⭐ 99.9% Hop Success Rate <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">🥕 Carrot-Powered <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">🐰 Bunny in Space <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">🚀 Launching to the Stars <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">🌕 Moon Bound <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">🥕 Zero-Emission Orbit <span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">⭐ 99.9% Hop Success Rate <span class="ticker-sep">✦</span></span>
+  </div>
+</div>
+
+<!-- ======= MISSION ======= -->
+<section class="mission section" id="mission">
+  <div class="mission-bg-glow"></div>
+  <div class="mission-grid">
+    <div class="mission-text">
+      <div class="section-tag reveal">The Mission</div>
+      <h2 class="section-title reveal delay-1">Why Shoot for<br>the <span class="c-star">Stars?</span></h2>
+      <p class="reveal delay-2">Because <strong>someone had to do it.</strong> When every space agency on Earth was burning fossil fuels, one brilliant — and admittedly slightly unhinged — bunny looked at a pile of carrots and asked: "What if?"</p>
+      <p class="reveal delay-3">BunnyBlast is the world's first carrot-fueled deep space exploration program. We believe that sustainable propulsion isn't just a dream — it's something a six-pound rabbit with a helmet can actually pull off.</p>
+      <div class="carrot-facts reveal delay-4">
+        <div class="carrot-fact"><div class="fact-icon">🔬</div><div class="fact-title">Beta-Carotene Propellant</div><div class="fact-body">Our patented CF-9 fuel converts beta-carotene into plasma thrust at 8,000°C.</div></div>
+        <div class="carrot-fact"><div class="fact-icon">♻️</div><div class="fact-title">Zero Emissions</div><div class="fact-body">100% organic. All exhaust is edible. (We think. We haven't tested this.)</div></div>
+        <div class="carrot-fact"><div class="fact-icon">⚡</div><div class="fact-title">Peak Thrust</div><div class="fact-body">2.4 million carrot-newtons of force. That's 12 billion baby carrots per second.</div></div>
+        <div class="carrot-fact"><div class="fact-icon">🌱</div><div class="fact-title">Grown Locally</div><div class="fact-body">All fuel carrots are sourced from our 3-acre facility in rural Bunnytopia.</div></div>
+      </div>
+    </div>
+
+    <div class="mission-visual reveal-right">
+      <!-- Animated orbit display -->
+      <div class="orbit-ring" style="width:320px;height:320px;--d:30s;">
+        <div class="orbit-dot" style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);">🥕</div>
+      </div>
+      <div class="orbit-ring" style="width:240px;height:240px;--d:20s;--rev:reverse;">
+        <div class="orbit-dot" style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--mint);box-shadow:0 0 20px rgba(77,255,164,0.5);">⭐</div>
+      </div>
+      <div class="orbit-ring" style="width:160px;height:160px;--d:13s;">
+        <div class="orbit-dot" style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--pink);box-shadow:0 0 20px rgba(255,77,143,0.5);">🌙</div>
+      </div>
+      <!-- Center -->
+      <div style="width:70px;height:70px;background:radial-gradient(circle,#1a3a7a,#050D1F);border-radius:50%;border:2px solid rgba(74,140,255,0.4);display:flex;align-items:center;justify-content:center;font-size:30px;position:relative;z-index:5;box-shadow:0 0 40px rgba(74,140,255,0.3);">🌍</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= HOW IT WORKS ======= -->
+<section class="how section" id="how">
+  <div class="how-inner">
+    <div class="how-header">
+      <div class="section-tag reveal" style="justify-content:center;">The Process</div>
+      <h2 class="section-title reveal delay-1">From Farm to <span class="c-orange">Orbit</span></h2>
+      <p class="reveal delay-2" style="max-width:500px;margin:0 auto;color:rgba(255,248,231,0.55);font-size:16px;font-weight:600;line-height:1.8;">Four elegant steps stand between a humble carrot and the cold vacuum of space.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal delay-1">
+        <div class="step-num" data-n="1">🥕</div>
+        <div class="step-title">Harvest the Fuel</div>
+        <div class="step-body">Premium organic carrots are hand-selected by our team of highly trained rabbits for maximum beta-carotene density and flight-grade crunchiness.</div>
+      </div>
+      <div class="step reveal delay-2">
+        <div class="step-num" data-n="2">⚗️</div>
+        <div class="step-title">CF-9 Conversion</div>
+        <div class="step-body">The carrots enter our patented Carrot Fusion reactor, where molecular carotene is extracted and supercharged into plasma-grade propellant at 8,000°C.</div>
+      </div>
+      <div class="step reveal delay-3">
+        <div class="step-num" data-n="3">🐰</div>
+        <div class="step-title">Captain Suits Up</div>
+        <div class="step-body">Captain Fluffernaut undergoes a rigorous pre-flight routine: ear check, carrot snack, helmet adjustment, and one last dramatic stare into the cosmos.</div>
+      </div>
+      <div class="step reveal delay-4">
+        <div class="step-num" data-n="4">🚀</div>
+        <div class="step-title">Blast Off!</div>
+        <div class="step-body">T-minus 3, 2, 1... WHOOOOSH. 2.4 million carrot-newtons of thrust send one very determined bunny screaming through the atmosphere at Mach 12.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= CAPTAIN BIO ======= -->
+<section class="captain section" id="captain">
+  <div class="captain-parallax-bg" id="captainBg"></div>
+  <div class="captain-grid" style="max-width:1240px;margin:0 auto;">
+    <div class="captain-portrait reveal-left">
+      <div class="portrait-ring parallax-layer" id="ring1"></div>
+      <div class="portrait-ring portrait-ring-2 parallax-layer" id="ring2"></div>
+      <div class="portrait-badge-orbit">🚀</div>
+      <div class="portrait-circle">
+        <!-- Large detailed bunny SVG portrait -->
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Space suit body -->
+          <ellipse cx="100" cy="148" rx="52" ry="44" fill="#D8E4F0"/>
+          <ellipse cx="100" cy="148" rx="46" ry="38" fill="#EEF3FF"/>
+          <!-- Suit details -->
+          <rect x="82" y="138" width="36" height="22" rx="6" fill="#C0CDDF"/>
+          <rect x="88" y="144" width="24" height="14" rx="3" fill="#1a3a7a" opacity="0.6"/>
+          <text x="100" y="154" text-anchor="middle" font-size="9" fill="#FFE566" font-weight="bold">CF-9</text>
+          <!-- Collar -->
+          <ellipse cx="100" cy="126" rx="36" ry="14" fill="#C0CDDF"/>
+          <!-- Helmet ring -->
+          <circle cx="100" cy="100" r="54" fill="none" stroke="#8BC8E8" stroke-width="3" opacity="0.5"/>
+          <!-- Helmet -->
+          <circle cx="100" cy="100" r="48" fill="#1a3a7a" opacity="0.85"/>
+          <circle cx="100" cy="100" r="44" fill="url(#helmetG)"/>
+          <!-- Helmet visor glare -->
+          <ellipse cx="86" cy="82" rx="14" ry="9" fill="rgba(255,255,255,0.15)" transform="rotate(-20 86 82)"/>
+          <!-- Bunny ears inside helmet -->
+          <ellipse cx="82" cy="70" rx="9" ry="18" fill="#F5E8DA" opacity="0.9"/>
+          <ellipse cx="82" cy="70" rx="5.5" ry="13" fill="#FFB5C8"/>
+          <ellipse cx="118" cy="70" rx="9" ry="18" fill="#F5E8DA" opacity="0.9"/>
+          <ellipse cx="118" cy="70" rx="5.5" ry="13" fill="#FFB5C8"/>
+          <!-- Bunny face -->
+          <circle cx="100" cy="104" r="28" fill="#F5E8DA"/>
+          <!-- Eyes — big cute eyes -->
+          <circle cx="89" cy="100" r="7" fill="#1a1025"/>
+          <circle cx="111" cy="100" r="7" fill="#1a1025"/>
+          <circle cx="90" cy="98" r="2.5" fill="white"/>
+          <circle cx="112" cy="98" r="2.5" fill="white"/>
+          <!-- Nose -->
+          <ellipse cx="100" cy="109" rx="3.5" ry="2.5" fill="#FF8FAB"/>
+          <!-- Smile -->
+          <path d="M93 113 Q100 120 107 113" stroke="#7a3a4a" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Cheeks -->
+          <ellipse cx="85" cy="108" rx="7" ry="4" fill="rgba(255,143,171,0.25)"/>
+          <ellipse cx="115" cy="108" rx="7" ry="4" fill="rgba(255,143,171,0.25)"/>
+          <!-- Arms holding carrot -->
+          <path d="M58 150 Q42 160 48 175" stroke="#C0CDDF" stroke-width="12" fill="none" stroke-linecap="round"/>
+          <text x="40" y="182" font-size="20">🥕</text>
+          <path d="M142 150 Q158 160 152 175" stroke="#C0CDDF" stroke-width="12" fill="none" stroke-linecap="round"/>
+          <text x="148" y="182" font-size="16">🌟</text>
+          <defs>
+            <radialGradient id="helmetG" cx="40%" cy="35%" r="70%">
+              <stop offset="0%" stop-color="#2a5090"/>
+              <stop offset="100%" stop-color="#0a1535"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="portrait-chip chip1">🟢 STATUS: IN ORBIT<span>Last ping: 0.3s ago</span></div>
+      <div class="portrait-chip chip2">⚡ THRUST: 98.7%<span>CF-9 fuel at capacity</span></div>
+    </div>
+
+    <div class="captain-text">
+      <div class="section-tag reveal">Meet the Crew</div>
+      <h2 class="section-title reveal delay-1">Captain <span class="c-mint">Fluffernaut</span></h2>
+      <div class="bio-quote reveal delay-2">Carrots aren't just food. They're the future of interstellar propulsion. Also, they're delicious.</div>
+      <p class="reveal delay-3">Born in a humble warren in Meadowshire, Captain Fluffernaut (born Gerald J. Cottontail III) showed an early obsession with both root vegetables and aerospace engineering. At age 2, he had already consumed 847 carrots and drawn detailed schematics of a carrot-powered spacecraft on his burrow wall.</p>
+      <p class="reveal delay-4">After a distinguished career at BunnyTech Institute (GPA: 4.0 carrots out of 4.0), he volunteered to be BunnyBlast's first and only test pilot. He has since completed 7 orbital missions, 2 lunar flybys, and one very unexpected trip past Mars.</p>
+      <div class="stats-cards reveal delay-5">
+        <div class="stats-card"><div class="n">7</div><div class="l">Missions</div></div>
+        <div class="stats-card"><div class="n">847</div><div class="l">Carrots/Day</div></div>
+        <div class="stats-card"><div class="n">100%</div><div class="l">Hop Rate</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= FUEL TECH ======= -->
+<section class="fuel section" id="fuel">
+  <div class="fuel-header">
+    <div class="section-tag reveal" style="justify-content:center;">Proprietary Technology</div>
+    <h2 class="section-title reveal delay-1">The <span class="c-carrot" style="color:var(--carrot);">CF-9</span> Fuel System</h2>
+    <p class="reveal delay-2" style="color:rgba(255,248,231,0.5);font-size:17px;font-weight:600;max-width:520px;margin:0 auto;line-height:1.8;">Six breakthroughs that turned a root vegetable into the most powerful propellant in the solar system.</p>
+  </div>
+  <div class="fuel-grid">
+    <div class="fuel-card reveal delay-1">
+      <div class="fuel-icon">⚛️</div>
+      <div class="fuel-card-title">Carotene Fusion Core</div>
+      <div class="fuel-card-body">Our reactor splits beta-carotene at the molecular level, releasing 140 megajoules per kilogram — 3x more energy-dense than conventional rocket fuel.</div>
+      <div class="fuel-card-tag">PATENTED TECH</div>
+    </div>
+    <div class="fuel-card reveal delay-2">
+      <div class="fuel-icon">🧊</div>
+      <div class="fuel-card-title">Cryo-Carrot Storage</div>
+      <div class="fuel-card-body">Liquid carrot concentrate stored at -196°C in our proprietary VegTank chambers, preventing premature carotenoid degradation during ascent.</div>
+      <div class="fuel-card-tag">ACTIVE</div>
+    </div>
+    <div class="fuel-card reveal delay-3">
+      <div class="fuel-icon">🔥</div>
+      <div class="fuel-card-title">Plasma Ignition</div>
+      <div class="fuel-card-body">8,000°C combustion chamber converts carotene plasma into directed thrust vectors. Also the world's most powerful air fryer, theoretically.</div>
+      <div class="fuel-card-tag">EXPERIMENTAL</div>
+    </div>
+    <div class="fuel-card reveal delay-1">
+      <div class="fuel-icon">🌿</div>
+      <div class="fuel-card-title">Zero-Carbon Exhaust</div>
+      <div class="fuel-card-body">100% of combustion byproduct is vitamin A vapor and trace beta-carotene particulates. Our test pilots report slightly better night vision after launches.</div>
+      <div class="fuel-card-tag">CERTIFIED ORGANIC</div>
+    </div>
+    <div class="fuel-card reveal delay-2">
+      <div class="fuel-icon">📡</div>
+      <div class="fuel-card-title">AI Fuel Management</div>
+      <div class="fuel-card-body">FlopAI — our onboard intelligence (trained exclusively on carrot data) optimizes fuel injection 10,000 times per second for peak thrust efficiency.</div>
+      <div class="fuel-card-tag">MACHINE LEARNING</div>
+    </div>
+    <div class="fuel-card reveal delay-3">
+      <div class="fuel-icon">🏆</div>
+      <div class="fuel-card-title">Side Carrot Boosters</div>
+      <div class="fuel-card-body">Twin CF-9 Mini boosters provide 40% additional liftoff thrust. Each booster holds 2,000 baby carrots compressed to diamond density. Very satisfying crunch at ignition.</div>
+      <div class="fuel-card-tag">SIGNATURE FEATURE</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= TESTIMONIALS ======= -->
+<section class="testimonials section">
+  <div class="testi-inner">
+    <div class="testi-header">
+      <div class="section-tag reveal" style="justify-content:center;">What They're Saying</div>
+      <h2 class="section-title reveal delay-1">Earthlings <span class="c-pink">React</span></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal delay-1">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-body">"I watched the launch from my garden and immediately went inside and ate three carrots. I don't know what came over me but I feel great. 10/10."</div>
+        <div class="testi-author"><div class="testi-avatar" style="--c:#4a8cff;">🧑‍🌾</div><div><div class="testi-name">Herbert Grunwick</div><div class="testi-role">Farmer, Meadowshire</div></div></div>
+      </div>
+      <div class="testi-card reveal delay-2">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-body">"As a NASA veteran, I was skeptical. Then I saw the telemetry. 2.4 million carrot-newtons is... somehow real. I've submitted my resignation and applied to BunnyBlast."</div>
+        <div class="testi-author"><div class="testi-avatar" style="--c:var(--mint);">👩‍🚀</div><div><div class="testi-name">Dr. Patricia Yuen</div><div class="testi-role">Former Flight Director, NASA</div></div></div>
+      </div>
+      <div class="testi-card reveal delay-3">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-body">"My kids asked me why that bunny is in space and I said 'because he wanted to' and honestly that's the most inspiring thing I've ever said. We're planting carrots now."</div>
+        <div class="testi-author"><div class="testi-avatar" style="--c:var(--pink);">👨‍👧</div><div><div class="testi-name">Marcus Okafor</div><div class="testi-role">Parent, Lagos</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= CTA ======= -->
+<section class="cta-section section" id="launch">
+  <div class="cta-glow"></div>
+  <div class="cta-floating-carrots" id="ctaCarrots"></div>
+  <div style="position:relative;z-index:5;">
+    <div class="section-tag reveal" style="justify-content:center;">Ready to Blast Off?</div>
+    <h2 class="section-title reveal delay-1" style="margin-left:auto;margin-right:auto;">Join the <span class="c-orange">Carrot</span><br><span class="c-star">Revolution</span></h2>
+    <p class="reveal delay-2">Subscribe to mission updates, carrot fuel research papers, and exclusive footage of Captain Fluffernaut doing zero-gravity binkies.</p>
+    <div class="cta-btns reveal delay-3">
+      <a href="#" class="btn-primary" style="font-size:20px;padding:18px 42px;">🚀 Join the Mission</a>
+      <a href="#" class="btn-ghost" style="font-size:20px;padding:17px 36px;">🥕 Fuel Database</a>
+    </div>
+  </div>
+</section>
+
+<!-- ======= FOOTER ======= -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">🐰 Bunny<span>Blast</span> — Carrot-Powered Space Agency</div>
+    <div class="footer-links">
+      <a href="#">Mission</a>
+      <a href="#">Fuel Tech</a>
+      <a href="#">Captain</a>
+      <a href="#">Press</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 BunnyBlast Inc. No carrots were harmed in the making of this website. (Many were eaten.)</div>
+  </div>
+</footer>
+
+<script>
+/* ===========================
+   CURSOR
+=========================== */
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.querySelectorAll('a, button, .fuel-card, .carrot-fact, .testi-card, .step').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+/* ===========================
+   STARS
+=========================== */
+const starsLayer = document.getElementById('starsLayer');
+for (let i = 0; i < 220; i++) {
+  const s = document.createElement('div');
+  s.className = 'star-dot';
+  const sz = Math.random() * 2.5 + 0.4;
+  s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*3.5}s;--dl:${Math.random()*4}s`;
+  starsLayer.appendChild(s);
+}
+
+/* ===========================
+   TICKER DUPLICATE
+=========================== */
+const ticker = document.getElementById('ticker');
+ticker.innerHTML += ticker.innerHTML;
+
+/* ===========================
+   NAV SCROLL
+=========================== */
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+}, {passive:true});
+
+/* ===========================
+   SCROLL REVEAL
+=========================== */
+const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12 });
+revealEls.forEach(el => revealObserver.observe(el));
+
+/* ===========================
+   PARALLAX ON SCROLL
+=========================== */
+const heroVisual = document.getElementById('heroVisual');
+const moonEl = document.getElementById('moonEl');
+const planetEl = document.getElementById('planetEl');
+const ring1 = document.getElementById('ring1');
+const ring2 = document.getElementById('ring2');
+const rocketWrapper = document.getElementById('rocketWrapper');
+
+let ticking = false;
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    requestAnimationFrame(() => {
+      const scrollY = window.scrollY;
+      // Hero visual parallax
+      if (heroVisual) {
+        heroVisual.style.transform = `translateY(${scrollY * 0.18}px)`;
+      }
+      if (moonEl) moonEl.style.transform = `translateY(${scrollY * 0.25}px)`;
+      if (planetEl) planetEl.style.transform = `translateY(${scrollY * 0.12}px)`;
+      // Captain section
+      if (ring1) ring1.style.transform = `translateY(${(scrollY - 2000) * 0.08}px) rotate(${(scrollY - 2000) * 0.04}deg)`;
+      if (ring2) ring2.style.transform = `translateY(${(scrollY - 2000) * -0.05}px) rotate(${(scrollY - 2000) * -0.06}deg)`;
+      ticking = false;
+    });
+    ticking = true;
+  }
+}, {passive:true});
+
+/* ===========================
+   MOUSE PARALLAX (hero)
+=========================== */
+document.addEventListener('mousemove', e => {
+  if (!heroVisual) return;
+  const x = (e.clientX / window.innerWidth - 0.5) * 22;
+  const y = (e.clientY / window.innerHeight - 0.5) * 14;
+  heroVisual.style.transform = `translate(${x}px, ${y}px) translateY(${window.scrollY * 0.18}px)`;
+});
+
+/* ===========================
+   COUNT UP ANIMATION
+=========================== */
+function animateCountUp(el) {
+  const target = parseInt(el.dataset.target);
+  const duration = 1800;
+  const start = performance.now();
+  const update = (now) => {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(eased * target).toLocaleString();
+    if (progress < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+const counters = document.querySelectorAll('.count-up');
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !e.target.dataset.counted) {
+      e.target.dataset.counted = 'true';
+      animateCountUp(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+counters.forEach(c => counterObserver.observe(c));
+
+/* ===========================
+   CTA FLOATING CARROTS
+=========================== */
+const ctaCarrots = document.getElementById('ctaCarrots');
+const carrotEmojis = ['🥕', '🥕', '🥕', '⭐', '🌟', '✨', '🚀'];
+for (let i = 0; i < 18; i++) {
+  const span = document.createElement('span');
+  span.textContent = carrotEmojis[Math.floor(Math.random() * carrotEmojis.length)];
+  span.style.cssText = `left:${Math.random()*100}%;--sz:${20+Math.random()*20}px;font-size:${20+Math.random()*20}px;--d:${6+Math.random()*8}s;--dl:${Math.random()*8}s`;
+  ctaCarrots.appendChild(span);
+}
+
+/* ===========================
+   HORIZONTAL SCROLL PROGRESS BAR
+=========================== */
+const progressBar = document.createElement('div');
+progressBar.style.cssText = `position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--star),var(--mint));z-index:9999;width:0%;transition:width 0.1s linear;pointer-events:none;`;
+document.body.appendChild(progressBar);
+window.addEventListener('scroll', () => {
+  const winScroll = window.scrollY;
+  const height = document.body.scrollHeight - window.innerHeight;
+  progressBar.style.width = (winScroll / height * 100) + '%';
+}, {passive:true});
+
+/* ===========================
+   SECTION BG PARALLAX (captain)
+=========================== */
+const captainBg = document.getElementById('captainBg');
+window.addEventListener('scroll', () => {
+  if (captainBg) {
+    const rect = captainBg.closest('.captain').getBoundingClientRect();
+    const offset = -rect.top * 0.3;
+    captainBg.style.transform = `translateY(${offset}px)`;
+  }
+}, {passive:true});
+</script>
+</body>
+</html>

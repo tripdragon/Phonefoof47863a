@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn Universe</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #fff5f0; color: #1a0a2e; overflow-x: hidden; }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #f093fb 40%, #f5576c 70%, #fda085 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 2rem;
+  position: relative; overflow: hidden;
+}
+.blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
+.blob1 { width: 500px; height: 500px; background: rgba(255,255,255,0.15); top: -100px; left: -100px; }
+.blob2 { width: 400px; height: 400px; background: rgba(255,200,100,0.2); bottom: -80px; right: -80px; }
+.blob3 { width: 300px; height: 300px; background: rgba(100,255,200,0.15); top: 40%; left: 55%; }
+
+.hero-badge {
+  background: rgba(255,255,255,0.25); color: #fff;
+  font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 0.5rem 1.5rem; border-radius: 100px; margin-bottom: 2rem; display: inline-block;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.5rem, 10vw, 9rem); font-weight: 900;
+  color: #fff; line-height: 0.95;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.15); margin-bottom: 1.5rem;
+}
+.hero h1 em { font-style: italic; color: #ffe066; display: block; }
+.hero-sub { color: rgba(255,255,255,0.9); font-size: 1.05rem; max-width: 500px; line-height: 1.75; margin: 0 auto 2.5rem; }
+.hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+
+.btn-white {
+  background: #fff; color: #7c3aed; font-weight: 700; font-size: 1rem;
+  padding: 1rem 2.5rem; border-radius: 100px; text-decoration: none;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15); transition: transform .2s, box-shadow .2s; display: inline-block;
+}
+.btn-white:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
+
+.btn-ghost {
+  background: transparent; color: #fff; font-weight: 700; font-size: 1rem;
+  padding: 1rem 2.5rem; border-radius: 100px; text-decoration: none;
+  border: 2px solid rgba(255,255,255,0.5); transition: background .2s; display: inline-block;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.2); border-color: #fff; }
+
+.scroll-indicator {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.7); font-size: 0.7rem; letter-spacing: 0.15em;
+  text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+}
+.scroll-arrow {
+  width: 22px; height: 22px;
+  border-right: 2px solid rgba(255,255,255,0.7);
+  border-bottom: 2px solid rgba(255,255,255,0.7);
+  transform: rotate(45deg);
+  animation: bounce 1.4s ease-in-out infinite;
+}
+@keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(6px)} }
+
+/* STATS */
+.stats {
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  padding: 3rem 2rem;
+  display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap;
+}
+.stat { text-align: center; }
+.stat-num { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; color: #fff; line-height: 1; }
+.stat-label { color: rgba(255,255,255,0.8); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.4rem; }
+
+/* MARQUEE */
+.marquee-wrap { background: #1a0a2e; padding: 1.2rem 0; overflow: hidden; }
+.marquee-track {
+  display: flex; gap: 3rem; white-space: nowrap;
+  animation: marquee 22s linear infinite;
+}
+.marquee-track span { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-style: italic; color: rgba(255,255,255,0.35); }
+.marquee-track span.hl { color: #f093fb; }
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* TOPICS */
+.topics-section { background: #fff5f0; padding: 7rem 2rem; }
+.topics-inner { max-width: 1200px; margin: 0 auto; }
+.section-header { text-align: center; margin-bottom: 4rem; }
+.eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 1rem; display: block; }
+
+h2 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem,5vw,4rem); font-weight: 900; line-height: 1.05; margin-bottom: 1rem; }
+
+.topics-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 1.5rem; }
+
+.topic-card {
+  border-radius: 20px; padding: 2rem; position: relative; overflow: hidden;
+  transition: transform .3s ease, box-shadow .3s ease; cursor: default;
+}
+.topic-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.18); }
+.topic-card::before {
+  content: ''; position: absolute; top: -30px; right: -30px;
+  width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,0.15);
+}
+.topic-icon { font-size: 2.2rem; margin-bottom: 1rem; display: block; }
+.topic-name { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #fff; margin-bottom: 0.6rem; }
+.topic-desc { font-size: 0.8rem; color: rgba(255,255,255,0.85); line-height: 1.75; }
+.topic-tag {
+  display: inline-block; margin-top: 1.2rem; background: rgba(255,255,255,0.2);
+  color: #fff; font-size: 0.62rem; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 0.3rem 0.8rem; border-radius: 100px;
+}
+
+/* WHY */
+.why-section { background: linear-gradient(160deg,#a18cd1 0%,#fbc2eb 100%); padding: 7rem 2rem; }
+.why-inner { max-width: 1200px; margin: 0 auto; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 2rem; margin-top: 3.5rem; }
+.feature-card {
+  background: rgba(255,255,255,0.6); backdrop-filter: blur(12px);
+  border-radius: 20px; padding: 2.5rem; transition: transform .3s;
+}
+.feature-card:hover { transform: translateY(-5px); }
+.feature-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; margin-bottom: 1.5rem;
+}
+.feature-card h3 { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; margin-bottom: 0.75rem; color: #1a0a2e; }
+.feature-card p { font-size: 0.82rem; color: #4a3060; line-height: 1.8; }
+
+/* PATHS */
+.paths-section { background: #1a0a2e; padding: 7rem 2rem; }
+.paths-inner { max-width: 1200px; margin: 0 auto; }
+.paths-inner h2 { color: #fff; margin-bottom: 3.5rem; }
+.paths-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 1.5rem; }
+.path-card {
+  border-radius: 20px; padding: 2.5rem; position: relative;
+  overflow: hidden; transition: transform .3s;
+}
+.path-card:hover { transform: translateY(-5px); }
+.path-num {
+  font-family: 'Playfair Display', serif; font-size: 5rem; font-weight: 900;
+  color: rgba(255,255,255,0.08); line-height: 1; position: absolute; top: 1rem; right: 1.5rem;
+}
+.path-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: #fff; margin-bottom: 1.5rem; }
+.path-steps { list-style: none; }
+.path-steps li {
+  color: rgba(255,255,255,0.75); font-size: 0.8rem;
+  padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; gap: 0.75rem;
+}
+.path-steps li::before { content: '→'; flex-shrink: 0; }
+
+/* QUOTE */
+.quote-section {
+  background: linear-gradient(135deg,#f093fb,#f5576c,#fda085);
+  padding: 8rem 2rem; text-align: center;
+}
+.quote-mark { font-family: 'Playfair Display', serif; font-size: 8rem; color: rgba(255,255,255,0.2); line-height: 0.5; display: block; margin-bottom: 1rem; }
+.quote-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem,4vw,3rem); font-style: italic;
+  color: #fff; max-width: 820px; margin: 0 auto 1.5rem; line-height: 1.35;
+}
+.quote-attr { color: rgba(255,255,255,0.75); font-size: 0.82rem; letter-spacing: 0.15em; text-transform: uppercase; }
+
+/* CTA */
+.cta-section {
+  background: linear-gradient(135deg,#4facfe,#00f2fe,#43e97b);
+  padding: 7rem 2rem; text-align: center;
+}
+.cta-section h2 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem,5vw,4rem); color: #fff; margin-bottom: 1rem; }
+.cta-section p { color: rgba(255,255,255,0.85); font-size: 1.05rem; margin-bottom: 2.5rem; }
+.btn-dark {
+  background: #1a0a2e; color: #fff; font-weight: 700; font-size: 1.1rem;
+  padding: 1.1rem 3rem; border-radius: 100px; text-decoration: none;
+  display: inline-block; transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+.btn-dark:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+
+/* FOOTER */
+footer { background: #1a0a2e; padding: 3rem 2rem; text-align: center; }
+.footer-logo { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: #fff; margin-bottom: 0.5rem; }
+.footer-logo span { color: #f093fb; }
+footer p { color: rgba(255,255,255,0.35); font-size: 0.78rem; }
+
+/* Animation initial states */
+.anim { opacity: 0; transform: translateY(40px); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+
+  <div class="hero-badge anim" id="badge">∞ The Knowledge Engine</div>
+  <h1 class="anim" id="h1">Learn<br><em>Everything.</em></h1>
+  <p class="hero-sub anim" id="hsub">A curated universe of topics spanning science, art, mathematics, philosophy, and beyond. Your mind is the only limit.</p>
+  <div class="hero-btns anim" id="hbtns">
+    <a href="#topics" class="btn-white">Explore Topics</a>
+    <a href="#paths" class="btn-ghost">Learning Paths</a>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-arrow"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat anim"><div class="stat-num" data-target="42">0</div><div class="stat-label">Topics</div></div>
+  <div class="stat anim"><div class="stat-num" data-target="600">0</div><div class="stat-label">Resources</div></div>
+  <div class="stat anim"><div class="stat-num" data-target="12">0</div><div class="stat-label">Learning Paths</div></div>
+  <div class="stat anim"><div class="stat-num" data-target="99">0</div><div class="stat-label">% Curiosity</div></div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span>Mathematics</span><span>•</span><span class="hl">Quantum Physics</span><span>•</span>
+    <span>Philosophy</span><span>•</span><span class="hl">Linguistics</span><span>•</span>
+    <span>Biology</span><span>•</span><span class="hl">Art History</span><span>•</span>
+    <span>Astronomy</span><span>•</span><span class="hl">Music Theory</span><span>•</span>
+    <span>Psychology</span><span>•</span><span class="hl">Economics</span><span>•</span>
+    <span>Chemistry</span><span>•</span><span class="hl">Computer Science</span><span>•</span>
+    <span>Mathematics</span><span>•</span><span class="hl">Quantum Physics</span><span>•</span>
+    <span>Philosophy</span><span>•</span><span class="hl">Linguistics</span><span>•</span>
+    <span>Biology</span><span>•</span><span class="hl">Art History</span><span>•</span>
+    <span>Astronomy</span><span>•</span><span class="hl">Music Theory</span><span>•</span>
+    <span>Psychology</span><span>•</span><span class="hl">Economics</span><span>•</span>
+    <span>Chemistry</span><span>•</span><span class="hl">Computer Science</span><span>•</span>
+  </div>
+</div>
+
+<!-- TOPICS -->
+<section class="topics-section" id="topics">
+  <div class="topics-inner">
+    <div class="section-header">
+      <span class="eyebrow anim" style="color:#f5576c">// 01 — Core Disciplines</span>
+      <h2 class="anim">The <em style="font-style:italic">universe</em> of knowledge</h2>
+      <p class="anim" style="color:#4a3060;max-width:500px;margin:0 auto;line-height:1.75">Twelve vast domains of human understanding, each with a lifetime of depth waiting to be explored.</p>
+    </div>
+    <div class="topics-grid" id="topics-grid"></div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="why-section">
+  <div class="why-inner">
+    <span class="eyebrow anim" style="color:#5b21b6">// 02 — Why It Works</span>
+    <h2 class="anim">Learning <em style="font-style:italic">reimagined</em></h2>
+    <div class="features-grid" id="features-grid"></div>
+  </div>
+</section>
+
+<!-- PATHS -->
+<section class="paths-section" id="paths">
+  <div class="paths-inner">
+    <span class="eyebrow anim" style="color:#fda085">// 03 — Curated Journeys</span>
+    <h2 class="anim">Learning <em style="font-style:italic;color:#fda085">Paths</em></h2>
+    <div class="paths-grid" id="paths-grid"></div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="quote-section">
+  <span class="quote-mark anim">"</span>
+  <blockquote class="quote-text anim">"The more that you read, the more things you will know. The more that you learn, the more places you'll go."</blockquote>
+  <p class="quote-attr anim">— Dr. Seuss</p>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="anim">Ready to begin?</h2>
+  <p class="anim">Pick a topic. Follow your curiosity. Never stop.</p>
+  <a href="#topics" class="btn-dark anim">Start Learning Now</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Learn<span>∞</span></div>
+  <p>© 2025 The Knowledge Engine. All curiosities reserved.</p>
+</footer>
+
+<script>
+// DATA
+const topics = [
+  { icon:'∑', name:'Mathematics', desc:'The language of the universe — from calculus to topology, number theory to chaos.', tag:'Formal Science', bg:'linear-gradient(135deg,#667eea,#764ba2)' },
+  { icon:'⚛', name:'Quantum Physics', desc:'Reality at the smallest scales: superposition, entanglement, and the nature of observation.', tag:'Natural Science', bg:'linear-gradient(135deg,#4facfe,#00f2fe)' },
+  { icon:'🧬', name:'Biology', desc:"Life's mechanisms from cellular machinery to ecosystems and evolutionary pressures.", tag:'Life Science', bg:'linear-gradient(135deg,#43e97b,#38f9d7)' },
+  { icon:'🧠', name:'Psychology', desc:'The architecture of mind: cognition, behavior, consciousness, and the unconscious.', tag:'Social Science', bg:'linear-gradient(135deg,#f093fb,#f5576c)' },
+  { icon:'☯', name:'Philosophy', desc:"Questions that don't expire — ethics, epistemology, metaphysics, and logic.", tag:'Humanities', bg:'linear-gradient(135deg,#ffecd2,#fcb69f)', dark:true },
+  { icon:'🎵', name:'Music Theory', desc:'The grammar of sound: harmony, rhythm, counterpoint, and sonic structure.', tag:'Arts', bg:'linear-gradient(135deg,#a18cd1,#fbc2eb)' },
+  { icon:'🌌', name:'Astronomy', desc:'Stellar evolution, cosmology, dark matter, and humanity\'s place in the cosmos.', tag:'Natural Science', bg:'linear-gradient(135deg,#30cfd0,#330867)' },
+  { icon:'💻', name:'Computer Science', desc:'Algorithms, complexity theory, machine learning, and the theory of computation.', tag:'Formal Science', bg:'linear-gradient(135deg,#0fd850,#f9f047)', dark:true },
+  { icon:'📜', name:'History', desc:'The record of human civilization — patterns, pivots, and the forces that shape societies.', tag:'Humanities', bg:'linear-gradient(135deg,#f7971e,#ffd200)', dark:true },
+  { icon:'🌐', name:'Linguistics', desc:'Language structure, evolution, semiotics, and how words shape thought.', tag:'Cognitive Science', bg:'linear-gradient(135deg,#ee9ca7,#ffdde1)', dark:true },
+  { icon:'⚗️', name:'Chemistry', desc:'Atomic bonds, reaction dynamics, thermodynamics, and the science of matter.', tag:'Natural Science', bg:'linear-gradient(135deg,#fd7143,#ef4e7b)' },
+  { icon:'📈', name:'Economics', desc:'Markets, incentive structures, game theory, behavioral economics, and macro dynamics.', tag:'Social Science', bg:'linear-gradient(135deg,#c471f5,#fa71cd)' },
+];
+
+const features = [
+  { icon:'🧭', bg:'#fff3e0', iconBg:'#ff9800', title:'Structured Curiosity', text:'Topics reveal surprising connections — the mathematics hiding in music, the philosophy embedded in physics.' },
+  { icon:'🔬', bg:'#e8f5e9', iconBg:'#43a047', title:'Deep Dives', text:'Surface-level understanding is just the beginning. Follow any thread from beginner foundations to expert nuances.' },
+  { icon:'🕸', bg:'#ede7f6', iconBg:'#7e57c2', title:'Cross-disciplinary', text:'Map hidden connections between fields and build a unified mental model greater than the sum of its parts.' },
+  { icon:'🚀', bg:'#e3f2fd', iconBg:'#1e88e5', title:'Progressive Learning', text:'Start anywhere. Resources adapt to your level and guide you naturally toward the next step in your journey.' },
+  { icon:'💡', bg:'#fff8e1', iconBg:'#f9a825', title:'Insight First', text:'We surface the "aha" moments — the ideas that genuinely change how you see the world.' },
+  { icon:'🎯', bg:'#fce4ec', iconBg:'#e91e63', title:'Clear Pathways', text:'Curated learning paths guide you from curious beginner to confident expert with no guesswork.' },
+];
+
+const paths = [
+  { num:'01', title:'The Scientist', bg:'linear-gradient(135deg,#4facfe,#00f2fe)', steps:['Scientific Method','Physics & Mathematics','Quantum Mechanics','Cosmology','Research Methods'] },
+  { num:'02', title:'The Philosopher', bg:'linear-gradient(135deg,#a18cd1,#fbc2eb)', steps:['Logic','History of Philosophy','Ethics & Moral Theory','Epistemology','Philosophy of Mind'] },
+  { num:'03', title:'The Artist', bg:'linear-gradient(135deg,#f093fb,#f5576c)', steps:['Art History','Color theory','Music Theory','Aesthetic philosophy','Creative neuroscience'] },
+  { num:'04', title:'The Engineer', bg:'linear-gradient(135deg,#0fd850,#f9f047)', steps:['Applied Mathematics','Computer Science','Systems Thinking','Information Theory','Complexity'], dark:true },
+  { num:'05', title:'The Humanist', bg:'linear-gradient(135deg,#f7971e,#ffd200)', steps:['World History','Literature','Anthropology','Cultural Linguistics','Political Philosophy'], dark:true },
+  { num:'06', title:'The Polymath', bg:'linear-gradient(135deg,#667eea,#764ba2)', steps:['All paths, no dogma','Seek connections','Build mental models','Synthesize disciplines','Question everything'] },
+];
+
+// BUILD GRIDS
+const topicsGrid = document.getElementById('topics-grid');
+topics.forEach(t => {
+  const d = document.createElement('div');
+  d.className = 'topic-card anim';
+  d.style.background = t.bg;
+  const c = t.dark ? '#1a0a2e' : '#fff';
+  const cs = t.dark ? 'rgba(26,10,46,0.75)' : 'rgba(255,255,255,0.85)';
+  const ct = t.dark ? 'rgba(26,10,46,0.12)' : 'rgba(255,255,255,0.2)';
+  const cc = t.dark ? 'rgba(26,10,46,0.6)' : '#fff';
+  d.innerHTML = `<span class="topic-icon">${t.icon}</span>
+    <div class="topic-name" style="color:${c}">${t.name}</div>
+    <div class="topic-desc" style="color:${cs}">${t.desc}</div>
+    <div class="topic-tag" style="background:${ct};color:${cc}">${t.tag}</div>`;
+  topicsGrid.appendChild(d);
+});
+
+const featuresGrid = document.getElementById('features-grid');
+features.forEach(f => {
+  const d = document.createElement('div');
+  d.className = 'feature-card anim';
+  d.style.background = f.bg;
+  d.innerHTML = `<div class="feature-icon" style="background:${f.iconBg}">${f.icon}</div>
+    <h3>${f.title}</h3><p>${f.text}</p>`;
+  featuresGrid.appendChild(d);
+});
+
+const pathsGrid = document.getElementById('paths-grid');
+paths.forEach(p => {
+  const d = document.createElement('div');
+  d.className = 'path-card anim';
+  d.style.background = p.bg;
+  const tc = p.dark ? '#1a0a2e' : '#fff';
+  const sc = p.dark ? 'rgba(26,10,46,0.8)' : 'rgba(255,255,255,0.75)';
+  const bc = p.dark ? 'rgba(26,10,46,0.1)' : 'rgba(255,255,255,0.08)';
+  d.innerHTML = `<div class="path-num">${p.num}</div>
+    <div class="path-title" style="color:${tc}">${p.title}</div>
+    <ul class="path-steps">${p.steps.map(s=>`<li style="color:${sc};border-color:${bc}">${s}</li>`).join('')}</ul>`;
+  pathsGrid.appendChild(d);
+});
+
+// GSAP
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero entrance
+gsap.timeline({ delay: 0.15 })
+  .to('#badge',  { opacity:1, y:0, duration:0.7, ease:'power3.out' })
+  .to('#h1',     { opacity:1, y:0, duration:0.9, ease:'power3.out' }, '-=0.4')
+  .to('#hsub',   { opacity:1, y:0, duration:0.7, ease:'power3.out' }, '-=0.5')
+  .to('#hbtns',  { opacity:1, y:0, duration:0.6, ease:'power3.out' }, '-=0.4');
+
+// Parallax blobs
+gsap.to('.blob1', { y:-120, ease:'none', scrollTrigger:{ trigger:'.hero', start:'top top', end:'bottom top', scrub:1 } });
+gsap.to('.blob2', { y:-80,  ease:'none', scrollTrigger:{ trigger:'.hero', start:'top top', end:'bottom top', scrub:1.5 } });
+gsap.to('.blob3', { y:-60,  ease:'none', scrollTrigger:{ trigger:'.hero', start:'top top', end:'bottom top', scrub:2 } });
+
+// Stats counters
+document.querySelectorAll('.stat').forEach((el, i) => {
+  ScrollTrigger.create({
+    trigger: el, start:'top 88%', once:true,
+    onEnter: () => {
+      gsap.to(el, { opacity:1, y:0, duration:0.6, delay:i*0.1, ease:'power3.out' });
+      const numEl = el.querySelector('.stat-num');
+      const target = +numEl.dataset.target;
+      const obj = { v: 0 };
+      gsap.to(obj, {
+        v: target, duration: 1.8, delay: i*0.1, ease:'power2.out',
+        onUpdate() { numEl.textContent = Math.round(obj.v) + '+'; }
+      });
+    }
+  });
+});
+
+// All other .anim elements
+document.querySelectorAll('.anim').forEach(el => {
+  if (['badge','h1','hsub','hbtns'].includes(el.id)) return;
+  if (el.closest('.stats')) return; // handled above
+  ScrollTrigger.create({
+    trigger: el, start:'top 92%', once:true,
+    onEnter: () => {
+      gsap.to(el, { opacity:1, y:0, x:0, duration:0.65, ease:'power3.out' });
+    }
+  });
+});
+
+// Stagger card grids
+function staggerGrid(id) {
+  const grid = document.getElementById(id);
+  if (!grid) return;
+  const cards = grid.querySelectorAll('.anim');
+  ScrollTrigger.create({
+    trigger: grid, start:'top 85%', once:true,
+    onEnter: () => {
+      gsap.to(cards, { opacity:1, y:0, duration:0.65, stagger:0.07, ease:'power3.out' });
+    }
+  });
+}
+staggerGrid('topics-grid');
+staggerGrid('features-grid');
+staggerGrid('paths-grid');
+</script>
+</body>
+</html>

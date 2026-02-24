@@ -29,6 +29,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/recursion-tree" href="#/recursion-tree">Recursion Tree</a></li>
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
+          <li><a class="menu-link" data-route="/languages" href="#/languages">languages</a></li>
 <li><a class="menu-link" data-route="/bunnyblast-full" href="bunnyblast-full.html">claude1</a></li>
 <li><a class="menu-link" data-route="/learn-univers_1" href="learn-univers_1.html">learn uni 1</a></li>
 <li><a class="menu-link" data-route="/claude-game-1" href="claude-game-1.html">claude game 1</a></li>
@@ -1965,6 +1966,221 @@ function renderThreeSuperneatRoute() {
   return renderSuperneatDemoRoute(routeContent);
 }
 
+function renderLanguagesRoute() {
+  const spokenLanguagesByPopularity = [
+    {
+      id: "english",
+      name: "English",
+      explainer: "A global lingua franca used widely in business, travel, media, and technology.",
+      helloNative: "Hello",
+      helloPronunciation: "heh-LOH",
+      foodNative: "Can I get a local dish, please?",
+      foodPronunciation: "kan eye get uh LOH-kuhl dish pleez",
+    },
+    {
+      id: "mandarin-chinese",
+      name: "Mandarin Chinese",
+      explainer: "The most spoken first language in the world, centered in China and across many global communities.",
+      helloNative: "你好",
+      helloPronunciation: "nee how",
+      foodNative: "我可以点本地菜吗？",
+      foodPronunciation: "waw kuh-yee dyen ben-dee tsye mah",
+    },
+    {
+      id: "hindi",
+      name: "Hindi",
+      explainer: "A major Indo-Aryan language and one of India’s most widely spoken languages.",
+      helloNative: "नमस्ते",
+      helloPronunciation: "nuh-MUH-stay",
+      foodNative: "क्या मुझे कोई स्थानीय खाना मिल सकता है?",
+      foodPronunciation: "kyaa moo-jhay koh-ee sthaa-nee-y kha-naa mil sak-taa hay",
+    },
+    {
+      id: "spanish",
+      name: "Spanish",
+      explainer: "A Romance language spoken across Spain, Latin America, and large diaspora communities.",
+      helloNative: "Hola",
+      helloPronunciation: "OH-lah",
+      foodNative: "¿Me puede traer un plato local, por favor?",
+      foodPronunciation: "meh PWEH-deh trah-EHR oon PLAH-toh loh-KAHL por fah-VOR",
+    },
+    {
+      id: "french",
+      name: "French",
+      explainer: "A global language of diplomacy and culture spoken in Europe, Africa, and the Americas.",
+      helloNative: "Bonjour",
+      helloPronunciation: "bohn-ZHOOR",
+      foodNative: "Puis-je avoir un plat local, s'il vous plaît ?",
+      foodPronunciation: "pwee zhah-VOIR uh plah loh-KAHL seel voo PLEH",
+    },
+    {
+      id: "standard-arabic",
+      name: "Standard Arabic",
+      explainer: "The formal shared variety used in media and writing across the Arabic-speaking world.",
+      helloNative: "مرحبا",
+      helloPronunciation: "MAR-ha-ban",
+      foodNative: "هل يمكنني الحصول على طبق محلي؟",
+      foodPronunciation: "hal yum-ki-nee al-hoo-SOOL a-laa ta-baq ma-HAL-lee",
+    },
+    {
+      id: "bengali",
+      name: "Bengali",
+      explainer: "An Eastern Indo-Aryan language spoken mainly in Bangladesh and eastern India.",
+      helloNative: "হ্যালো",
+      helloPronunciation: "hyah-loh",
+      foodNative: "আমি কি একটা স্থানীয় খাবার পেতে পারি?",
+      foodPronunciation: "a-mee kee ek-ta sthaa-nee-yo kha-bar pe-te paa-ree",
+    },
+    {
+      id: "portuguese",
+      name: "Portuguese",
+      explainer: "A Romance language spoken in Portugal, Brazil, and parts of Africa and Asia.",
+      helloNative: "Olá",
+      helloPronunciation: "oh-LAH",
+      foodNative: "Posso pedir um prato local?",
+      foodPronunciation: "POH-soh peh-DEER oong PRAH-too loh-KAHL",
+    },
+    {
+      id: "russian",
+      name: "Russian",
+      explainer: "An East Slavic language with broad use across Russia and neighboring regions.",
+      helloNative: "Привет",
+      helloPronunciation: "pree-VYET",
+      foodNative: "Можно мне местное блюдо?",
+      foodPronunciation: "MOZH-nah mnyeh MYES-nah-yeh BLYOO-dah",
+    },
+    {
+      id: "urdu",
+      name: "Urdu",
+      explainer: "A major South Asian language with rich literary tradition and broad mutual intelligibility with Hindi.",
+      helloNative: "ہیلو",
+      helloPronunciation: "HEH-loh",
+      foodNative: "کیا مجھے کوئی مقامی کھانا مل سکتا ہے؟",
+      foodPronunciation: "kya muj-heh koy ma-qa-mee kha-na mil sak-ta hay",
+    },
+    {
+      id: "indonesian",
+      name: "Indonesian",
+      explainer: "The national language of Indonesia, used to connect speakers across many local languages.",
+      helloNative: "Halo",
+      helloPronunciation: "HAH-loh",
+      foodNative: "Boleh saya pesan makanan lokal?",
+      foodPronunciation: "boh-leh sah-yah peh-san mah-kah-nan loh-kal",
+    },
+    {
+      id: "german",
+      name: "German",
+      explainer: "A major West Germanic language spoken in Germany, Austria, Switzerland, and beyond.",
+      helloNative: "Hallo",
+      helloPronunciation: "HAH-loh",
+      foodNative: "Kann ich ein lokales Gericht bekommen?",
+      foodPronunciation: "kahn ikh ine loh-KAH-les geh-RIKHT beh-KOH-men",
+    },
+    {
+      id: "japanese",
+      name: "Japanese",
+      explainer: "The primary language of Japan, known for layered politeness and multiple writing systems.",
+      helloNative: "こんにちは",
+      helloPronunciation: "kohn-nee-chee-wah",
+      foodNative: "地元の料理をいただけますか？",
+      foodPronunciation: "jee-moh-toh noh ryoh-ree oh ee-tah-dah-keh-mahs kah",
+    },
+    {
+      id: "nigerian-pidgin",
+      name: "Nigerian Pidgin",
+      explainer: "A widely used contact language in Nigeria for everyday communication across groups.",
+      helloNative: "How far?",
+      helloPronunciation: "how far",
+      foodNative: "Abeg, I fit get local food?",
+      foodPronunciation: "ah-beg, eye fit get loh-kal food",
+    },
+    {
+      id: "marathi",
+      name: "Marathi",
+      explainer: "An Indo-Aryan language primarily spoken in Maharashtra, India.",
+      helloNative: "नमस्कार",
+      helloPronunciation: "nuh-muh-skaar",
+      foodNative: "मला स्थानिक जेवण मिळेल का?",
+      foodPronunciation: "muh-laa sthaa-nee-k jeh-vun mi-lel kaa",
+    },
+    {
+      id: "telugu",
+      name: "Telugu",
+      explainer: "A major Dravidian language spoken in the Indian states of Andhra Pradesh and Telangana.",
+      helloNative: "నమస్కారం",
+      helloPronunciation: "nuh-muh-skaa-rum",
+      foodNative: "నాకు స్థానిక వంటకం ఇవ్వగలరా?",
+      foodPronunciation: "naa-koo sthaa-ni-ka von-ta-kam iv-va-ga-la-raa",
+    },
+    {
+      id: "turkish",
+      name: "Turkish",
+      explainer: "A Turkic language and the official language of Türkiye.",
+      helloNative: "Merhaba",
+      helloPronunciation: "MEHR-hah-bah",
+      foodNative: "Yerel bir yemek alabilir miyim?",
+      foodPronunciation: "yeh-REL beer yeh-MEK ah-la-BEE-leer MEE-yeem",
+    },
+    {
+      id: "tamil",
+      name: "Tamil",
+      explainer: "A classical Dravidian language with deep literary history in South India and Sri Lanka.",
+      helloNative: "வணக்கம்",
+      helloPronunciation: "vah-nuh-kum",
+      foodNative: "எனக்கு உள்ளூர் உணவு கிடைக்குமா?",
+      foodPronunciation: "eh-nuh-koo ul-loo-roo oo-na-voo ki-dye-koo-maa",
+    },
+    {
+      id: "yue-cantonese",
+      name: "Yue Chinese (Cantonese)",
+      explainer: "A major Sinitic language spoken in Hong Kong, Macau, and southern China communities.",
+      helloNative: "你好",
+      helloPronunciation: "nay hoh",
+      foodNative: "可唔可以叫一個本地菜？",
+      foodPronunciation: "ho m ho yee giu yat go boon-dei choi",
+    },
+    {
+      id: "vietnamese",
+      name: "Vietnamese",
+      explainer: "The national language of Vietnam, tonal and written in the Latin-based quốc ngữ script.",
+      helloNative: "Xin chào",
+      helloPronunciation: "sin chow",
+      foodNative: "Tôi có thể gọi món ăn địa phương không?",
+      foodPronunciation: "toy koh thay goy mon an dee-ah fuh-ung khong",
+    },
+  ];
+
+  const links = spokenLanguagesByPopularity
+    .map(({ id, name }, index) => `<li><a class="language-link" href="#${id}">${index + 1}. ${name}</a></li>`)
+    .join("");
+
+  const sections = spokenLanguagesByPopularity
+    .map(
+      ({ id, name, explainer, helloNative, helloPronunciation, foodNative, foodPronunciation }) => `
+        <article class="language-card" id="${id}">
+          <h2>${name}</h2>
+          <p>${explainer}</p>
+          <p><strong>Hello:</strong> <span class="language-native">${helloNative}</span> <span class="language-pronunciation">(${helloPronunciation})</span></p>
+          <p><strong>Ask for local food:</strong> <span class="language-native">${foodNative}</span> <span class="language-pronunciation">(${foodPronunciation})</span></p>
+          <p><a class="language-back-link" href="#/languages">Back to top</a></p>
+        </article>
+      `,
+    )
+    .join("");
+
+  routeContent.innerHTML = `
+    <p class="hero-label">Language Discovery</p>
+    <h1 class="hero-title">Most-spoken languages (global popularity)</h1>
+    <p class="hero-subtitle">Tap a language to jump to its quick explainer and useful phrases.</p>
+    <ol class="language-list">${links}</ol>
+    <section class="language-sections" aria-label="Language quick reference cards">${sections}</section>
+    <div class="hero-controls">
+      <a class="action" href="#/" aria-label="Go to home">Back home</a>
+    </div>
+  `;
+}
+
+
 const routes = {
   "/": renderHomeRoute,
   "/shows": renderShowsRoute,
@@ -1975,6 +2191,7 @@ const routes = {
   "/piano": renderPianoRoute,
   "/three-demo": renderThreeRoute,
   "/three-superneat": renderThreeSuperneatRoute,
+  "/languages": renderLanguagesRoute,
 };
 
 function renderRoute() {

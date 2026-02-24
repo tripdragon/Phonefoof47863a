@@ -213,6 +213,69 @@ main {
 }
 
 
+
+.language-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.language-link {
+  color: #312e81;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.language-link:hover,
+.language-link:focus-visible {
+  text-decoration: underline;
+}
+
+
+.language-sections {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.language-card {
+  border: 1px solid #dbe3f4;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+}
+
+.language-card h2 {
+  margin: 0 0 0.35rem;
+  color: #1e1b4b;
+  font-size: 1.05rem;
+}
+
+.language-card p {
+  margin: 0.25rem 0;
+}
+
+.language-native {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.language-pronunciation {
+  color: #475569;
+}
+
+.language-back-link {
+  color: #4338ca;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.language-back-link:hover,
+.language-back-link:focus-visible {
+  text-decoration: underline;
+}
+
 .action {
   display: inline-block;
   margin-top: 1.5rem;

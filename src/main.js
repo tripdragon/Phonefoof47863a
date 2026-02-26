@@ -116,6 +116,27 @@ function renderHomeRoute() {
         <p class="weather-metrics" id="weather-metrics"></p>
       </div>
     </section>
+
+    <section class="stocks-widget" aria-live="polite" aria-label="Dow Jones Industrial Average">
+      <div class="stocks-header">
+        <div class="stocks-title-row">
+          <span class="stocks-ticker">DJIA</span>
+          <span class="stocks-name">Dow Jones Industrial Average</span>
+        </div>
+        <span class="stocks-badge" id="stocks-badge">LIVE</span>
+      </div>
+      <div class="stocks-body">
+        <div class="stocks-price-group">
+          <p class="stocks-price" id="stocks-price">—</p>
+          <p class="stocks-change" id="stocks-change">Loading…</p>
+        </div>
+        <div class="stocks-chart-wrap" aria-hidden="true">
+          <canvas id="stocks-sparkline" class="stocks-sparkline" width="120" height="48"></canvas>
+        </div>
+      </div>
+      <p class="stocks-meta" id="stocks-meta"></p>
+    </section>
+
     <section class="scribble-widget" aria-label="Scribble board">
       <div class="scribble-header">
         <p class="scribble-title">Quick Scribble Board</p>
@@ -239,6 +260,109 @@ function renderHomeRoute() {
   const wireB = document.getElementById("wire-b");
   const wireOut = document.getElementById("wire-out");
 
+  // --- Dow Jones Widget ---
+  const stocksPrice = document.getElementById("stocks-price");
+  const stocksChange = document.getElementById("stocks-change");
+  const stocksMeta = document.getElementById("stocks-meta");
+  const stocksBadge = document.getElementById("stocks-badge");
+  const sparklineCanvas = document.getElementById("stocks-sparkline");
+
+  function drawSparkline(values, isUp) {
+    if (!sparklineCanvas || values.length < 2) return;
+    const ctx = sparklineCanvas.getContext("2d");
+    const w = sparklineCanvas.width;
+    const h = sparklineCanvas.height;
+    const padding = 4;
+    ctx.clearRect(0, 0, w, h);
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+
+    const toX = (i) => padding + (i / (values.length - 1)) * (w - padding * 2);
+    const toY = (v) => h - padding - ((v - min) / range) * (h - padding * 2);
+
+    const color = isUp ? "#22c55e" : "#ef4444";
+
+    // Gradient fill
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, isUp ? "rgba(34,197,94,0.35)" : "rgba(239,68,68,0.35)");
+    grad.addColorStop(1, "rgba(255,255,255,0)");
+
+    ctx.beginPath();
+    ctx.moveTo(toX(0), toY(values[0]));
+    for (let i = 1; i < values.length; i++) {
+      ctx.lineTo(toX(i), toY(values[i]));
+    }
+    ctx.lineTo(toX(values.length - 1), h);
+    ctx.lineTo(toX(0), h);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Line
+    ctx.beginPath();
+    ctx.moveTo(toX(0), toY(values[0]));
+    for (let i = 1; i < values.length; i++) {
+      ctx.lineTo(toX(i), toY(values[i]));
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = "round";
+    ctx.stroke();
+  }
+
+  async function loadDowJones() {
+    // Yahoo Finance unofficial quote endpoint (no API key needed, works from browser)
+    const symbol = "%5EDJI"; // ^DJI URL-encoded
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=5m&range=1d&includePrePost=false`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("fetch failed");
+      const json = await response.json();
+
+      const result = json?.chart?.result?.[0];
+      if (!result) throw new Error("no result");
+
+      const meta = result.meta;
+      const closes = result.indicators?.quote?.[0]?.close ?? [];
+      const validCloses = closes.filter((v) => v != null);
+
+      const currentPrice = meta.regularMarketPrice ?? validCloses[validCloses.length - 1];
+      const prevClose = meta.chartPreviousClose ?? meta.previousClose;
+      const change = currentPrice - prevClose;
+      const changePct = (change / prevClose) * 100;
+      const isUp = change >= 0;
+
+      const fmt = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const sign = isUp ? "+" : "";
+
+      stocksPrice.textContent = fmt.format(currentPrice);
+      stocksChange.textContent = `${sign}${fmt.format(change)} (${sign}${changePct.toFixed(2)}%)`;
+      stocksChange.className = `stocks-change ${isUp ? "is-up" : "is-down"}`;
+
+      const marketState = meta.marketState ?? "CLOSED";
+      const isRegular = marketState === "REGULAR";
+      stocksBadge.textContent = isRegular ? "LIVE" : marketState;
+      stocksBadge.className = `stocks-badge ${isRegular ? "is-live" : "is-closed"}`;
+
+      const now = new Date();
+      stocksMeta.textContent = `Updated ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · Prev close ${fmt.format(prevClose)}`;
+
+      drawSparkline(validCloses, isUp);
+    } catch {
+      stocksChange.textContent = "Data unavailable";
+      stocksMeta.textContent = "Could not fetch market data";
+      stocksBadge.textContent = "—";
+    }
+  }
+
+  loadDowJones();
+  // Refresh every 60 seconds
+  const stocksIntervalId = window.setInterval(loadDowJones, 60_000);
+
+  // --- Slide carousel ---
   let currentSlide = 0;
 
   function renderSlide(index) {
@@ -556,6 +680,7 @@ function renderHomeRoute() {
 
   return () => {
     window.clearInterval(intervalId);
+    window.clearInterval(stocksIntervalId);
     scribbleCanvas.removeEventListener("pointerdown", startDrawing);
     scribbleCanvas.removeEventListener("pointermove", draw);
     scribbleCanvas.removeEventListener("pointerup", stopDrawing);
@@ -1327,7 +1452,7 @@ function renderLanguagesRoute() {
     {
       id: "hindi",
       name: "Hindi",
-      explainer: "A major Indo-Aryan language and one of India’s most widely spoken languages.",
+      explainer: "A major Indo-Aryan language and one of India's most widely spoken languages.",
       helloNative: "नमस्ते",
       helloPronunciation: "nuh-MUH-stay",
       foodNative: "क्या मुझे कोई स्थानीय खाना मिल सकता है?",

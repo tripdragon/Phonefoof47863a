@@ -171,6 +171,134 @@ main {
   font-size: 0.95rem;
 }
 
+/* ── Stocks Widget ─────────────────────────────────────────── */
+
+.stocks-widget {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 1px solid #334155;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.22);
+  color: #e2e8f0;
+}
+
+.stocks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.stocks-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.stocks-ticker {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.stocks-name {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stocks-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+}
+
+.stocks-badge.is-live {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.35);
+  animation: stocks-pulse 2s ease-in-out infinite;
+}
+
+.stocks-badge.is-closed {
+  background: rgba(100, 116, 139, 0.15);
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+@keyframes stocks-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.stocks-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.stocks-price-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stocks-price {
+  margin: 0;
+  font-size: clamp(1.7rem, 5vw, 2.4rem);
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.stocks-change {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #94a3b8;
+}
+
+.stocks-change.is-up {
+  color: #4ade80;
+}
+
+.stocks-change.is-down {
+  color: #f87171;
+}
+
+.stocks-chart-wrap {
+  flex-shrink: 0;
+}
+
+.stocks-sparkline {
+  display: block;
+  border-radius: 6px;
+}
+
+.stocks-meta {
+  margin: 0.65rem 0 0;
+  font-size: 0.75rem;
+  color: #475569;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ───────────────────────────────────────────────────────────── */
+
 .scribble-widget {
   margin-top: 1rem;
   padding: 1rem;

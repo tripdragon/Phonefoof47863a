@@ -137,6 +137,15 @@ function renderHomeRoute() {
       <p class="stocks-meta" id="stocks-meta"></p>
     </section>
 
+    <section class="shader-widget" aria-label="Animated canvas art shader">
+      <div class="shader-header">
+        <p class="shader-title">Nebula Shader Widget</p>
+        <button class="shader-refresh" id="shader-refresh" type="button">Reroll seed</button>
+      </div>
+      <canvas id="shader-canvas" class="shader-canvas" height="220" aria-label="Animated random art canvas"></canvas>
+      <p class="shader-meta" id="shader-meta">Seed: --</p>
+    </section>
+
     <section class="scribble-widget" aria-label="Scribble board">
       <div class="scribble-header">
         <p class="scribble-title">Quick Scribble Board</p>
@@ -266,6 +275,94 @@ function renderHomeRoute() {
   const stocksMeta = document.getElementById("stocks-meta");
   const stocksBadge = document.getElementById("stocks-badge");
   const sparklineCanvas = document.getElementById("stocks-sparkline");
+  const shaderCanvas = document.getElementById("shader-canvas");
+  const shaderMeta = document.getElementById("shader-meta");
+  const shaderRefresh = document.getElementById("shader-refresh");
+
+  let shaderFrame = 0;
+  let shaderSeed = Math.random() * 9999;
+  let shaderAnimationFrameId = null;
+
+  function updateShaderMeta() {
+    shaderMeta.textContent = `Seed: ${Math.floor(shaderSeed)}`;
+  }
+
+  function resizeShaderCanvas() {
+    const ratio = window.devicePixelRatio || 1;
+    const bounds = shaderCanvas.getBoundingClientRect();
+    const displayWidth = Math.max(280, Math.floor(bounds.width || 480));
+    const displayHeight = 220;
+    shaderCanvas.width = Math.floor(displayWidth * ratio);
+    shaderCanvas.height = Math.floor(displayHeight * ratio);
+  }
+
+  function drawShaderFrame() {
+    const context = shaderCanvas.getContext("2d");
+    const width = shaderCanvas.width;
+    const height = shaderCanvas.height;
+
+    if (!context || !width || !height) {
+      return;
+    }
+
+    const time = shaderFrame * 0.014;
+    const seedA = shaderSeed * 0.00081;
+    const seedB = shaderSeed * 0.00127;
+
+    context.globalCompositeOperation = "source-over";
+    context.fillStyle = "rgba(2, 6, 23, 0.22)";
+    context.fillRect(0, 0, width, height);
+
+    const radial = context.createRadialGradient(width * 0.5, height * 0.48, width * 0.02, width * 0.5, height * 0.5, width * 0.7);
+    radial.addColorStop(0, `hsla(${(time * 80 + shaderSeed) % 360}, 100%, 64%, 0.32)`);
+    radial.addColorStop(0.5, `hsla(${(time * 40 + shaderSeed * 0.6 + 100) % 360}, 92%, 58%, 0.2)`);
+    radial.addColorStop(1, "rgba(2, 6, 23, 0)");
+    context.fillStyle = radial;
+    context.fillRect(0, 0, width, height);
+
+    context.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 70; i += 1) {
+      const drift = i * 0.22;
+      const x = ((Math.sin(time * 0.9 + drift + seedA) + Math.cos(time * 0.55 + drift * 1.7 + seedB)) * 0.25 + 0.5) * width;
+      const y = ((Math.cos(time * 1.1 + drift * 0.7 + seedB) + Math.sin(time * 0.48 + drift * 1.3 + seedA)) * 0.25 + 0.5) * height;
+      const radius = (Math.sin(time + i + seedB) * 0.5 + 0.5) * 18 + 4;
+      const hue = (shaderSeed * 0.1 + i * 9 + time * 75) % 360;
+
+      context.beginPath();
+      context.fillStyle = `hsla(${hue}, 96%, 62%, 0.12)`;
+      context.arc(x, y, radius, 0, Math.PI * 2);
+      context.fill();
+    }
+
+    context.globalCompositeOperation = "screen";
+    context.strokeStyle = "rgba(148, 163, 184, 0.14)";
+    context.lineWidth = 1;
+    context.beginPath();
+    for (let x = 0; x <= width; x += width / 24) {
+      const y = height * 0.5 + Math.sin(time * 1.9 + x * 0.014 + seedA) * 26 + Math.cos(time * 1.2 + x * 0.02 + seedB) * 16;
+      if (x === 0) {
+        context.moveTo(x, y);
+      } else {
+        context.lineTo(x, y);
+      }
+    }
+    context.stroke();
+
+    shaderFrame += 1;
+    shaderAnimationFrameId = window.requestAnimationFrame(drawShaderFrame);
+  }
+
+  function rerollShader() {
+    shaderSeed = Math.random() * 9999;
+    shaderFrame = 0;
+    updateShaderMeta();
+  }
+
+  resizeShaderCanvas();
+  updateShaderMeta();
+  drawShaderFrame();
+  window.addEventListener("resize", resizeShaderCanvas);
+  shaderRefresh.addEventListener("click", rerollShader);
 
   function drawSparkline(values, isUp) {
     if (!sparklineCanvas || values.length < 2) return;
@@ -693,6 +790,9 @@ function renderHomeRoute() {
     logicInputA.removeEventListener("change", syncLogicResult);
     logicInputB.removeEventListener("change", syncLogicResult);
     logicGateButtons.forEach((button) => button.removeEventListener("click", handleGateSelection));
+    window.removeEventListener("resize", resizeShaderCanvas);
+    shaderRefresh.removeEventListener("click", rerollShader);
+    window.cancelAnimationFrame(shaderAnimationFrameId);
   };
 }
 

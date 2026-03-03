@@ -1616,3 +1616,122 @@ code {
     opacity: 0.6;
   }
 }
+
+.rubix-guide {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.1rem;
+}
+
+.rubix-step-card {
+  border: 1px solid #dbe3f4;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 1.3fr minmax(220px, 1fr);
+  gap: 0.9rem;
+  align-items: center;
+}
+
+.rubix-step-card h2 {
+  margin: 0;
+  color: #1e1b4b;
+  font-size: 1.08rem;
+}
+
+.rubix-step-card p {
+  margin: 0.45rem 0 0;
+  color: #334155;
+}
+
+.rubix-algorithm {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #312e81;
+  background: #e0e7ff;
+  border: 1px dashed #a5b4fc;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+}
+
+.cube-illustration {
+  width: 100%;
+  height: auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+}
+
+.face {
+  fill: #dde6f5;
+  stroke: #64748b;
+  stroke-width: 2;
+}
+
+.face-top {
+  fill: #dbeafe;
+}
+
+.face-front {
+  fill: #e2e8f0;
+}
+
+.face-left {
+  fill: #d1fae5;
+}
+
+.face-right {
+  fill: #fee2e2;
+}
+
+.face.solved {
+  fill: #dcfce7;
+}
+
+.sticker {
+  stroke: #334155;
+  stroke-width: 1.4;
+}
+
+.sticker-white {
+  fill: #ffffff;
+}
+
+.sticker-yellow {
+  fill: #fde047;
+}
+
+.sticker-edge {
+  fill: #fb7185;
+}
+
+.arrow-shape,
+.move-head {
+  fill: #4f46e5;
+}
+
+.move-path {
+  fill: none;
+  stroke: #4f46e5;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.algo-label {
+  font-size: 12px;
+  fill: #312e81;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+}
+
+.solved-label {
+  font-size: 14px;
+  fill: #166534;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .rubix-step-card {
+    grid-template-columns: 1fr;
+  }
+}

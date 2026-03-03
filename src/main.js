@@ -30,6 +30,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
           <li><a class="menu-link" data-route="/languages" href="#/languages">languages</a></li>
+          <li><a class="menu-link" data-route="/rubix-cube" href="#/rubix-cube">Rubix Cube</a></li>
 <li><a class="menu-link" data-route="/bunnyblast-full" href="bunnyblast-full.html">claude1</a></li>
 <li><a class="menu-link" data-route="/learn-univers_1" href="learn-univers_1.html">learn uni 1</a></li>
 <li><a class="menu-link" data-route="/claude-game-1" href="claude-game-1.html">claude game 1</a></li>
@@ -1743,6 +1744,140 @@ function renderLanguagesRoute() {
   `;
 }
 
+function renderRubixCubeRoute() {
+  const steps = [
+    {
+      title: "1) Make the white cross",
+      summary:
+        "Find white edge pieces and line each one up with its matching center color. Keep white on the bottom when done.",
+      algorithm: "No single algorithm required — focus on matching edge color + center color.",
+      diagram: `
+        <svg class="cube-illustration" viewBox="0 0 260 150" role="img" aria-label="White cross illustration">
+          <rect x="95" y="20" width="70" height="70" rx="10" class="face face-top" />
+          <rect x="25" y="55" width="70" height="70" rx="10" class="face face-left" />
+          <rect x="95" y="55" width="70" height="70" rx="10" class="face face-front" />
+          <rect x="165" y="55" width="70" height="70" rx="10" class="face face-right" />
+          <circle cx="130" cy="90" r="13" class="sticker sticker-white" />
+          <circle cx="130" cy="70" r="10" class="sticker sticker-white" />
+          <circle cx="110" cy="90" r="10" class="sticker sticker-white" />
+          <circle cx="150" cy="90" r="10" class="sticker sticker-white" />
+          <circle cx="130" cy="110" r="10" class="sticker sticker-white" />
+        </svg>
+      `,
+    },
+    {
+      title: "2) Finish the white corners",
+      summary:
+        "Move each white corner above its target slot, then use a corner insertion trigger until it clicks into place.",
+      algorithm: "R' D' R D (repeat until corner is solved)",
+      diagram: `
+        <svg class="cube-illustration" viewBox="0 0 260 150" role="img" aria-label="White corner insertion illustration">
+          <rect x="95" y="20" width="70" height="70" rx="10" class="face face-top" />
+          <rect x="95" y="55" width="70" height="70" rx="10" class="face face-front" />
+          <polygon points="155,28 170,12 184,28 170,43" class="arrow-shape" />
+          <circle cx="153" cy="32" r="8" class="sticker sticker-white" />
+          <circle cx="150" cy="72" r="8" class="sticker sticker-white" />
+          <circle cx="153" cy="112" r="8" class="sticker sticker-white" />
+          <text x="177" y="18" class="algo-label">R' D' R D</text>
+        </svg>
+      `,
+    },
+    {
+      title: "3) Solve the middle layer edges",
+      summary:
+        "Find an edge on top with no yellow. Match its front color, then insert left or right depending on target slot.",
+      algorithm: "Right insert: U R U' R' U' F' U F",
+      diagram: `
+        <svg class="cube-illustration" viewBox="0 0 260 150" role="img" aria-label="Middle layer edge insertion illustration">
+          <rect x="95" y="20" width="70" height="70" rx="10" class="face face-top" />
+          <rect x="25" y="55" width="70" height="70" rx="10" class="face face-left" />
+          <rect x="95" y="55" width="70" height="70" rx="10" class="face face-front" />
+          <path d="M120 36 C140 20, 165 25, 182 42" class="move-path" />
+          <polygon points="180,40 192,44 184,52" class="move-head" />
+          <rect x="120" y="52" width="18" height="18" rx="4" class="sticker sticker-edge" />
+          <text x="20" y="24" class="algo-label">U R U' R' U' F' U F</text>
+        </svg>
+      `,
+    },
+    {
+      title: "4) Make the yellow cross",
+      summary:
+        "Use one algorithm from dot, L-shape, or line states until the yellow cross appears on top.",
+      algorithm: "F R U R' U' F'",
+      diagram: `
+        <svg class="cube-illustration" viewBox="0 0 260 150" role="img" aria-label="Yellow cross illustration">
+          <rect x="95" y="40" width="70" height="70" rx="10" class="face face-top" />
+          <circle cx="130" cy="75" r="10" class="sticker sticker-yellow" />
+          <rect x="126" y="50" width="8" height="18" rx="3" class="sticker sticker-yellow" />
+          <rect x="126" y="82" width="8" height="18" rx="3" class="sticker sticker-yellow" />
+          <rect x="105" y="71" width="18" height="8" rx="3" class="sticker sticker-yellow" />
+          <rect x="137" y="71" width="18" height="8" rx="3" class="sticker sticker-yellow" />
+          <text x="78" y="132" class="algo-label">F R U R' U' F'</text>
+        </svg>
+      `,
+    },
+    {
+      title: "5) Position yellow corners",
+      summary:
+        "Get corners into the correct locations first (orientation can be wrong). Repeat until all corners are in the right spots.",
+      algorithm: "U R U' L' U R' U' L",
+      diagram: `
+        <svg class="cube-illustration" viewBox="0 0 260 150" role="img" aria-label="Yellow corner positioning illustration">
+          <rect x="95" y="40" width="70" height="70" rx="10" class="face face-top" />
+          <circle cx="106" cy="52" r="8" class="sticker sticker-yellow" />
+          <circle cx="154" cy="52" r="8" class="sticker sticker-yellow" />
+          <circle cx="106" cy="98" r="8" class="sticker sticker-yellow" />
+          <circle cx="154" cy="98" r="8" class="sticker sticker-yellow" />
+          <path d="M84 78 C84 42, 176 42, 176 78" class="move-path" />
+          <polygon points="174,76 185,83 173,88" class="move-head" />
+          <text x="60" y="132" class="algo-label">U R U' L' U R' U' L</text>
+        </svg>
+      `,
+    },
+    {
+      title: "6) Twist yellow corners and finish edges",
+      summary:
+        "Twist each corner in place with the same trigger, rotating only the top face between corners. Then cycle final edges.",
+      algorithm: "Corner twist: R' D' R D · Edge cycle: F2 U L R' F2 L' R U F2",
+      diagram: `
+        <svg class="cube-illustration" viewBox="0 0 260 150" role="img" aria-label="Final layer completion illustration">
+          <rect x="95" y="40" width="70" height="70" rx="10" class="face face-top solved" />
+          <rect x="95" y="110" width="70" height="14" rx="6" class="face face-front solved" />
+          <text x="80" y="28" class="solved-label">Solved 🎉</text>
+          <text x="8" y="136" class="algo-label">R' D' R D · F2 U L R' F2 L' R U F2</text>
+        </svg>
+      `,
+    },
+  ];
+
+  const stepMarkup = steps
+    .map(
+      ({ title, summary, algorithm, diagram }) => `
+      <article class="rubix-step-card">
+        <div>
+          <h2>${title}</h2>
+          <p>${summary}</p>
+          <p class="rubix-algorithm"><strong>Algorithm:</strong> ${algorithm}</p>
+        </div>
+        ${diagram}
+      </article>
+    `,
+    )
+    .join("");
+
+  routeContent.innerHTML = `
+    <p class="hero-label">Rubix Cube Guide</p>
+    <h1 class="hero-title">How to solve a 3×3 Rubix Cube</h1>
+    <p class="hero-subtitle">A beginner layer-by-layer walkthrough with quick visual illustrations and key move sequences.</p>
+    <section class="rubix-guide" aria-label="Rubix cube solving instructions">
+      ${stepMarkup}
+    </section>
+    <div class="hero-controls">
+      <a class="action" href="#/" aria-label="Go to home">Back home</a>
+    </div>
+  `;
+}
+
 
 const routes = {
   "/": renderHomeRoute,
@@ -1755,6 +1890,7 @@ const routes = {
   "/three-demo": renderThreeRoute,
   "/three-superneat": renderThreeSuperneatRoute,
   "/languages": renderLanguagesRoute,
+  "/rubix-cube": renderRubixCubeRoute,
 };
 
 function renderRoute() {

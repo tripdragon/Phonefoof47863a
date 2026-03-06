@@ -1,0 +1,75 @@
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { Primitives } from "superneatlib";
+
+export function renderRubixCRoute(container) {
+  container.innerHTML = `
+    <p class="hero-label">Three.js + SuperNeatLib</p>
+    <h1 class="hero-title">rubixC</h1>
+    <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
+    <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
+  `;
+
+  const canvasWrap = container.querySelector("#rubixc-canvas-wrap");
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color("#e2e8f0");
+
+  const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+  camera.position.set(3, 2.5, 3.5);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  canvasWrap.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.target.set(0, 0, 0);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  keyLight.position.set(4, 5, 3);
+  scene.add(keyLight);
+
+  const cube = Primitives.cube({ scale: 1.4, color: 0x3b82f6 });
+  scene.add(cube);
+
+  const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
+  grid.position.y = -1.1;
+  scene.add(grid);
+
+  let animationFrameId = null;
+
+  function resizeRenderer() {
+    const width = canvasWrap.clientWidth;
+    const height = canvasWrap.clientHeight;
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  }
+
+  function animate() {
+    animationFrameId = window.requestAnimationFrame(animate);
+    cube.rotation.x += 0.004;
+    cube.rotation.y += 0.007;
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  resizeRenderer();
+  animate();
+
+  window.addEventListener("resize", resizeRenderer);
+
+  return () => {
+    if (animationFrameId !== null) {
+      window.cancelAnimationFrame(animationFrameId);
+    }
+
+    window.removeEventListener("resize", resizeRenderer);
+    controls.dispose();
+    renderer.dispose();
+    canvasWrap.innerHTML = "";
+  };
+}

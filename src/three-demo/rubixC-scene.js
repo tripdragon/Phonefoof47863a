@@ -5,7 +5,7 @@ import { Primitives } from "superneatlib";
 export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">rubixC 2</h1>
+    <h1 class="hero-title">3 rubixC 2</h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -33,14 +33,17 @@ const plane = Primitives.plane;
   keyLight.position.set(4, 5, 3);
   scene.add(keyLight);
 
-  const cube = Primitives.cube({ scale: 1.4, color: 0x3b82f6 });
+  const cube = Primitives.cube({ scale: 1.4, color: 0xff0000 });
  // scene.add(cube);
 
-  const p1 = plane({scale: 0.5});
-  scene.add(p1);
+  const i1 = new THREE.Group3D();
+  scene.add(i1);
+  i1.position.y = 1;
+  const p1 = plane({scale: 0.5, color:0xff0000});
+  i1.add(p1);
 
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
-  grid.position.y = -1.1;
+  //grid.position.y = -1.1;
   scene.add(grid);
 
   let animationFrameId = null;

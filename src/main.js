@@ -37,7 +37,7 @@ document.querySelector("#app").innerHTML = `
 
 <li><a class="menu-link" data-route="/claude-botany-math" href="claude-botany-math.html">claude botany 1</a></li>
 
-<li><a class="menu-link" data-route="#/rubix1" href="rubix1.html">rubix1</a></li>
+<li><a class="menu-link" data-route="/rubix1" href="#/rubix1">rubix1b</a></li>
 
           
         </ul>

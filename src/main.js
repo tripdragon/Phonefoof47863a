@@ -4,6 +4,7 @@ import { renderShowsSection } from "./shows/controller";
 import { createShowsStore } from "./shows/store";
 import { renderThreeDemoRoute } from "./three-demo/scene";
 import { renderSuperneatDemoRoute } from "./three-demo/superneat-scene";
+import { renderRubixCRoute } from "./three-demo/rubixC-scene";
 import { renderSentenceStructureAnalysis } from "./sentence-structure";
 import { renderBotanyInteractive, renderBotanyLatex } from "./interactives/botany";
 import { renderCameraInteractive } from "./interactives/camera";
@@ -38,6 +39,7 @@ document.querySelector("#app").innerHTML = `
 <li><a class="menu-link" data-route="/claude-botany-math" href="claude-botany-math.html">claude botany 1</a></li>
 
 <li><a class="menu-link" data-route="/rubix1" href="#/rubix1">rubix1b</a></li>
+          <li><a class="menu-link" data-route="/rubixC" href="#/rubixC">rubixC</a></li>
 
           
         </ul>
@@ -1532,6 +1534,10 @@ function renderThreeSuperneatRoute() {
   return renderSuperneatDemoRoute(routeContent);
 }
 
+function renderRubixCPageRoute() {
+  return renderRubixCRoute(routeContent);
+}
+
 function renderLanguagesRoute() {
   const spokenLanguagesByPopularity = [
     {
@@ -1893,6 +1899,7 @@ const routes = {
   "/three-superneat": renderThreeSuperneatRoute,
   "/languages": renderLanguagesRoute,
   "/rubix-cube": renderRubixCubeRoute,
+  "/rubixC": renderRubixCPageRoute,
 };
 
 function renderRoute() {

@@ -51,7 +51,7 @@ const plane = Primitives.plane;
   p2.rotation.x = Math.PI * 0.5;
   p2.rotation.z = Math.PI * 0.5;
   p2.position.y = -0.5;
-  p2.position.x = -0.5;
+  p2.position.x = 0.5;
   
   let p3 = plane({scale:1,color:colors.b});
   i1.add(p3);

@@ -58,7 +58,7 @@ const plane = Primitives.plane;
   p3.rotation.y = Math.PI * 0.5;
   p3.rotation.z = Math.PI * 0.5;
   p3.position.y = -0.5;
-  p3.position.x = 0.5;
+  p3.position.z = -0.5;
     
   
   }

@@ -36,11 +36,20 @@ const plane = Primitives.plane;
   const cube = Primitives.cube({ scale: 1.4, color: 0xff0000 });
  // scene.add(cube);
 
+  const colors {w:0x000000,r:0xff0000,
+    g:0x00ff00,b:0x0000ff,o:0xff00ff,y:0x00ffff
+               };
+   
   const i1 = new THREE.Group();
   scene.add(i1);
   i1.position.y = 1;
-  const p1 = plane({scale: 0.5, color:0xff0000});
+  {
+  let p1 = plane({color:colors.w});
   i1.add(p1);
+  let p2 = plane({color:colors.o});
+  p2.rotation.x = Math.PI;
+  i1.add(p2);
+  }
 
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

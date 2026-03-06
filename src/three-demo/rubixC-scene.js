@@ -36,7 +36,7 @@ const plane = Primitives.plane;
   const cube = Primitives.cube({ scale: 1.4, color: 0xff0000 });
  // scene.add(cube);
 
-  const i1 = new THREE.Group3D();
+  const i1 = new THREE.Group();
   scene.add(i1);
   i1.position.y = 1;
   const p1 = plane({scale: 0.5, color:0xff0000});

@@ -67,9 +67,9 @@ scene.add( axesHelper );
 class Piece extends THREE.Object3D {
   isPiece = true;
   borderMat = null;
-  borderWidth = 0.04;
+  borderWidth;
   borderColor=0xffaacc;
-  constructor({ colors = [],borderColor=0x000000,borderWidth=0.2 } = {}) {
+  constructor({ colors = [],borderColor=0x000000,borderWidth=0.04 } = {}) {
     super();
     this.colors = [...colors];
     this.borderColor = borderColor;

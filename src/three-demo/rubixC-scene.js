@@ -78,13 +78,7 @@ class Piece extends THREE.Object3D {
     let p1 = plane({scale:1,color:colors.w});
   this.add(p1);
     }
-  let p2 = plane({scale:1,color:colors.o});
- // i1.add(p2);
-  p2.rotation.x = Math.PI * 0.5;
-  p2.rotation.z = Math.PI * 0.5;
-  p2.position.y = -0.5;
-  p2.position.x = 0.5;
-    
+  
   }
 }
 

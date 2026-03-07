@@ -36,6 +36,9 @@ const plane = Primitives.plane;
   const cube = Primitives.cube({ scale: 1.4, color: 0xff0000 });
  // scene.add(cube);
 
+  const axesHelper = new THREE.AxesHelper( 5 );
+scene.add( axesHelper );
+  
   const colors = {w:0xffeeee,r:0xff0000,
     g:0x00ff00,b:0x0000ff,o:0xffbb00,y:0x00ffff
                };

@@ -90,8 +90,8 @@ class Piece extends THREE.Object3D {
         this.add(p2);
         p2.rotation.x = Math.PI * 0.5;
         p2.rotation.z = Math.PI * 0.5;
-        p2.position.y = 0.5;
-        p2.position.x = 0.5;
+        p2.position.y = -0.5;
+        p2.position.x = -0.5;
       }
     }
   

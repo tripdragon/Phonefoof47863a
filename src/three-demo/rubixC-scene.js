@@ -17,7 +17,7 @@ const plane = Primitives.plane;
   scene.background = new THREE.Color("#e2e8f0");
 
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
-  camera.position.set(3, 2.5, -3.5);
+  camera.position.set(-3, 2.5, -3.5);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));

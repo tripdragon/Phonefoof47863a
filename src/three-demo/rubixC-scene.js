@@ -68,6 +68,7 @@ class Piece extends THREE.Object3D {
   isPiece = true;
   borderMat = null;
   borderWidth = 0.2;
+  borderColor=0xffaacc;
   constructor({ colors = [],borderColor=0x000000,borderWidth=0.2 } = {}) {
     super();
     this.colors = [...colors];
@@ -82,7 +83,7 @@ class Piece extends THREE.Object3D {
       
       if(this.colors.length > 1){
         //let p3 = plane({scale:1,color:this.colors[1]});
-        let p3 = makePlane(this.colors[0]);
+        let p3 = this.makePlane(this.colors[0]);
         this.add(p3);
         p3.rotation.y = Math.PI * 0.5;
         p3.rotation.z = Math.PI * 0.5;

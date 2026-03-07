@@ -5,7 +5,7 @@ import { Primitives } from "superneatlib";
 export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">8b 7b 555m 44 b 12221ab  9193 8787 777@5554433@2b q e01@ rubixC 2</h1>
+    <h1 class="hero-title">12bbb 8b 7b 555m 44 b 12221ab  9193 8787 777@5554433@2b q e01@ rubixC 2</h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -61,13 +61,6 @@ scene.add( axesHelper );
   p2.position.y = -0.5;
   p2.position.x = 0.5;
   
-  let p3 = plane({scale:1,color:colors.b});
-  //i1.add(p3);
-  p3.rotation.y = Math.PI * 0.5;
-  p3.rotation.z = Math.PI * 0.5;
-  p3.position.y = -0.5;
-  p3.position.z = -0.5;
-    
   
   }
 
@@ -82,22 +75,23 @@ class Piece extends THREE.Object3D {
     if(this.colors.length > 0){
       let p1 = plane({scale:1,color:this.colors[0]});
       this.add(p1);
-
+      
       if(this.colors.length > 1){
-        let p2 = plane({scale:1,color:this.colors[1]});
-        this.add(p2);
-        p2.rotation.x = Math.PI * 0.5;
-        p2.rotation.z = Math.PI * 0.5;
-        p2.position.y = -0.5;
-        p2.position.x = 0.5;
-      }
-      if(this.colors.length > 2){
-        let p3 = plane({scale:1,color:this.colors[2]});
+        let p3 = plane({scale:1,color:this.colors[1]});
         this.add(p3);
         p3.rotation.y = Math.PI * 0.5;
         p3.rotation.z = Math.PI * 0.5;
         p3.position.y = -0.5;
         p3.position.z = -0.5;
+      }
+
+      if(this.colors.length > 2){
+        let p2 = plane({scale:1,color:this.colors[2]});
+        this.add(p2);
+        p2.rotation.x = Math.PI * 0.5;
+        p2.rotation.z = Math.PI * 0.5;
+        p2.position.y = 0.5;
+        p2.position.x = 0.5;
       }
     }
   

@@ -99,8 +99,9 @@ class Piece extends THREE.Object3D {
         p2.position.y = -0.5;
         p2.position.x = -0.5;
       }
-    }//build
-    
+    }
+  }// build
+
     makePlane(color=0xeeaa22){
       
     const mat = new THREE.ShaderMaterial({
@@ -138,7 +139,6 @@ class Piece extends THREE.Object3D {
     const plane = new THREE.Mesh(geometry, mat);
     return plane;
     }//makePlane
-  }
 }
 
 

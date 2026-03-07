@@ -66,9 +66,13 @@ scene.add( axesHelper );
 
 class Piece extends THREE.Object3D {
   isPiece = true;
-  constructor({ colors = [] } = {}) {
+  borderMat = null;
+  borderWidth = 0.2;
+  constructor({ colors = [],borderColor=0x000000,borderWidth=0.2 } = {}) {
     super();
     this.colors = [...colors];
+    this.borderColor = borderColor;
+    this.borderWidth = borderWidth;
     this.build();
   }
   build(){
@@ -77,7 +81,8 @@ class Piece extends THREE.Object3D {
       this.add(p1);
       
       if(this.colors.length > 1){
-        let p3 = plane({scale:1,color:this.colors[1]});
+        //let p3 = plane({scale:1,color:this.colors[1]});
+        let p3 = makePlane(this.colors[0]);
         this.add(p3);
         p3.rotation.y = Math.PI * 0.5;
         p3.rotation.z = Math.PI * 0.5;
@@ -93,8 +98,45 @@ class Piece extends THREE.Object3D {
         p2.position.y = -0.5;
         p2.position.x = -0.5;
       }
-    }
-  
+    }//build
+    
+    makePlane(color=0xeeaa22){
+      
+    this.borderMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uMainColor: { value: new THREE.Color(color) },
+        uBorderColor: { value: new THREE.Color(this.borderColor) },
+        uBorderWidth: { value: 0.08 } // 0.0 -> 0.5
+      },
+      vertexShader: `
+        varying vec2 vUv;
+
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uMainColor;
+        uniform vec3 uBorderColor;
+        uniform float uBorderWidth;
+
+        varying vec2 vUv;
+
+        void main() {
+          float d = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
+          float borderMask = step(d, uBorderWidth);
+
+          vec3 color = mix(uMainColor, uBorderColor, borderMask);
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `
+    });
+
+    const geometry = new THREE.PlaneGeometry(1.0, 1.0);
+    const plane = new THREE.Mesh(geometry, material);
+    return plane;
+    }//makePlane
   }
 }
 

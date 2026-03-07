@@ -67,7 +67,7 @@ scene.add( axesHelper );
 class Piece extends THREE.Object3D {
   isPiece = true;
   borderMat = null;
-  borderWidth = 0.2;
+  borderWidth = 0.04;
   borderColor=0xffaacc;
   constructor({ colors = [],borderColor=0x000000,borderWidth=0.2 } = {}) {
     super();
@@ -162,7 +162,7 @@ class Piece extends THREE.Object3D {
   
   const p_3 = new Piece({colors:[colors.w,colors.b,colors.o]});
   scene.add(p_3);
-  // p_3.position.x += -3.5;
+  p_3.position.x += -3.5;
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

@@ -81,6 +81,7 @@ class Piece extends THREE.Object3D {
       // let p1 = plane({scale:1,color:this.colors[0]});
       let p1 = this.makePlane(this.colors[0]);
       this.add(p1);
+      p1.rotation.x = Math.PI * -0.5;
       
       if(this.colors.length > 1){
         //let p3 = plane({scale:1,color:this.colors[1]});

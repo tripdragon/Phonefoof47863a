@@ -91,7 +91,7 @@ class Piece extends THREE.Object3D {
   }
 }
 
-  const p_2 = new Piece({colors:[0xffccff]});
+  const p_2 = new Piece({colors:[colors.o,colors.o]});
   scene.add(p_2);
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);

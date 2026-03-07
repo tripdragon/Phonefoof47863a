@@ -5,7 +5,7 @@ import { Primitives } from "superneatlib";
 export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">456 7765 4421 55a 4vc 22 A 974 77655422b ggfh14kujyi 12bbb 8b 7b 555m 44 b 12221ab  9193 8787 777@5554433@2b q e01@ rubixC 2</h1>
+    <h1 class="hero-title">22198 456 7765 4421 55a 4vc 22 A 974 77655422b ggfh14kujyi 12bbb 8b 7b 555m 44 b 12221ab  9193 8787 777@5554433@2b q e01@ rubixC 2</h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -100,7 +100,7 @@ class Piece extends THREE.Object3D {
         // p2.rotation.z = Math.PI * 0.5;
         // p2.position.y = -0.5;
         // p2.position.x = -0.5;
-        p2.rotation.x = Math.PI * 0.5;
+        //p2.rotation.x = Math.PI * 0.5;
        // p2.rotation.z = Math.PI * 0.5;
         p2.position.y = -0.5;
         p2.position.x = -0.5;

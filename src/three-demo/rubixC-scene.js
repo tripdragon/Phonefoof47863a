@@ -98,8 +98,19 @@ class Piece extends THREE.Object3D {
   }
 }
 
-  const p_2 = new Piece({colors:[colors.w,colors.b,colors.o]});
+
+  const p_1 = new Piece({colors:[colors.w]});
+  scene.add(p_1);
+
+  
+  const p_2 = new Piece({colors:[colors.w,colors.b]});
   scene.add(p_2);
+  p_2.position.x += 1.5;
+  
+  
+  const p_3 = new Piece({colors:[colors.w,colors.b,colors.o]});
+  scene.add(p_3);
+  p_3.position.x += 2.5;
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

@@ -336,8 +336,8 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     
     const p7 = new Piece({colors:[colors.r],debug:true});
     magicCube.add(p7);
-    p7.rotation.z = -Math.PI * 2 * 0.75;
-    p7.position.x = -0.5;
+    p7.rotation.z = Math.PI * 2 * 0.75;
+    p7.position.x = 0.5;
     window.spindebug = p7;
     window.posdebug = p7;
     

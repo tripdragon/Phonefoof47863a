@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
+    444a 374 122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -223,244 +223,238 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     }
   }
   const topLevel = new LevelPieces();
+
+  class RubixCubeLike extends THREE.Group{
+    constructor(){
+      super();
+      this.buildTopLevel();
+      this.buildCenterLevel();
+      this.buildBottomLevel();
+    }
+    // routine for blocks of pieces
+    // starting from center, down, bottom right going in a counterclockwise circle
+    // top
+    buildTopLevel(){
+      const p0 = new Piece({colors:[colors.w],debug:true});
+      this.add(p0);
+      p0.position.y = 0.5;
+      
+      const p1 = new Piece({colors:[colors.w,colors.b]});
+      this.add(p1);
+      p1.position.z = -0.5;
+      p1.position.y = 0.5;
+      
+      const p2 = new Piece({colors:[colors.w,colors.b,colors.o]});
+      this.add(p2);
+      p2.position.z = -0.5;
+      p2.position.x = -0.5;
+      p2.position.y = 0.5;
+      //
+      const p3 = new Piece({colors:[colors.w,colors.o]});
+      this.add(p3);
+      p3.position.x = -0.5;
+      p3.rotation.y = Math.PI * 0.5;
+      p3.position.y = 0.5;
+      
+      const p4 = new Piece({colors:[colors.w,colors.o,colors.g]});
+      this.add(p4);
+      p4.position.z = 0.5;
+      p4.position.x = -0.5;
+      p4.rotation.y = Math.PI * 0.5;
+      p4.position.y = 0.5;
+      //
+      const p5 = new Piece({colors:[colors.w,colors.g]});
+      this.add(p5);
+      p5.position.z = 0.5;
+      p5.rotation.y = Math.PI;
+      p5.position.y = 0.5;
+      
+      const p6 = new Piece({colors:[colors.w,colors.g,colors.r]});
+      this.add(p6);
+      p6.position.z = 0.5;
+      p6.position.x = 0.5;
+      p6.rotation.y = Math.PI;
+      p6.position.y = 0.5;
+      //
+      const p7 = new Piece({colors:[colors.w,colors.r]});
+      this.add(p7);
+      p7.position.x = 0.5;
+      p7.rotation.y = Math.PI * 2.0 * 0.75;
+      p7.position.y = 0.5;
+      const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});
+      this.add(p8);
+      p8.position.z = -0.5;
+      p8.position.x = 0.5;
+      p8.rotation.y = Math.PI * 2.0 * 0.75;
+      p8.position.y = 0.5;
+    }
+
+    buildCenterLevel(){
+      // goes counterclockwise from front
+      const p1 = new Piece({colors:[colors.b],debug:true});
+      this.add(p1);
+      p1.rotation.x = Math.PI *-0.5;
+      p1.position.z = -0.5;
+      //
+      const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
+      this.add(p2);
+      // rotations derived from testing on lilgui
+      p2.rotation.x = -Math.PI;
+      p2.rotation.y = Math.PI * 0.5;
+      p2.rotation.z = Math.PI * 0.5;
+      p2.position.x = -0.5;
+      p2.position.z = -0.5;
+      //
+      const p3 = new Piece({colors:[colors.o],debug:true});
+      this.add(p3);
+      p3.rotation.z = -Math.PI * 2 * 0.75;
+      p3.position.x = -0.5;
+      // window.posdebug = p3;
+      //
+      const p4 = new Piece({colors:[colors.o,colors.g],debug:true});
+      this.add(p4);
+      // rotations derived from testing on lilgui
+      p4.rotation.x = -Math.PI;
+      p4.rotation.y = 0;
+      p4.rotation.z = Math.PI * 0.5;
+      p4.position.x = -0.5;
+      p4.position.z = 0.5;
+      //
+      // window.spindebug = p4;
+      
+      const p5 = new Piece({colors:[colors.g],debug:true});
+      this.add(p5);
+      p5.rotation.x = -Math.PI * 2 * 0.75;
+      p5.position.z = 0.5;
+      // window.spindebug = p5;
+      // window.posdebug = p5;
+      // 
+      const p6 = new Piece({colors:[colors.g,colors.r],debug:true});
+      this.add(p6);
+      p6.rotation.x = Math.PI;
+      p6.rotation.y = Math.PI * 2 * 0.75;
+      p6.rotation.z = Math.PI * 0.5;
+      p6.position.x = 0.5;
+      p6.position.y = 0;
+      p6.position.z = 0.5;
+      //
+      // window.spindebug = p6;
+      // window.posdebug = p6;
+  
+      const p7 = new Piece({colors:[colors.r],debug:true});
+      this.add(p7);
+      p7.rotation.z = Math.PI * 2 * 0.75;
+      p7.position.x = 0.5;
+      window.spindebug = p7;
+      window.posdebug = p7;
+      // 
+      const p8 = new Piece({colors:[colors.r,colors.b],debug:true});
+      this.add(p8);
+      p8.rotation.x = -Math.PI;
+      p8.rotation.y = Math.PI;
+      p8.rotation.z = Math.PI * 0.5;
+      p8.position.x = 0.5;
+      p8.position.y = 0;
+      p8.position.z = -0.5;
+      //
+      // window.spindebug = p8;
+      // window.posdebug = p8;
+    }// buildTopLevel
+    
+    buildBottomLevel(){
+      const p0 = new Piece({colors:[colors.y],debug:true});
+      this.add(p0);
+      p0.position.y = -0.5;
+      p0.rotation.z = Math.PI;
+      window.spindebug = p0;
+      
+      const p1 = new Piece({colors:[colors.y,colors.b]});
+      this.add(p1);
+      p1.position.z = -0.5;
+      p1.position.y = -0.5;
+      p1.rotation.z = Math.PI;
+      
+      
+      const p2 = new Piece({colors:[colors.y,colors.o,colors.b]});
+      this.add(p2);
+      p2.position.z = -0.5;
+      p2.position.x = -0.5;
+      p2.position.y = -0.5;
+      p2.rotation.x = Math.PI * 0.5;
+      p2.rotation.y = Math.PI * 0.5;
+      p2.rotation.z = Math.PI * 0.5;
+      // window.spindebug=p2;
+      // window.posdebug = p2;
+      //
+      const p3 = new Piece({colors:[colors.y,colors.o]});
+      this.add(p3);
+      p3.position.x = -0.5;
+      p3.rotation.y = Math.PI * 0.5;
+      p3.rotation.z = -Math.PI;
+      p3.position.y = -0.5;
+  
+      const p4 = new Piece({colors:[colors.y,colors.g,colors.o]});
+      this.add(p4);
+      p4.position.z = 0.5;
+      p4.position.x = -0.5;
+      p4.position.y = -0.5;
+      p4.rotation.x = 0;
+      p4.rotation.y = -Math.PI;
+      p4.rotation.z = Math.PI;
+      
+      //
+      const p5 = new Piece({colors:[colors.y,colors.g]});
+      this.add(p5);
+      p5.position.z = 0.5;
+      p5.position.y = -0.5;
+      p5.rotation.x = 0;
+      p5.rotation.y = Math.PI;
+      p5.rotation.z = Math.PI;
+  
+      
+      
+      const p6 = new Piece({colors:[colors.y,colors.r,colors.g]});
+      this.add(p6);
+      p6.position.x = 0.5;
+      p6.position.y = -0.5;
+      p6.position.z = 0.5;
+      p6.rotation.x = Math.PI;
+      p6.rotation.y = Math.PI * 2 * 0.75;
+      p6.rotation.z = 0;
+  
+      //
+      const p7 = new Piece({colors:[colors.y,colors.r]});
+      this.add(p7);
+      p7.position.x = 0.5;
+      p7.position.y = -0.5;
+      p7.rotation.x = 0;
+      p7.rotation.y = -Math.PI * 0.5;
+      p7.rotation.z = Math.PI;
+  
+      
+      const p8 = new Piece({colors:[colors.y,colors.b,colors.r]});
+      this.add(p8);
+      p8.position.x = 0.5;
+      p8.position.y = -0.5;
+      p8.position.z = -0.5;
+      p8.rotation.x = 0;
+      p8.rotation.y = 0;
+      p8.rotation.z = Math.PI;
+      
+  
+      
+      window.spindebug=p8;
+      window.posdebug = p8;
+      
+      return
+      
+    }// buildBottomLevel
+
+  }// RubixCubeLike
+
+
   const magicCube = new THREE.Group();
   scene.add(magicCube);
-  
-  // routine for blocks of pieces
-  // starting from center, down, bottom right going in a counterclockwise circle
-  // top
-  function buildTopLevel(){
-    const p0 = new Piece({colors:[colors.w],debug:true});
-    magicCube.add(p0);
-    p0.position.y = 0.5;
-    
-    const p1 = new Piece({colors:[colors.w,colors.b]});
-    magicCube.add(p1);
-    p1.position.z = -0.5;
-    p1.position.y = 0.5;
-    
-    const p2 = new Piece({colors:[colors.w,colors.b,colors.o]});
-    magicCube.add(p2);
-    p2.position.z = -0.5;
-    p2.position.x = -0.5;
-    p2.position.y = 0.5;
-    //
-    const p3 = new Piece({colors:[colors.w,colors.o]});
-    magicCube.add(p3);
-    p3.position.x = -0.5;
-    p3.rotation.y = Math.PI * 0.5;
-    p3.position.y = 0.5;
-    
-    const p4 = new Piece({colors:[colors.w,colors.o,colors.g]});
-    magicCube.add(p4);
-    p4.position.z = 0.5;
-    p4.position.x = -0.5;
-    p4.rotation.y = Math.PI * 0.5;
-    p4.position.y = 0.5;
-    //
-    const p5 = new Piece({colors:[colors.w,colors.g]});
-    magicCube.add(p5);
-    p5.position.z = 0.5;
-    p5.rotation.y = Math.PI;
-    p5.position.y = 0.5;
-    
-    const p6 = new Piece({colors:[colors.w,colors.g,colors.r]});
-    magicCube.add(p6);
-    p6.position.z = 0.5;
-    p6.position.x = 0.5;
-    p6.rotation.y = Math.PI;
-    p6.position.y = 0.5;
-    //
-    const p7 = new Piece({colors:[colors.w,colors.r]});
-    magicCube.add(p7);
-    p7.position.x = 0.5;
-    p7.rotation.y = Math.PI * 2.0 * 0.75;
-    p7.position.y = 0.5;
-    const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});
-    magicCube.add(p8);
-    p8.position.z = -0.5;
-    p8.position.x = 0.5;
-    p8.rotation.y = Math.PI * 2.0 * 0.75;
-    p8.position.y = 0.5;
-  }
-
-  function buildCenterLevel(){
-    // goes counterclockwise from front
-    const p1 = new Piece({colors:[colors.b],debug:true});
-    magicCube.add(p1);
-    p1.rotation.x = Math.PI *-0.5;
-    p1.position.z = -0.5;
-    //
-    const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
-    magicCube.add(p2);
-    // rotations derived from testing on lilgui
-    p2.rotation.x = -Math.PI;
-    p2.rotation.y = Math.PI * 0.5;
-    p2.rotation.z = Math.PI * 0.5;
-    p2.position.x = -0.5;
-    p2.position.z = -0.5;
-    //
-    const p3 = new Piece({colors:[colors.o],debug:true});
-    magicCube.add(p3);
-    p3.rotation.z = -Math.PI * 2 * 0.75;
-    p3.position.x = -0.5;
-    // window.posdebug = p3;
-    //
-    const p4 = new Piece({colors:[colors.o,colors.g],debug:true});
-    magicCube.add(p4);
-    // rotations derived from testing on lilgui
-    p4.rotation.x = -Math.PI;
-    p4.rotation.y = 0;
-    p4.rotation.z = Math.PI * 0.5;
-    p4.position.x = -0.5;
-    p4.position.z = 0.5;
-    //
-    // window.spindebug = p4;
-    
-    const p5 = new Piece({colors:[colors.g],debug:true});
-    magicCube.add(p5);
-    p5.rotation.x = -Math.PI * 2 * 0.75;
-    p5.position.z = 0.5;
-    // window.spindebug = p5;
-    // window.posdebug = p5;
-    // 
-    const p6 = new Piece({colors:[colors.g,colors.r],debug:true});
-    magicCube.add(p6);
-    p6.rotation.x = Math.PI;
-    p6.rotation.y = Math.PI * 2 * 0.75;
-    p6.rotation.z = Math.PI * 0.5;
-    p6.position.x = 0.5;
-    p6.position.y = 0;
-    p6.position.z = 0.5;
-    //
-    // window.spindebug = p6;
-    // window.posdebug = p6;
-
-    const p7 = new Piece({colors:[colors.r],debug:true});
-    magicCube.add(p7);
-    p7.rotation.z = Math.PI * 2 * 0.75;
-    p7.position.x = 0.5;
-    window.spindebug = p7;
-    window.posdebug = p7;
-    // 
-    const p8 = new Piece({colors:[colors.r,colors.b],debug:true});
-    magicCube.add(p8);
-    p8.rotation.x = -Math.PI;
-    p8.rotation.y = Math.PI;
-    p8.rotation.z = Math.PI * 0.5;
-    p8.position.x = 0.5;
-    p8.position.y = 0;
-    p8.position.z = -0.5;
-    //
-    // window.spindebug = p8;
-    // window.posdebug = p8;
-
-  }
-
-
-
-  //
-
-  //
-
-  function buildBottomLevel(){
-    const p0 = new Piece({colors:[colors.y],debug:true});
-    magicCube.add(p0);
-    p0.position.y = -0.5;
-    p0.rotation.z = Math.PI;
-    window.spindebug = p0;
-    
-    const p1 = new Piece({colors:[colors.y,colors.b]});
-    magicCube.add(p1);
-    p1.position.z = -0.5;
-    p1.position.y = -0.5;
-    p1.rotation.z = Math.PI;
-    
-    
-    const p2 = new Piece({colors:[colors.y,colors.o,colors.b]});
-    magicCube.add(p2);
-    p2.position.z = -0.5;
-    p2.position.x = -0.5;
-    p2.position.y = -0.5;
-    p2.rotation.x = Math.PI * 0.5;
-    p2.rotation.y = Math.PI * 0.5;
-    p2.rotation.z = Math.PI * 0.5;
-    // window.spindebug=p2;
-    // window.posdebug = p2;
-    //
-    const p3 = new Piece({colors:[colors.y,colors.o]});
-    magicCube.add(p3);
-    p3.position.x = -0.5;
-    p3.rotation.y = Math.PI * 0.5;
-    p3.rotation.z = -Math.PI;
-    p3.position.y = -0.5;
-
-    const p4 = new Piece({colors:[colors.y,colors.g,colors.o]});
-    magicCube.add(p4);
-    p4.position.z = 0.5;
-    p4.position.x = -0.5;
-    p4.position.y = -0.5;
-    p4.rotation.x = 0;
-    p4.rotation.y = -Math.PI;
-    p4.rotation.z = Math.PI;
-    
-    //
-    const p5 = new Piece({colors:[colors.y,colors.g]});
-    magicCube.add(p5);
-    p5.position.z = 0.5;
-    p5.position.y = -0.5;
-    p5.rotation.x = 0;
-    p5.rotation.y = Math.PI;
-    p5.rotation.z = Math.PI;
-
-    
-    
-    const p6 = new Piece({colors:[colors.y,colors.r,colors.g]});
-    magicCube.add(p6);
-    p6.position.x = 0.5;
-    p6.position.y = -0.5;
-    p6.position.z = 0.5;
-    p6.rotation.x = Math.PI;
-    p6.rotation.y = Math.PI * 2 * 0.75;
-    p6.rotation.z = 0;
-
-    //
-    const p7 = new Piece({colors:[colors.y,colors.r]});
-    magicCube.add(p7);
-    p7.position.x = 0.5;
-    p7.position.y = -0.5;
-    p7.rotation.x = 0;
-    p7.rotation.y = -Math.PI * 0.5;
-    p7.rotation.z = Math.PI;
-
-    
-    const p8 = new Piece({colors:[colors.y,colors.b,colors.r]});
-    magicCube.add(p8);
-    p8.position.x = 0.5;
-    p8.position.y = -0.5;
-    p8.position.z = -0.5;
-    p8.rotation.x = 0;
-    p8.rotation.y = 0;
-    p8.rotation.z = Math.PI;
-    
-
-    
-    window.spindebug=p8;
-    window.posdebug = p8;
-    
-    return
-    
-  }
-
-  
-  buildTopLevel();
-  buildCenterLevel();
-
-  buildBottomLevel();
-
-
-
-
   
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);

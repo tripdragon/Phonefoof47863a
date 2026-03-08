@@ -275,7 +275,6 @@ gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
     p1.rotation.x = Math.PI *-0.5;
     p1.position.z = -0.5;
     //
-    
     const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
     magicCube.add(p2);
     // rotations derived from testing on lilgui
@@ -284,11 +283,11 @@ gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
     p2.rotation.z = Math.PI * 0.5;
     p2.position.x = -0.5;
     p2.position.z = -0.5;
-  
+    //
     const p3 = new Piece({colors:[colors.o],debug:true});
     magicCube.add(p3);
-    p2.rotation.z = -Math.PI * 2 * 0.75;
-    p2.position.x = 0.5;
+    p3.rotation.z = -Math.PI * 2 * 0.75;
+    p3.position.x = 0.5;
     
     // window.spindebug = p2;
     

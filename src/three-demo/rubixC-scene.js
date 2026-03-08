@@ -301,17 +301,17 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     const p3 = new Piece({colors:[colors.o],debug:true});
     magicCube.add(p3);
     p3.rotation.z = -Math.PI * 2 * 0.75;
-    p3.position.x = 1.5;
+    p3.position.x = -0.5;
     window.posdebug = p3;
     //
     const p4 = new Piece({colors:[colors.o,colors.g],debug:true});
     magicCube.add(p4);
     // rotations derived from testing on lilgui
-    // p4.rotation.x = -Math.PI;
-    // p4.rotation.y = Math.PI * 0.5;
-    //p4.rotation.z = -Math.PI * 0.5;
-    p4.position.x = -1;
-    p4.position.z = 1;
+    p4.rotation.x = -Math.PI;
+    p4.rotation.y = 0;
+    p4.rotation.z = Math.PI * 0.5;
+    p4.position.x = -0.5;
+    p4.position.z = 0.5;
     //
     window.spindebug = p4;
     

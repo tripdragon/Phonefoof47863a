@@ -400,20 +400,23 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     p4.position.z = 0.5;
     p4.position.x = -0.5;
     p4.position.y = -0.5;
-    p4.rotation.y = Math.PI * 0.5;
+    p4.rotation.x = 0;
+    p4.rotation.y = -Math.PI;
     p4.rotation.z = Math.PI;
     
-    window.spindebug=p4;
-    window.posdebug = p4;
-    
-    return
-    
     //
-    const p5 = new Piece({colors:[colors.w,colors.g]});
+    const p5 = new Piece({colors:[colors.y,colors.g]});
     magicCube.add(p5);
     p5.position.z = 0.5;
     p5.rotation.y = Math.PI;
-    p5.position.y = 0.5;
+    p5.position.y = -0.5;
+
+    
+    window.spindebug=p5;
+    window.posdebug = p5;
+    
+    return
+    
     
     const p6 = new Piece({colors:[colors.w,colors.g,colors.r]});
     magicCube.add(p6);

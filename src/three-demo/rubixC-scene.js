@@ -333,14 +333,25 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     // window.spindebug = p6;
     // window.posdebug = p6;
 
-    
     const p7 = new Piece({colors:[colors.r],debug:true});
     magicCube.add(p7);
     p7.rotation.z = Math.PI * 2 * 0.75;
     p7.position.x = 0.5;
     window.spindebug = p7;
     window.posdebug = p7;
-    
+    // 
+    const p8 = new Piece({colors:[colors.r,colors.b],debug:true});
+    magicCube.add(p8);
+    // p8.rotation.x = Math.PI;
+    // p8.rotation.y = Math.PI * 2 * 0.75;
+    // p8.rotation.z = Math.PI * 0.5;
+    p8.position.x = 0.5;
+    p8.position.y = 0;
+    p8.position.z = 0.5;
+    //
+    window.spindebug = p8;
+    window.posdebug = p8;
+
   }
   
   buildTopLevel();

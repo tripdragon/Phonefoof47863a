@@ -429,14 +429,16 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     magicCube.add(p7);
     p7.position.x = 0.5;
     p7.position.y = -0.5;
+    p7.rotation.x = 0;
     p7.rotation.y = -Math.PI * 0.5;
-    p7.position.y = Math.PI;
+    p7.rotation.z = Math.PI;
 
     
     const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});
     magicCube.add(p8);
     p8.position.z = -0.5;
     p8.position.x = 0.5;
+    p8.position.y = -0.5;
     p8.rotation.y = Math.PI * 2.0 * 0.75;
     p8.position.y = -0.5;
 

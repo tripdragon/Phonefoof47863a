@@ -5,7 +5,7 @@ import { Primitives } from "superneatlib";
 export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">aaa 4 726 44256anb 8237msdf 22198 456 7765 4421 55a 4vc 22 A 974 77655422b ggfh14kujyi 12bbb 8b 7b 555m 44 b 12221ab  9193 8787 777@5554433@2b q e01@ rubixC 2</h1>
+    <h1 class="hero-title">bb aaa 4 726 44256anb 8237msdf 22198 456 7765 4421 55a 4vc 22 A 974 77655422b ggfh14kujyi 12bbb 8b 7b 555m 44 b 12221ab  9193 8787 777@5554433@2b q e01@ rubixC 2</h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -90,14 +90,16 @@ class Piece extends THREE.Object3D {
       // let p1 = plane({scale:1,color:this.colors[0]});
       let p1 = this.makePlane(this.colors[0]);
       p1.rotation.x = Math.PI * -0.5;
+      p1.position.y = 1;
       this.add(p1);
       
       if(this.colors.length > 1){
         //let p3 = plane({scale:1,color:this.colors[1]});
         let p3 = this.makePlane(this.colors[1]);
         this.add(p3);
-        p3.position.y = -0.5;
+        p3.position.y = 0.5;
         p3.position.z = -0.5;
+        
         p3.rotation.y = Math.PI * 1.0;
         p3.rotation.z = Math.PI * 0.5;
         
@@ -114,14 +116,14 @@ class Piece extends THREE.Object3D {
         //p2.rotation.x = Math.PI * 0.5;
        // p2.rotation.z = Math.PI * 0.5;
         p2.rotation.y = Math.PI * -0.5;
-        p2.position.y = -0.5;
+        p2.position.y = 0.5;
         p2.position.x = -0.5;
       }
     }
   }// build
 
   buildDebug(){
-    const geometry = new THREE.SphereGeometry( 1, 8, 8 );
+    const geometry = new THREE.SphereGeometry( 0.2, 8, 8 );
     const material = new THREE.MeshBasicMaterial( { color: 0x8822ff } );
     const sphere = new THREE.Mesh( geometry, material );
     this.add( sphere );

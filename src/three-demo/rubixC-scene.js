@@ -80,6 +80,7 @@ class Piece extends THREE.Object3D {
     this.borderColor = borderColor;
     this.borderWidth = borderWidth;
     this.debug=debug;
+    this.debug=true;
     this.build();
     if(debug){
       this.buildDebug();

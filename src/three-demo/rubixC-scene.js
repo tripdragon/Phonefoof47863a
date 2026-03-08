@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Primitives‎ } from "superneatlib";
-//CheapPool
 
 export function renderRubixCRoute(container) {
+// CheapPool
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">level 33b hfgfh2 nwuw22 vovu22 rr44 r 22 se2 ccbb444mklmklog 2 bb aaa 4 726 44256anb 8237msdf 22198 456 7765 4421 55a 4vc 22 A 974 77655422b ggfh14kujyi 12bbb 8b 7b 555m 44 b 12221ab  9193 8787 777@5554433@2b q e01@ rubixC 2</h1>
@@ -38,7 +38,7 @@ const plane = Primitives.plane;
  // scene.add(cube);
 
   const axesHelper = new THREE.AxesHelper( 5 );
-scene.add( axesHelper );
+  scene.add( axesHelper );
   
   const colors = {
     w:0xffeeee,
@@ -49,21 +49,21 @@ scene.add( axesHelper );
     y:0x00ffff
   };
    
-  const i1 = new THREE.Group();
-  //scene.add(i1);
-  i1.position.y = 1;
-  {
-  let p1 = plane({scale:1,color:colors.w});
- // i1.add(p1);
-  let p2 = plane({scale:1,color:colors.o});
- // i1.add(p2);
-  p2.rotation.x = Math.PI * 0.5;
-  p2.rotation.z = Math.PI * 0.5;
-  p2.position.y = -0.5;
-  p2.position.x = 0.5;
+ //  const i1 = new THREE.Group();
+ //  //scene.add(i1);
+ //  i1.position.y = 1;
+ //  {
+ //  let p1 = plane({scale:1,color:colors.w});
+ // // i1.add(p1);
+ //  let p2 = plane({scale:1,color:colors.o});
+ // // i1.add(p2);
+ //  p2.rotation.x = Math.PI * 0.5;
+ //  p2.rotation.z = Math.PI * 0.5;
+ //  p2.position.y = -0.5;
+ //  p2.position.x = 0.5;
   
   
-  }
+ //  }
 
 class Piece extends THREE.Object3D {
   isPiece = true;

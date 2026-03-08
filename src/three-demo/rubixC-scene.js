@@ -257,7 +257,9 @@ class Piece extends THREE.Object3D {
     const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
     magicCube.add(p2);
     // p2.rotation.x = Math.PI * 0.5;
-    // p2.rotation.z = Math.PI * 1;
+    p2.rotation.z = Math.PI * 2 * 0.75;
+    
+    p2.rotation.y = Math.PI * 2 * 0.5;
     // p2.rotation.z = Math.PI*0.5;
     //p2.rotation.y = Math.PI*2*0.75;
     // p2.setRotationFromEuler(new THREE.Euler(Math.PI*0.5,Math.PI*0.5,0,'XYZ'));

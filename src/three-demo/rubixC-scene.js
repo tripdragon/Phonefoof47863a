@@ -43,7 +43,7 @@ const plane = Primitives.plane;
   scene.add( axesHelper );
   
   const colors = {
-    w:0xffeeee,
+    w:0xffeffe,
     r:0xff0000,
     g:0x00bb00,
     b:0x0000ff,
@@ -75,7 +75,7 @@ class Piece extends THREE.Object3D {
   debug;
   constructor({ colors = [],
                borderColor=0x000000,
-               borderWidth=0.04,
+               borderWidth=0.02546,
                debug=false
               } = {}) {
     super();
@@ -83,7 +83,7 @@ class Piece extends THREE.Object3D {
     this.borderColor = borderColor;
     this.borderWidth = borderWidth;
     this.debug=debug;
-    this.debug=true;
+    this.debug=false;
     this.build();
     if(this.debug){
       this.buildDebug();

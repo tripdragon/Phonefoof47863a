@@ -189,63 +189,6 @@ class Piece extends THREE.Object3D {
   const magicCube = new THREE.Group();
   scene.add(magicCube);
   
-  // routine for blocks of pieces
-  // starting from center, down, bottom right going in a counterclockwise circle
-  // top
-  function buildTopLevel(){
-    const p0 = new Piece({colors:[colors.w],debug:true});
-    magicCube.add(p0);
-    p0.position.y = 0.5;
-    
-    const p1 = new Piece({colors:[colors.w,colors.b]});
-    magicCube.add(p1);
-    p1.position.z = -0.5;
-    p1.position.y = 0.5;
-    
-    const p2 = new Piece({colors:[colors.w,colors.b,colors.o]});
-    magicCube.add(p2);
-    p2.position.z = -0.5;
-    p2.position.x = -0.5;
-    p2.position.y = 0.5;
-    //
-    const p3 = new Piece({colors:[colors.w,colors.o]});
-    magicCube.add(p3);
-    p3.position.x = -0.5;
-    p3.rotation.y = Math.PI * 0.5;
-    p3.position.y = 0.5;
-    
-    const p4 = new Piece({colors:[colors.w,colors.o,colors.g]});
-    magicCube.add(p4);
-    p4.position.z = 0.5;
-    p4.position.x = -0.5;
-    p4.rotation.y = Math.PI * 0.5;
-    p4.position.y = 0.5;
-    //
-    const p5 = new Piece({colors:[colors.w,colors.g]});
-    magicCube.add(p5);
-    p5.position.z = 0.5;
-    p5.rotation.y = Math.PI;
-    p5.position.y = 0.5;
-    
-    const p6 = new Piece({colors:[colors.w,colors.g,colors.r]});
-    magicCube.add(p6);
-    p6.position.z = 0.5;
-    p6.position.x = 0.5;
-    p6.rotation.y = Math.PI;
-    p6.position.y = 0.5;
-    //
-    const p7 = new Piece({colors:[colors.w,colors.r]});
-    magicCube.add(p7);
-    p7.position.x = 0.5;
-    p7.rotation.y = Math.PI * 2.0 * 0.75;
-    p7.position.y = 0.5;
-    const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});
-    magicCube.add(p8);
-    p8.position.z = -0.5;
-    p8.position.x = 0.5;
-    p8.rotation.y = Math.PI * 2.0 * 0.75;
-    p8.position.y = 0.5;
-  }
 
   const gui = new GUI();
 gui.add( document, 'title' );
@@ -280,6 +223,72 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       window.posdebug.position.z = v;
     });
 
+    // routine for blocks of pieces
+  // starting from center, down, bottom right going in a counterclockwise circle
+  // top
+  function buildBottomLevel(){
+    const p0 = new Piece({colors:[colors.y],debug:true});
+    magicCube.add(p0);
+    p0.position.y = -0.5;
+    p0.rotation.z = Math.PI;
+    
+    const p1 = new Piece({colors:[colors.y,colors.w]});
+    magicCube.add(p1);
+    p1.position.z = -0.5;
+    p1.position.y = -0.5;
+    p1.rotation.z = Math.PI;
+    
+    const p2 = new Piece({colors:[colors.y,colors.o,colors.w]});
+    magicCube.add(p2);
+    p2.position.z = -0.5;
+    p2.position.x = -0.5;
+    p2.position.y = -0.5;
+    p2.rotation.z = Math.PI;
+    //
+    const p3 = new Piece({colors:[colors.y,colors.o]});
+    magicCube.add(p3);
+    p3.position.x = -0.5;
+    p3.rotation.y = Math.PI * 0.5;
+    p3.position.y = -0.5;
+    p3.rotation.z = Math.PI;
+    
+    const p4 = new Piece({colors:[colors.y,colors.g,colors.o]});
+    magicCube.add(p4);
+    p4.position.z = 0.5;
+    p4.position.x = -0.5;
+    p4.rotation.y = Math.PI * 0.5;
+    p4.position.y = -0.5;
+    p4.rotation.z = Math.PI;
+    
+    //
+    const p5 = new Piece({colors:[colors.y,colors.o]});
+    magicCube.add(p5);
+    p5.position.z = 0.5;
+    p5.rotation.y = Math.PI;
+    p5.position.y = -0.5;
+    p5.rotation.z = Math.PI;
+    
+    const p6 = new Piece({colors:[colors.y,colors.g,colors.r]});
+    magicCube.add(p6);
+    p6.position.z = 0.5;
+    p6.position.x = 0.5;
+    p6.rotation.y = Math.PI;
+    p6.position.y = 0.5;
+    //
+    const p7 = new Piece({colors:[colors.w,colors.r]});
+    magicCube.add(p7);
+    p7.position.x = 0.5;
+    p7.rotation.y = Math.PI * 2.0 * 0.75;
+    p7.position.y = 0.5;
+    const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});
+    magicCube.add(p8);
+    p8.position.z = -0.5;
+    p8.position.x = 0.5;
+    p8.rotation.y = Math.PI * 2.0 * 0.75;
+    p8.position.y = 0.5;
+  }
+
+  
   
   function buildCenterLevel(){
     // goes counterclockwise from front
@@ -356,7 +365,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   
   buildTopLevel();
   buildCenterLevel();
-
+  buildBottomLavel();
 
 
 

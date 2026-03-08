@@ -255,7 +255,10 @@ gui.add( document, 'title' );
     const guiobj = {
       x: 0,
       y: 0,
-      z: 0
+      z: 0,
+      px: 0,
+      py: 0,
+      pz: 0
     }
     gui.add(guiobj, "x", -Math.PI*2, Math.PI*2).onChange(v=>{
       window.spindebug.rotation.x = v;
@@ -265,6 +268,17 @@ gui.add(guiobj, "y", -Math.PI*2, Math.PI*2).onChange(v=>{
     });
 gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
       window.spindebug.rotation.z = v;
+    });
+  
+gui.add(guiobj, "px", -1, 1).onChange(v=>{
+      window.posdebug.position.x = v;
+    });
+  
+gui.add(guiobj, "py", -1, 1).onChange(v=>{
+      window.posdebug.position.y = v;
+    });
+gui.add(guiobj, "pz", -1, 1).onChange(v=>{
+      window.posdebug.position.z = v;
     });
 
   
@@ -288,13 +302,14 @@ gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
     magicCube.add(p3);
     p3.rotation.z = -Math.PI * 2 * 0.75;
     p3.position.x = 1.5;
+    window.posdebug = p3;
     //
     const p4 = new Piece({colors:[colors.o,colors.g],debug:true});
     magicCube.add(p4);
     // rotations derived from testing on lilgui
-    p4.rotation.x = -Math.PI;
+    // p4.rotation.x = -Math.PI;
     // p4.rotation.y = Math.PI * 0.5;
-    p4.rotation.z = -Math.PI * 0.5;
+    //p4.rotation.z = -Math.PI * 0.5;
     p4.position.x = -1;
     p4.position.z = 1;
     //

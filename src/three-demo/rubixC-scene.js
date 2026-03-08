@@ -6,7 +6,7 @@ export function renderRubixCRoute(container) {
 // CheapPool
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">55384bbb5a 4444aa 2222bbba </h1>
+    <h1 class="hero-title">777banbsd 55384bbb5a 4444aa 2222bbba </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -205,6 +205,17 @@ class Piece extends THREE.Object3D {
     p2.position.z = -0.5;
     p2.position.x = -0.5;
 
+    //
+    const p3 = new Piece({colors:[colors.w,colors.o]});
+    magicCube.add(p3);
+    p3.position.x = -0.5;
+    p3.rotation.y = Math.PI * 0.5;
+    
+    const p4 = new Piece({colors:[colors.w,colors.o,colors.g]});
+    magicCube.add(p4);
+    p4.position.z = 0.5;
+    p4.position.x = -0.5;
+    p4.rotation.y = Math.PI * 0.5;
   }
 
   buildTopLevel();

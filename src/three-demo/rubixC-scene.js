@@ -288,6 +288,12 @@ gui.add( document, 'title' );
     gui.add(guiobj, "x", -Math.PI*2, Math.PI*2).onChange(v=>{
       p2.rotation.x = v;
     });
+gui.add(guiobj, "y", -Math.PI*2, Math.PI*2).onChange(v=>{
+      p2.rotation.y = v;
+    });
+gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
+      p2.rotation.z = v;
+    });
 
     
   }

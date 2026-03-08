@@ -6,7 +6,7 @@ export function renderRubixCRoute(container) {
 // CheapPool
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">4444mmmbcyt </h1>
+    <h1 class="hero-title">792A 4444mmmbcyt </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -195,52 +195,56 @@ class Piece extends THREE.Object3D {
   function buildTopLevel(){
     const p0 = new Piece({colors:[colors.w],debug:true});
     magicCube.add(p0);
+    p0.position.y = 0.5;
     
     const p1 = new Piece({colors:[colors.w,colors.b]});
     magicCube.add(p1);
     p1.position.z = -0.5;
+    p1.position.y = 0.5;
     
     const p2 = new Piece({colors:[colors.w,colors.b,colors.o]});
     magicCube.add(p2);
     p2.position.z = -0.5;
     p2.position.x = -0.5;
-
+    p2.position.y = 0.5;
     //
     const p3 = new Piece({colors:[colors.w,colors.o]});
     magicCube.add(p3);
     p3.position.x = -0.5;
     p3.rotation.y = Math.PI * 0.5;
+    p3.position.y = 0.5;
     
     const p4 = new Piece({colors:[colors.w,colors.o,colors.g]});
     magicCube.add(p4);
     p4.position.z = 0.5;
     p4.position.x = -0.5;
     p4.rotation.y = Math.PI * 0.5;
-
+    p4.position.y = 0.5;
     //
     const p5 = new Piece({colors:[colors.w,colors.g]});
     magicCube.add(p5);
     p5.position.z = 0.5;
     p5.rotation.y = Math.PI;
+    p5.position.y = 0.5;
     
     const p6 = new Piece({colors:[colors.w,colors.g,colors.r]});
     magicCube.add(p6);
     p6.position.z = 0.5;
     p6.position.x = 0.5;
     p6.rotation.y = Math.PI;
-
+    p6.position.y = 0.5;
     //
     const p7 = new Piece({colors:[colors.w,colors.r]});
     magicCube.add(p7);
     p7.position.x = 0.5;
     p7.rotation.y = Math.PI * 2.0 * 0.75;
-    
+    p7.position.y = 0.5;
     const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});
     magicCube.add(p8);
     p8.position.z = -0.5;
     p8.position.x = 0.5;
     p8.rotation.y = Math.PI * 2.0 * 0.75;
-  
+    p8.position.y = 0.5;
   }
 
   function buildCenterLevel(){
@@ -249,7 +253,18 @@ class Piece extends THREE.Object3D {
     magicCube.add(p1);
     p1.rotation.x = Math.PI *-0.5;
     p1.position.z = -0.5;
-    p1.position.y = -0.5;
+    //
+    const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
+    magicCube.add(p2);
+    p2.rotation.z = Math.PI *-0.5;
+    p2.rotation.x = Math.PI *-0.5;
+    p2.position.z = -0.5;
+    //
+    const p3 = new Piece({colors:[colors.o],debug:true});
+    magicCube.add(p3);
+    p3.rotation.y = Math.PI -0.5;
+    p1.position.x = 0.5;
+    
   }
   
   buildTopLevel();

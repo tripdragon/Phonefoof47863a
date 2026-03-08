@@ -5,7 +5,7 @@ import { Primitives } from "superneatlib";
 export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">726 44256anb 8237msdf 22198 456 7765 4421 55a 4vc 22 A 974 77655422b ggfh14kujyi 12bbb 8b 7b 555m 44 b 12221ab  9193 8787 777@5554433@2b q e01@ rubixC 2</h1>
+    <h1 class="hero-title">aaa 4 726 44256anb 8237msdf 22198 456 7765 4421 55a 4vc 22 A 974 77655422b ggfh14kujyi 12bbb 8b 7b 555m 44 b 12221ab  9193 8787 777@5554433@2b q e01@ rubixC 2</h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -69,12 +69,21 @@ class Piece extends THREE.Object3D {
   borderMat = null;
   borderWidth;
   borderColor=0xffaacc;
-  constructor({ colors = [],borderColor=0x000000,borderWidth=0.04 } = {}) {
+  debug;
+  constructor({ colors = [],
+               borderColor=0x000000,
+               borderWidth=0.04,
+               debug=false
+              } = {}) {
     super();
     this.colors = [...colors];
     this.borderColor = borderColor;
     this.borderWidth = borderWidth;
+    this.debug=debug;
     this.build();
+    if(debug){
+      this.buildDebug();
+    }
   }
   build(){
     if(this.colors.length > 0){
@@ -111,47 +120,53 @@ class Piece extends THREE.Object3D {
     }
   }// build
 
+  buildDebug(){
+    const geometry = new THREE.SphereGeometry( 1, 8, 8 );
+    const material = new THREE.MeshBasicMaterial( { color: 0x8822ff } );
+    const sphere = new THREE.Mesh( geometry, material );
+    this.add( sphere );
+  }//buildDebug
+
     makePlane(color=0xeeaa22){
-      
-    const mat = new THREE.ShaderMaterial({
-      uniforms: {
-        uMainColor: { value: new THREE.Color(color) },
-        uBorderColor: { value: new THREE.Color(this.borderColor) },
-        uBorderWidth: { value: this.borderWidth } // 0.0 -> 0.5
-      },
-      vertexShader: `
-        varying vec2 vUv;
-
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 uMainColor;
-        uniform vec3 uBorderColor;
-        uniform float uBorderWidth;
-
-        varying vec2 vUv;
-
-        void main() {
-          float d = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
-          float borderMask = step(d, uBorderWidth);
-
-          vec3 color = mix(uMainColor, uBorderColor, borderMask);
-          gl_FragColor = vec4(color, 1.0);
-        }
-      `
-    });
-
-    const geometry = new THREE.PlaneGeometry(1.0, 1.0);
-    const plane = new THREE.Mesh(geometry, mat);
-    return plane;
+      const mat = new THREE.ShaderMaterial({
+        uniforms: {
+          uMainColor: { value: new THREE.Color(color) },
+          uBorderColor: { value: new THREE.Color(this.borderColor) },
+          uBorderWidth: { value: this.borderWidth } // 0.0 -> 0.5
+        },
+        vertexShader: `
+          varying vec2 vUv;
+  
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 uMainColor;
+          uniform vec3 uBorderColor;
+          uniform float uBorderWidth;
+  
+          varying vec2 vUv;
+  
+          void main() {
+            float d = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
+            float borderMask = step(d, uBorderWidth);
+  
+            vec3 color = mix(uMainColor, uBorderColor, borderMask);
+            gl_FragColor = vec4(color, 1.0);
+          }
+        `
+      });
+  
+      const geometry = new THREE.PlaneGeometry(1.0, 1.0);
+      const plane = new THREE.Mesh(geometry, mat);
+      return plane;
     }//makePlane
 }
 
 
-  const p_1 = new Piece({colors:[colors.w]});
+  const p_1 = new Piece({colors:[colors.w],debug:true});
   scene.add(p_1);
 
   
@@ -163,6 +178,8 @@ class Piece extends THREE.Object3D {
   const p_3 = new Piece({colors:[colors.w,colors.b,colors.o]});
   scene.add(p_3);
   p_3.position.x += -3.5;
+
+
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

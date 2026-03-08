@@ -4,7 +4,6 @@ import { Primitives, CheapPool } from "superneatlib";
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
 
 export function renderRubixCRoute(container) {
-// CheapPool
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">nnn2 aa 2 dvsfrf 44c 222 wuyie38 g4 m222 792A 4444mmmbcyt </h1>
@@ -331,9 +330,16 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     p6.position.y = 0;
     p6.position.z = 0.5;
     //
-    window.spindebug = p6;
-    window.posdebug = p6;
+    // window.spindebug = p6;
+    // window.posdebug = p6;
+
     
+    const p7 = new Piece({colors:[colors.r],debug:true});
+    magicCube.add(p7);
+    p7.rotation.z = -Math.PI * 2 * 0.75;
+    p7.position.x = -0.5;
+    window.spindebug = p7;
+    window.posdebug = p7;
     
   }
   

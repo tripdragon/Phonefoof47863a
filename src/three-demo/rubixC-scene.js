@@ -280,9 +280,11 @@ gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
     
     const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
     magicCube.add(p2);
-    // p2.rotation.x = Math.PI * 0.5;
+    p2.rotation.x = Math.PI;
+    p2.rotation.y = -Math.PI * 0.5;
+    p2.rotation.z = -Math.PI * 0.5;
     //p2.rotation.z = Math.PI * 2 * 0.75;
-    
+        
     //p2.rotation.y = Math.PI * 2 * 0.5;
     // p2.rotation.z = Math.PI*0.5;
     //p2.rotation.y = Math.PI*2*0.75;
@@ -291,7 +293,7 @@ gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
     p2.position.z = -0.5;
     p2.position.y = 2;
 
-    window.spindebug = p2;
+    // window.spindebug = p2;
     
     // p2.rotateZ(Math.PI*0.5);
     // p2.rotateX(Math.PI*0.5);

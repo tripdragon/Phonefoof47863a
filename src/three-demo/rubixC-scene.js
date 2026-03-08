@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-//CheapPool
 import { Primitives‎ } from "superneatlib";
+//CheapPool
 
 export function renderRubixCRoute(container) {
   container.innerHTML = `
@@ -157,14 +157,14 @@ class Piece extends THREE.Object3D {
           vec3 color = mix(uMainColor, uBorderColor, borderMask);
           gl_FragColor = vec4(color, 1.0);
         }
-      `
-    });
+        `
+      });
 
-    const geometry = new THREE.PlaneGeometry(1.0, 1.0);
-    const plane = new THREE.Mesh(geometry, mat);
-    return plane;
-  }//makePlane
-}
+      const geometry = new THREE.PlaneGeometry(1.0, 1.0);
+      const plane = new THREE.Mesh(geometry, mat);
+      return plane;
+    }//makePlane
+  }
 
 
   const p_1 = new Piece({colors:[colors.w],debug:true});
@@ -179,15 +179,6 @@ class Piece extends THREE.Object3D {
   const p_3 = new Piece({colors:[colors.w,colors.b,colors.o]});
   scene.add(p_3);
   p_3.position.x += -3.5;
-
-  // special array with .add
-  // holds 9 for top & bottom, 8 for center
-  // class LevelPieces extends CheapPool‎ {
-  //   constructor(){
-  //     super();
-      
-  //   }
-  // }
   
 
   

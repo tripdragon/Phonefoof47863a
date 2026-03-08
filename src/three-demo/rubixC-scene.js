@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Primitives, CheapPool } from "superneatlib";
+import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
 
 export function renderRubixCRoute(container) {
 // CheapPool
@@ -254,6 +255,10 @@ class Piece extends THREE.Object3D {
     p1.rotation.x = Math.PI *-0.5;
     p1.position.z = -0.5;
     //
+    
+    const gui = new GUI();
+gui.add( document, 'title' );
+    
     const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
     magicCube.add(p2);
     // p2.rotation.x = Math.PI * 0.5;

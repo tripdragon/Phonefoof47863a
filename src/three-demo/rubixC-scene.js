@@ -6,7 +6,9 @@ import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
 export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">nnn2 aa 2 dvsfrf 44c 222 wuyie38 g4 m222 792A 4444mmmbcyt </h1>
+    <h1 class="hero-title">
+    2222222
+    </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -46,7 +48,7 @@ const plane = Primitives.plane;
     g:0x00bb00,
     b:0x0000ff,
     o:0xffbb00,
-    y:0x00ffff
+    y:0xff00ff
   };
    
  //  const i1 = new THREE.Group();
@@ -368,10 +370,12 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     p0.rotation.z = Math.PI;
     window.spindebug = p0;
     
-    const p1 = new Piece({colors:[colors.w,colors.b]});
+    const p1 = new Piece({colors:[colors.y,colors.g]});
     magicCube.add(p1);
     p1.position.z = -0.5;
-    p1.position.y = 0.5;
+    p1.position.y = -0.5;
+    window.spindebug=p1;
+    window.posdebug = p1;
     
     const p2 = new Piece({colors:[colors.w,colors.b,colors.o]});
     magicCube.add(p2);

@@ -280,9 +280,9 @@ gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
     
     const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
     magicCube.add(p2);
-    p2.rotation.x = Math.PI;
-    p2.rotation.y = -Math.PI * 0.5;
-    p2.rotation.z = -Math.PI * 0.5;
+    p2.rotation.x = -Math.PI;
+    p2.rotation.y = Math.PI * 0.5;
+    p2.rotation.z = Math.PI * 0.5;
     //p2.rotation.z = Math.PI * 2 * 0.75;
         
     //p2.rotation.y = Math.PI * 2 * 0.5;

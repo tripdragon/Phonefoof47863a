@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
 // CheapPool
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">aa 2 dvsfrf 44c 222 wuyie38 g4 m222 792A 4444mmmbcyt </h1>
+    <h1 class="hero-title">nnn2 aa 2 dvsfrf 44c 222 wuyie38 g4 m222 792A 4444mmmbcyt </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -287,7 +287,7 @@ gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
     const p3 = new Piece({colors:[colors.o],debug:true});
     magicCube.add(p3);
     p3.rotation.z = -Math.PI * 2 * 0.75;
-    p3.position.x = 0.5;
+    p3.position.x = 1.5;
     //
     const p4 = new Piece({colors:[colors.o,colors.g],debug:true});
     magicCube.add(p4);
@@ -296,7 +296,7 @@ gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
     p4.rotation.y = Math.PI * 0.5;
     p4.rotation.z = Math.PI * 0.5;
     p4.position.x = -0.5;
-    p4.position.z = -0.5;
+    p4.position.z = 0.5;
     //
     window.spindebug = p4;
     

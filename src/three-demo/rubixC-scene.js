@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    2222222
+    3333 2222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -48,7 +48,7 @@ const plane = Primitives.plane;
     g:0x00bb00,
     b:0x0000ff,
     o:0xffbb00,
-    y:0xff00ff
+    y:0xffff00
   };
    
  //  const i1 = new THREE.Group();
@@ -374,14 +374,16 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     magicCube.add(p1);
     p1.position.z = -0.5;
     p1.position.y = -0.5;
-    window.spindebug=p1;
-    window.posdebug = p1;
+    p1.rotation.z = Math.PI;
     
-    const p2 = new Piece({colors:[colors.w,colors.b,colors.o]});
+    
+    const p2 = new Piece({colors:[colors.y,colors.o,colors.b]});
     magicCube.add(p2);
     p2.position.z = -0.5;
     p2.position.x = -0.5;
-    p2.position.y = 0.5;
+    p2.position.y = -0.5;
+    window.spindebug=p2;
+    window.posdebug = p2;
     //
     const p3 = new Piece({colors:[colors.w,colors.o]});
     magicCube.add(p3);

@@ -256,14 +256,15 @@ class Piece extends THREE.Object3D {
     //
     const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
     magicCube.add(p2);
-    p2.rotation.z = Math.PI *-0.5;
-    p2.rotation.x = Math.PI *-0.5;
+    p2.rotation.z = Math.PI *0.5;
+    p2.rotation.x = Math.PI *0.5;
     p2.position.z = -0.5;
+    p2.position.x = 0.5;
     //
     const p3 = new Piece({colors:[colors.o],debug:true});
     magicCube.add(p3);
-    p3.rotation.y = Math.PI -0.5;
-    p1.position.x = 0.5;
+    p3.rotation.y = Math.PI 0.5;
+    p3.position.x = 0.5;
     
   }
   

@@ -259,7 +259,8 @@ class Piece extends THREE.Object3D {
     // p2.rotation.x = Math.PI * 0.5;
     // p2.rotation.z = Math.PI * 1;
     p2.rotation.z = Math.PI*0.5;
-    p2.rotation.y = Math.PI*2*0.75;
+    //p2.rotation.y = Math.PI*2*0.75;
+    // p2.setRotationFromEuler(new THREE.Euler());
     p2.position.x = -0.5;
     p2.position.z = -0.5;
     

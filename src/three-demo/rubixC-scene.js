@@ -279,6 +279,16 @@ gui.add( document, 'title' );
     // magicCube.add(p3);
     // p3.rotation.y = Math.PI 0.5;
     // p3.position.x = 0.5;
+
+    const guiobj = {
+      x: 0,
+      y: 0,
+      z: 0
+    }
+    gui.add(guiobj, "x", -Math.PI*2, Math.PI*2).onChange(v=>{
+      p2.rotation.x = v;
+    });
+
     
   }
   

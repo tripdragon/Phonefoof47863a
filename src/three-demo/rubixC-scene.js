@@ -6,7 +6,7 @@ export function renderRubixCRoute(container) {
 // CheapPool
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">999ajsdbf 888aadfgdf 777banbsd 55384bbb5a 4444aa 2222bbba </h1>
+    <h1 class="hero-title">bb999ajsdbf 888aadfgdf 777banbsd 55384bbb5a 4444aa 2222bbba </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -43,7 +43,7 @@ const plane = Primitives.plane;
   const colors = {
     w:0xffeeee,
     r:0xff0000,
-    g:0x007700,
+    g:0x00ee00,
     b:0x0000ff,
     o:0xffbb00,
     y:0x00ffff

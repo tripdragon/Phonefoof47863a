@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    777b 555a 44 3333 2222
+    888jbasf 77b 555a 44 3333 2222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -424,12 +424,6 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     p6.rotation.y = Math.PI * 2 * 0.75;
     p6.rotation.z = 0;
 
-    
-    window.spindebug=p6;
-    window.posdebug = p6;
-    
-    return
-    
     //
     const p7 = new Piece({colors:[colors.y,colors.r]});
     magicCube.add(p7);
@@ -437,10 +431,10 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     p7.rotation.y = Math.PI * 2.0 * 0.75;
     p7.position.y = -0.5;
 
-    // window.spindebug=p7;
-    // window.posdebug = p7;
+    window.spindebug=p7;
+    window.posdebug = p7;
     
-    // return
+    return
     
     
     const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});

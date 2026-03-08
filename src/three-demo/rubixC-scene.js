@@ -439,8 +439,10 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     p8.position.z = -0.5;
     p8.position.x = 0.5;
     p8.position.y = -0.5;
-    p8.rotation.y = Math.PI * 2.0 * 0.75;
-    p8.position.y = -0.5;
+    p8.rotation.x = 0;
+    p8.rotation.y = -Math.PI;
+    p8.rotation.z = -Math.PI;
+    
 
     
     window.spindebug=p8;

@@ -180,6 +180,41 @@ class Piece extends THREE.Object3D {
   // scene.add(p_3);
   // p_3.position.x += -3.5;
 
+  
+  const gui = new GUI();
+gui.add( document, 'title' );
+
+    
+    const guiobj = {
+      x: 0,
+      y: 0,
+      z: 0,
+      px: 0,
+      py: 0,
+      pz: 0
+    }
+    gui.add(guiobj, "x", -Math.PI*2, Math.PI*2).onChange(v=>{
+      window.spindebug.rotation.x = v;
+    });
+gui.add(guiobj, "y", -Math.PI*2, Math.PI*2).onChange(v=>{
+      window.spindebug.rotation.y = v;
+    });
+gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
+      window.spindebug.rotation.z = v;
+    });
+  
+gui.add(guiobj, "px", -1, 1).onChange(v=>{
+      window.posdebug.position.x = v;
+    });
+  
+gui.add(guiobj, "py", -1, 1).onChange(v=>{
+      window.posdebug.position.y = v;
+    });
+gui.add(guiobj, "pz", -1, 1).onChange(v=>{
+      window.posdebug.position.z = v;
+    });
+
+  
   class LevelPieces extends CheapPool {
     constructor(){
       super();
@@ -247,40 +282,6 @@ class Piece extends THREE.Object3D {
     p8.position.y = 0.5;
   }
 
-  const gui = new GUI();
-gui.add( document, 'title' );
-
-    
-    const guiobj = {
-      x: 0,
-      y: 0,
-      z: 0,
-      px: 0,
-      py: 0,
-      pz: 0
-    }
-    gui.add(guiobj, "x", -Math.PI*2, Math.PI*2).onChange(v=>{
-      window.spindebug.rotation.x = v;
-    });
-gui.add(guiobj, "y", -Math.PI*2, Math.PI*2).onChange(v=>{
-      window.spindebug.rotation.y = v;
-    });
-gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
-      window.spindebug.rotation.z = v;
-    });
-  
-gui.add(guiobj, "px", -1, 1).onChange(v=>{
-      window.posdebug.position.x = v;
-    });
-  
-gui.add(guiobj, "py", -1, 1).onChange(v=>{
-      window.posdebug.position.y = v;
-    });
-gui.add(guiobj, "pz", -1, 1).onChange(v=>{
-      window.posdebug.position.z = v;
-    });
-
-  
   function buildCenterLevel(){
     // goes counterclockwise from front
     const p1 = new Piece({colors:[colors.b],debug:true});
@@ -353,11 +354,75 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     // window.posdebug = p8;
 
   }
+
+
+
+  //
+
+  //
+
+  function buildBottomLevel(){
+    const p0 = new Piece({colors:[colors.y],debug:true});
+    magicCube.add(p0);
+    p0.position.y = -0.5;
+    p0.rotation.z = Math.PI;
+    window.spindebug = p0;
+    
+    const p1 = new Piece({colors:[colors.w,colors.b]});
+    magicCube.add(p1);
+    p1.position.z = -0.5;
+    p1.position.y = 0.5;
+    
+    const p2 = new Piece({colors:[colors.w,colors.b,colors.o]});
+    magicCube.add(p2);
+    p2.position.z = -0.5;
+    p2.position.x = -0.5;
+    p2.position.y = 0.5;
+    //
+    const p3 = new Piece({colors:[colors.w,colors.o]});
+    magicCube.add(p3);
+    p3.position.x = -0.5;
+    p3.rotation.y = Math.PI * 0.5;
+    p3.position.y = 0.5;
+    
+    const p4 = new Piece({colors:[colors.w,colors.o,colors.g]});
+    magicCube.add(p4);
+    p4.position.z = 0.5;
+    p4.position.x = -0.5;
+    p4.rotation.y = Math.PI * 0.5;
+    p4.position.y = 0.5;
+    //
+    const p5 = new Piece({colors:[colors.w,colors.g]});
+    magicCube.add(p5);
+    p5.position.z = 0.5;
+    p5.rotation.y = Math.PI;
+    p5.position.y = 0.5;
+    
+    const p6 = new Piece({colors:[colors.w,colors.g,colors.r]});
+    magicCube.add(p6);
+    p6.position.z = 0.5;
+    p6.position.x = 0.5;
+    p6.rotation.y = Math.PI;
+    p6.position.y = 0.5;
+    //
+    const p7 = new Piece({colors:[colors.w,colors.r]});
+    magicCube.add(p7);
+    p7.position.x = 0.5;
+    p7.rotation.y = Math.PI * 2.0 * 0.75;
+    p7.position.y = 0.5;
+    const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});
+    magicCube.add(p8);
+    p8.position.z = -0.5;
+    p8.position.x = 0.5;
+    p8.rotation.y = Math.PI * 2.0 * 0.75;
+    p8.position.y = 0.5;
+  }
+
   
   buildTopLevel();
   buildCenterLevel();
 
-
+  buildBottomLevel();
 
 
 

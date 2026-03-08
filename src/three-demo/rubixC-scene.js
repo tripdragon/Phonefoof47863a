@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
 // CheapPool
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
-    <h1 class="hero-title">dvsfrf 44c 222 wuyie38 g4 m222 792A 4444mmmbcyt </h1>
+    <h1 class="hero-title">aa 2 dvsfrf 44c 222 wuyie38 g4 m222 792A 4444mmmbcyt </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
@@ -248,6 +248,26 @@ class Piece extends THREE.Object3D {
     p8.position.y = 0.5;
   }
 
+  const gui = new GUI();
+gui.add( document, 'title' );
+
+    
+    const guiobj = {
+      x: 0,
+      y: 0,
+      z: 0
+    }
+    gui.add(guiobj, "x", -Math.PI*2, Math.PI*2).onChange(v=>{
+      window.spindebug.rotation.x = v;
+    });
+gui.add(guiobj, "y", -Math.PI*2, Math.PI*2).onChange(v=>{
+      window.spindebug.rotation.y = v;
+    });
+gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
+      window.spindebug.rotation.z = v;
+    });
+
+  
   function buildCenterLevel(){
     // goes counterclockwise from front
     const p1 = new Piece({colors:[colors.b],debug:true});
@@ -256,8 +276,7 @@ class Piece extends THREE.Object3D {
     p1.position.z = -0.5;
     //
     
-    const gui = new GUI();
-gui.add( document, 'title' );
+    
     
     const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
     magicCube.add(p2);
@@ -271,6 +290,8 @@ gui.add( document, 'title' );
     p2.position.x = -0.5;
     p2.position.z = -0.5;
     p2.position.y = 2;
+
+    window.spindebug = p2;
     
     // p2.rotateZ(Math.PI*0.5);
     // p2.rotateX(Math.PI*0.5);
@@ -280,20 +301,6 @@ gui.add( document, 'title' );
     // p3.rotation.y = Math.PI 0.5;
     // p3.position.x = 0.5;
 
-    const guiobj = {
-      x: 0,
-      y: 0,
-      z: 0
-    }
-    gui.add(guiobj, "x", -Math.PI*2, Math.PI*2).onChange(v=>{
-      p2.rotation.x = v;
-    });
-gui.add(guiobj, "y", -Math.PI*2, Math.PI*2).onChange(v=>{
-      p2.rotation.y = v;
-    });
-gui.add(guiobj, "z", -Math.PI*2, Math.PI*2).onChange(v=>{
-      p2.rotation.z = v;
-    });
 
     
   }

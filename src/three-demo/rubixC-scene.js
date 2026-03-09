@@ -481,9 +481,9 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   const magicCube = new RubixCubeLike();
   scene.add(magicCube);
 
-  magicCube.pieces.forEach(x=>{
-    x.highlight({amp:0.4});
-  });
+  // magicCube.pieces.forEach(x=>{
+  //   x.highlight({amp:0.4});
+  // });
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

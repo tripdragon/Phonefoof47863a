@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    777bbb 444bbbba 374 122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
+    8bb 777bbb 444bbbba 374 122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -177,13 +177,13 @@ class Piece extends THREE.Object3D {
       return plane;
     }//makePlane
   
-    highlight({duration=1,highlight=0.2}){
+    highlight({duration=1,amp=0.2}){
       // const colorsHex = this.colors.slice();
       const colorsHsl = this.planes.map(x=>{
         hexToHsl(x.color);
       });
       for(let i = 0; i > colorsHsl.length-1; i++){
-        const ll = colorsHsl[i].l + hightlight;
+        const ll = colorsHsl[i].l + amp;
         //const yy = hslToHex(colorsHsl.h,colorsHsl.s,ll);
         this.planes[i].plane?.material?.color?.setHsl(colorsHsl.h,colorsHsl.s,yy);
       }
@@ -480,7 +480,10 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
 
   const magicCube = new RubixCubeLike();
   scene.add(magicCube);
-  
+
+  magicCube.forEach(x=>{
+    x.highlight({amp:0.4});
+  });
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

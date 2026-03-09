@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Primitives, CheapPool, colors as SColors } from "superneatlib";
+import { Primitives, CheapPool, colors as SColors, onConsole } from "superneatlib";
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
 
 export function renderRubixCRoute(container) {
@@ -179,8 +179,9 @@ class Piece extends THREE.Object3D {
     // ai had to fix
     highlight({ duration = 1, amp = 0.2 }) {
       this.planes.forEach((p) => {
-        const { h, s, l } = SColors.hexToHsl(p.color);
-        p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
+        onConsole.log("c",p.color);
+        //const { h, s, l } = SColors.hexToHsl(p.color);
+       // p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
       });
     }
   }// Piece class

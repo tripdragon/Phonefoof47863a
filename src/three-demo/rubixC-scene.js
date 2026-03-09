@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Primitives, CheapPool } from "superneatlib";
+import { Primitives, CheapPool, hexToHsl } from "superneatlib";
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
 
 export function renderRubixCRoute(container) {

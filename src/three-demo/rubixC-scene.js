@@ -183,15 +183,21 @@ class Piece extends THREE.Object3D {
     highlight({ duration = 1, amp = 0.2 }) {
       this.planes.forEach((p) => {
         //onConsole("c",p.color);
-        console.log("4$");
+        console.log("5$");
        // console.log("c5",p.plane?.material?.uniforms?.uMainColor?.value);
         //p.color.getHSL(this.cc);
         // p.plane?.material?.color?.offsetHSL(0,0,amp);
         // p.plane?.material?.color?.setHex(0xffffff);
-       // p.plane?.material?.uniforms?.uMainColor?.value?.setHex(0xffffff);
+       //p.plane?.material?.uniforms?.uMainColor?.value?.setHex(0xffffff);
        // p.plane?.material?.needsUpdate = true;
         //const { h, s, l } = SColors.hexToHsl(p.color);
        // p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
+
+        const mat = p.plane?.material;
+if (mat?.uniforms?.uMainColor?.value) {
+  mat.uniforms.uMainColor.value.setHex(0xffffff);
+}
+        console.log("$9");
       });
     }
   }// Piece class

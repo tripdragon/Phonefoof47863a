@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    444bbbba 374 122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
+    777bbb 444bbbba 374 122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -73,6 +73,8 @@ class Piece extends THREE.Object3D {
   borderWidth;
   borderColor=0xffaacc;
   debug;
+  planes=[];// tuple {plane,color}
+  colors=[];
   constructor({ colors = [],
                borderColor=0x000000,
                borderWidth=0.02546,
@@ -89,6 +91,9 @@ class Piece extends THREE.Object3D {
       this.buildDebug();
     }
   }
+  storePlane(plane,color){
+    this.planes.push({plane,color:color});
+  }
   build(){
     if(this.colors.length > 0){
       // let p1 = plane({scale:1,color:this.colors[0]});
@@ -96,12 +101,15 @@ class Piece extends THREE.Object3D {
       p1.rotation.x = Math.PI * -0.5;
       p1.position.y = 1;
       this.add(p1);
+      this.storePlane(p1,this.colors[0]);
       
       if(this.colors.length > 1){
         p1.position.z = -0.5;
         //let p3 = plane({scale:1,color:this.colors[1]});
         let pf = this.makePlane(this.colors[1]);
         this.add(pf);
+        this.storePlane(pf,this.colors[1]);
+      
         pf.position.y = 0.5;
         pf.position.z = -1;
         
@@ -113,6 +121,8 @@ class Piece extends THREE.Object3D {
           pf.position.x = -0.5;
           let ps = this.makePlane(this.colors[2]);
           this.add(ps);
+          this.storePlane(ps,this.colors[2]);
+    
           ps.position.z = -0.5;
           ps.rotation.y = Math.PI * -0.5;
           ps.position.y = 0.5;
@@ -166,7 +176,21 @@ class Piece extends THREE.Object3D {
       const plane = new THREE.Mesh(geometry, mat);
       return plane;
     }//makePlane
-  }
+  
+    highlight({duration=1,highlight=0.2}){
+      // const colorsHex = this.colors.slice();
+      const colorsHsl = this.planes.map(x=>{
+        hexToHsl(x.color);
+      });
+      for(let i = 0; i > colorsHsl.length-1; i++){
+        const ll = colorsHsl[i].l + hightlight;
+        //const yy = hslToHex(colorsHsl.h,colorsHsl.s,ll);
+        this.planes[i].plane?.material?.color?.setHsl(colorsHsl.h,colorsHsl.s,yy);
+      }
+      
+    }//highlight
+  
+  }// Piece class
 
 
   // const p_1 = new Piece({colors:[colors.w],debug:true});
@@ -225,6 +249,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   const topLevel = new LevelPieces();
 
   class RubixCubeLike extends THREE.Group{
+    pieces=[];
     constructor(){
       super();
       this.buildTopLevel();
@@ -236,53 +261,53 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     // top
     buildTopLevel(){
       const p0 = new Piece({colors:[colors.w],debug:true});
-      this.add(p0);
+      this.add(p0); this.pieces.push(p0);
       p0.position.y = 0.5;
       
       const p1 = new Piece({colors:[colors.w,colors.b]});
-      this.add(p1);
+      this.add(p1);this.pieces.push(p1);
       p1.position.z = -0.5;
       p1.position.y = 0.5;
       
       const p2 = new Piece({colors:[colors.w,colors.b,colors.o]});
-      this.add(p2);
+      this.add(p2);this.pieces.push(p2);
       p2.position.z = -0.5;
       p2.position.x = -0.5;
       p2.position.y = 0.5;
       //
       const p3 = new Piece({colors:[colors.w,colors.o]});
-      this.add(p3);
+      this.add(p3);this.pieces.push(p3);
       p3.position.x = -0.5;
       p3.rotation.y = Math.PI * 0.5;
       p3.position.y = 0.5;
       
       const p4 = new Piece({colors:[colors.w,colors.o,colors.g]});
-      this.add(p4);
+      this.add(p4);this.pieces.push(p4);
       p4.position.z = 0.5;
       p4.position.x = -0.5;
       p4.rotation.y = Math.PI * 0.5;
       p4.position.y = 0.5;
       //
       const p5 = new Piece({colors:[colors.w,colors.g]});
-      this.add(p5);
+      this.add(p5);this.pieces.push(p5);
       p5.position.z = 0.5;
       p5.rotation.y = Math.PI;
       p5.position.y = 0.5;
       
       const p6 = new Piece({colors:[colors.w,colors.g,colors.r]});
-      this.add(p6);
+      this.add(p6);this.pieces.push(p6);
       p6.position.z = 0.5;
       p6.position.x = 0.5;
       p6.rotation.y = Math.PI;
       p6.position.y = 0.5;
       //
       const p7 = new Piece({colors:[colors.w,colors.r]});
-      this.add(p7);
+      this.add(p7);this.pieces.push(p7);
       p7.position.x = 0.5;
       p7.rotation.y = Math.PI * 2.0 * 0.75;
       p7.position.y = 0.5;
       const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});
-      this.add(p8);
+      this.add(p8);this.pieces.push(p8);
       p8.position.z = -0.5;
       p8.position.x = 0.5;
       p8.rotation.y = Math.PI * 2.0 * 0.75;
@@ -292,12 +317,12 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     buildCenterLevel(){
       // goes counterclockwise from front
       const p1 = new Piece({colors:[colors.b],debug:true});
-      this.add(p1);
+      this.add(p1);this.pieces.push(p1);
       p1.rotation.x = Math.PI *-0.5;
       p1.position.z = -0.5;
       //
       const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
-      this.add(p2);
+      this.add(p2);this.pieces.push(p2);
       // rotations derived from testing on lilgui
       p2.rotation.x = -Math.PI;
       p2.rotation.y = Math.PI * 0.5;
@@ -306,13 +331,13 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       p2.position.z = -0.5;
       //
       const p3 = new Piece({colors:[colors.o],debug:true});
-      this.add(p3);
+      this.add(p3);this.pieces.push(p3);
       p3.rotation.z = -Math.PI * 2 * 0.75;
       p3.position.x = -0.5;
       // window.posdebug = p3;
       //
       const p4 = new Piece({colors:[colors.o,colors.g],debug:true});
-      this.add(p4);
+      this.add(p4);this.pieces.push(p4);
       // rotations derived from testing on lilgui
       p4.rotation.x = -Math.PI;
       p4.rotation.y = 0;
@@ -323,14 +348,14 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       // window.spindebug = p4;
       
       const p5 = new Piece({colors:[colors.g],debug:true});
-      this.add(p5);
+      this.add(p5);this.pieces.push(p5);
       p5.rotation.x = -Math.PI * 2 * 0.75;
       p5.position.z = 0.5;
       // window.spindebug = p5;
       // window.posdebug = p5;
       // 
       const p6 = new Piece({colors:[colors.g,colors.r],debug:true});
-      this.add(p6);
+      this.add(p6);this.pieces.push(p6);
       p6.rotation.x = Math.PI;
       p6.rotation.y = Math.PI * 2 * 0.75;
       p6.rotation.z = Math.PI * 0.5;
@@ -342,14 +367,14 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       // window.posdebug = p6;
   
       const p7 = new Piece({colors:[colors.r],debug:true});
-      this.add(p7);
+      this.add(p7);this.pieces.push(p7);
       p7.rotation.z = Math.PI * 2 * 0.75;
       p7.position.x = 0.5;
       window.spindebug = p7;
       window.posdebug = p7;
       // 
       const p8 = new Piece({colors:[colors.r,colors.b],debug:true});
-      this.add(p8);
+      this.add(p8);this.pieces.push(p8);
       p8.rotation.x = -Math.PI;
       p8.rotation.y = Math.PI;
       p8.rotation.z = Math.PI * 0.5;
@@ -363,20 +388,20 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     
     buildBottomLevel(){
       const p0 = new Piece({colors:[colors.y],debug:true});
-      this.add(p0);
+      this.add(p0);this.pieces.push(p0);
       p0.position.y = -0.5;
       p0.rotation.z = Math.PI;
       window.spindebug = p0;
       
       const p1 = new Piece({colors:[colors.y,colors.b]});
-      this.add(p1);
+      this.add(p1);this.pieces.push(p1);
       p1.position.z = -0.5;
       p1.position.y = -0.5;
       p1.rotation.z = Math.PI;
       
       
       const p2 = new Piece({colors:[colors.y,colors.o,colors.b]});
-      this.add(p2);
+      this.add(p2);this.pieces.push(p2);
       p2.position.z = -0.5;
       p2.position.x = -0.5;
       p2.position.y = -0.5;
@@ -387,14 +412,14 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       // window.posdebug = p2;
       //
       const p3 = new Piece({colors:[colors.y,colors.o]});
-      this.add(p3);
+      this.add(p3);this.pieces.push(p3);
       p3.position.x = -0.5;
       p3.rotation.y = Math.PI * 0.5;
       p3.rotation.z = -Math.PI;
       p3.position.y = -0.5;
   
       const p4 = new Piece({colors:[colors.y,colors.g,colors.o]});
-      this.add(p4);
+      this.add(p4);this.pieces.push(p4);
       p4.position.z = 0.5;
       p4.position.x = -0.5;
       p4.position.y = -0.5;
@@ -404,7 +429,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       
       //
       const p5 = new Piece({colors:[colors.y,colors.g]});
-      this.add(p5);
+      this.add(p5);this.pieces.push(p5);
       p5.position.z = 0.5;
       p5.position.y = -0.5;
       p5.rotation.x = 0;
@@ -414,7 +439,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       
       
       const p6 = new Piece({colors:[colors.y,colors.r,colors.g]});
-      this.add(p6);
+      this.add(p6);this.pieces.push(p6);
       p6.position.x = 0.5;
       p6.position.y = -0.5;
       p6.position.z = 0.5;
@@ -424,7 +449,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   
       //
       const p7 = new Piece({colors:[colors.y,colors.r]});
-      this.add(p7);
+      this.add(p7);this.pieces.push(p7);
       p7.position.x = 0.5;
       p7.position.y = -0.5;
       p7.rotation.x = 0;
@@ -433,7 +458,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   
       
       const p8 = new Piece({colors:[colors.y,colors.b,colors.r]});
-      this.add(p8);
+      this.add(p8);this.pieces.push(p8);
       p8.position.x = 0.5;
       p8.position.y = -0.5;
       p8.position.z = -0.5;

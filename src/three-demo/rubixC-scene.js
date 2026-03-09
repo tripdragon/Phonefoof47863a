@@ -176,20 +176,13 @@ class Piece extends THREE.Object3D {
       const plane = new THREE.Mesh(geometry, mat);
       return plane;
     }//makePlane
-  
-    highlight({duration=1,amp=0.2}){
-      // const colorsHex = this.colors.slice();
-      const colorsHsl = this.planes.map(x=>{
-        hexToHsl(x.color);
+    // ai had to fix
+    highlight({ duration = 1, amp = 0.2 }) {
+      this.planes.forEach((p) => {
+        const { h, s, l } = hexToHsl(p.color);
+        p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
       });
-      for(let i = 0; i > colorsHsl.length-1; i++){
-        const ll = colorsHsl[i].l + amp;
-        //const yy = hslToHex(colorsHsl.h,colorsHsl.s,ll);
-        this.planes[i].plane?.material?.color?.setHsl(colorsHsl.h,colorsHsl.s,yy);
-      }
-      
-    }//highlight
-  
+    }
   }// Piece class
 
 
@@ -481,9 +474,9 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   const magicCube = new RubixCubeLike();
   scene.add(magicCube);
 
-  // magicCube.pieces.forEach(x=>{
-  //   x.highlight({amp:0.4});
-  // });
+  magicCube.pieces.forEach(x=>{
+    x.highlight({amp:0.4});
+  });
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

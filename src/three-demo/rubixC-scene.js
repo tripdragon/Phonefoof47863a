@@ -74,7 +74,7 @@ class Piece extends THREE.Object3D {
   borderColor=0xffaacc;
   debug;
   planes=[];// tuple {plane,color}
-  colors=[];
+  colors=[];//hex but js does not store as 0x
   constructor({ colors = [],
                borderColor=0x000000,
                borderWidth=0.02546,
@@ -92,7 +92,8 @@ class Piece extends THREE.Object3D {
     }
   }
   storePlane(plane,color){
-    this.planes.push({plane,color:color});
+    // this.planes.push({plane,color:color});
+    this.planes.push({plane,color:new THREE.Color(color)});
   }
   build(){
     if(this.colors.length > 0){
@@ -176,11 +177,15 @@ class Piece extends THREE.Object3D {
       const plane = new THREE.Mesh(geometry, mat);
       return plane;
     }//makePlane
+  
     // ai had to fix
+    //cc = {h:0,s:0,l:0}
     highlight({ duration = 1, amp = 0.2 }) {
       this.planes.forEach((p) => {
-        onConsole("c",p.color);
+        //onConsole("c",p.color);
         console.log("c2",p.color);
+        //p.color.getHSL(this.cc);
+        p.plane?.material?.color?.offsetHSL(0,0,amp);
         //const { h, s, l } = SColors.hexToHsl(p.color);
        // p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
       });

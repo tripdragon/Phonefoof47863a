@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    8bb 777bbb 444bbbba 374 122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
+    99995$ 8bb 777bbb 444bbbba 374 122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -183,12 +183,13 @@ class Piece extends THREE.Object3D {
     highlight({ duration = 1, amp = 0.2 }) {
       this.planes.forEach((p) => {
         //onConsole("c",p.color);
-        console.log("c5",p.plane?.material?.uniforms?.uMainColor?.value);
+        console.log("4$");
+       // console.log("c5",p.plane?.material?.uniforms?.uMainColor?.value);
         //p.color.getHSL(this.cc);
         // p.plane?.material?.color?.offsetHSL(0,0,amp);
         // p.plane?.material?.color?.setHex(0xffffff);
-        p.plane?.material?.uniforms?.uMainColor?.value?.setHex(0xffffff);
-        p.plane?.material?.needsUpdate = true;
+       // p.plane?.material?.uniforms?.uMainColor?.value?.setHex(0xffffff);
+       // p.plane?.material?.needsUpdate = true;
         //const { h, s, l } = SColors.hexToHsl(p.color);
        // p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
       });
@@ -483,7 +484,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
 
   const magicCube = new RubixCubeLike();
   scene.add(magicCube);
-gui.hide();
+//gui.hide();
   onConsole("???");
   magicCube.pieces.forEach(x=>{
     x.highlight({amp:0.4});

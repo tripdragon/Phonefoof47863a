@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    99995$ 8bb 777bbb 444bbbba 374 122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
+    rrrh 9995$ 8bb 777bbb 444bbbba 374 122121212bbb 10101012 99jhdf 888jbasf 77b 555a 44 3333 2222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -195,7 +195,9 @@ class Piece extends THREE.Object3D {
 
         const mat = p.plane?.material;
 if (mat?.uniforms?.uMainColor?.value) {
-  mat.uniforms.uMainColor.value.setHex(0xffffff);
+//  mat.uniforms.uMainColor.value.setHex(0xffffff);
+       mat.uniforms.uMainColor.value.setHSL(h, s, Math.min(l + amp, 1));
+  
 }
         console.log("$9");
       });

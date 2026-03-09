@@ -180,6 +180,7 @@ class Piece extends THREE.Object3D {
     highlight({ duration = 1, amp = 0.2 }) {
       this.planes.forEach((p) => {
         onConsole("c",p.color);
+        console.log("c2",p.color);
         //const { h, s, l } = SColors.hexToHsl(p.color);
        // p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
       });

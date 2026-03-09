@@ -179,7 +179,7 @@ class Piece extends THREE.Object3D {
     }//makePlane
   
     // ai had to fix
-    //cc = {h:0,s:0,l:0}
+    cc = {h:0,s:0,l:0}
     highlight({ duration = 1, amp = 0.2 }) {
       this.planes.forEach((p) => {
         //onConsole("c",p.color);
@@ -196,7 +196,9 @@ class Piece extends THREE.Object3D {
         const mat = p.plane?.material;
 if (mat?.uniforms?.uMainColor?.value) {
 //  mat.uniforms.uMainColor.value.setHex(0xffffff);
-       mat.uniforms.uMainColor.value.setHSL(h, s, Math.min(l + amp, 1));
+          p.color?.getHSL(this.cc);
+  
+       mat.uniforms.uMainColor.value.setHSL(this.cc.h, this.cc.s, Math.min(this.cc.l + amp, 1));
   
 }
         console.log("$9");

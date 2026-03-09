@@ -179,7 +179,7 @@ class Piece extends THREE.Object3D {
     // ai had to fix
     highlight({ duration = 1, amp = 0.2 }) {
       this.planes.forEach((p) => {
-        onConsole.log("c",p.color);
+        onConsole("c",p.color);
         //const { h, s, l } = SColors.hexToHsl(p.color);
        // p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
       });

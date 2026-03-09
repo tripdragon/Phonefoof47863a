@@ -474,7 +474,8 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
 
   const magicCube = new RubixCubeLike();
   scene.add(magicCube);
-
+gui.hide();
+  
   magicCube.pieces.forEach(x=>{
     x.highlight({amp:0.4});
   });

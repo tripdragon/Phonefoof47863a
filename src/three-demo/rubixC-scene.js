@@ -186,7 +186,8 @@ class Piece extends THREE.Object3D {
         console.log("c2",p.color);
         //p.color.getHSL(this.cc);
         // p.plane?.material?.color?.offsetHSL(0,0,amp);
-        p.plane?.material?.color?.setHex(0xffffff);
+        // p.plane?.material?.color?.setHex(0xffffff);
+        p.plane?.material?.uniforms?.uMainColor?.value?.setHex(0xffffff);
         p.plane?.material?.needsUpdate = true;
         //const { h, s, l } = SColors.hexToHsl(p.color);
        // p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));

@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    68273b 7364 5555bbb 4444m 2 
+    224b 7364 5555bbb 4444m 2 
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -590,6 +590,8 @@ function StartSpin({direction="counter"}={}){
   // 2. Compute target quaternion by adding PI/2 to Y rotation
   const startEuler = new THREE.Euler().setFromQuaternion(startQuaternion);
   const yy = remapPiToPI2(startEuler.y);
+ const startY = target.rotation.y;
+  const endY = startY + delta;
   
   const delta = Math.PI / 2 * (direction === "counter" ? 1 : -1);
   const targetEuler = new THREE.Euler(startEuler.x, yy + delta, startEuler.z);
@@ -611,7 +613,9 @@ function StartSpin({direction="counter"}={}){
       console.log("t",t);
       if (t >= 1) {
           // Snap exactly at the end
-          target.quaternion.copy(targetQuaternion);
+          // target.quaternion.copy(targetQuaternion);
+        target.rotation.y = endY;
+        
           setTimeout(x=>{
             StartSpin({direction:"counter"});
           },1000);
@@ -623,7 +627,11 @@ function StartSpin({direction="counter"}={}){
 
       // Interpolate rotation
       // THREE.Quaternion.slerp(startQuaternion, targetQuaternion, target.quaternion, easedT);
-          target.quaternion.slerp(targetQuaternion, easedT);
+          // target.quaternion.slerp(targetQuaternion, easedT);
+
+    
+        target.rotation.y = startY + (endY - startY) * easedT;
+
 
   
       requestAnimationFrame(spinGroup);

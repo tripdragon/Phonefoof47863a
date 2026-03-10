@@ -502,15 +502,24 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   scene.add(magicCube);
 //gui.hide();
   onConsole("???");
-  magicCube.pieces.forEach(x=>{
+  // magicCube.pieces.forEach(x=>{
+  //   x.highlight({amp:0.4});
+  // });
+
+  // setTimeout(x=>{
+  //   magicCube.pieces.forEach(x=>{
+  //     x.revertColor();
+  //   });
+  // },2000);
+
+  const PiecesGroup1 = new CheapPool;
+  magicCube.pieces.forEach((x)=>{
+    if(x.position.y > 1;
+    PiecesGroup1.add(x);
+  });
+  PiecesGroup1.forEach(x=>{
     x.highlight({amp:0.4});
   });
-
-  setTimeout(x=>{
-    magicCube.pieces.forEach(x=>{
-      x.revertColor();
-    });
-  },2000);
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

@@ -602,19 +602,18 @@ function StartSpin(){
       const easedT = smoothstep(t);
   
       // Interpolate rotation
-      THREE.Quaternion.slerp(startQuaternion, targetQuaternion, target.quaternion, easedT);
+      // THREE.Quaternion.slerp(startQuaternion, targetQuaternion, target.quaternion, easedT);
+          target.quaternion.slerp(targetQuaternion, easedT);
+
   
       requestAnimationFrame(spinGroup);
   }
 
+  // start
   requestAnimationFrame(spinGroup);
     
 }
 
-// Start animation
-// requestAnimationFrame(animate);
-
-  
   
   
   

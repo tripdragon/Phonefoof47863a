@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    2222b 
+    4444m 2 
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -543,7 +543,8 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       if(x.whichType !== "center" && PiecesGroup1.center){
         // well, it might jitter, but the rubix cube also has no center parent
         // so whatever like
-        PiecesGroup1.center.add(x);
+        PiecesGroup1.center.attach(x);
+        
       }
     });
     spinGroup();
@@ -552,7 +553,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   function spinGroup() {
     requestAnimationFrame(spinGroup);
     if(PiecesGroup1.center){
-      PiecesGroup1.center.rotation.y += 0.1;
+      PiecesGroup1.center.rotation.y += 0.01;
     }
     
   }

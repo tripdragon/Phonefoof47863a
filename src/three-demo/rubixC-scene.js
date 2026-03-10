@@ -590,10 +590,11 @@ function StartSpin({direction="counter"}={}){
   // 2. Compute target quaternion by adding PI/2 to Y rotation
   const startEuler = new THREE.Euler().setFromQuaternion(startQuaternion);
   const yy = remapPiToPI2(startEuler.y);
+  
+  const delta = Math.PI / 2 * (direction === "counter" ? 1 : -1);
  const startY = target.rotation.y;
   const endY = startY + delta;
   
-  const delta = Math.PI / 2 * (direction === "counter" ? 1 : -1);
   const targetEuler = new THREE.Euler(startEuler.x, yy + delta, startEuler.z);
   
   // const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);

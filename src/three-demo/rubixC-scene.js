@@ -69,6 +69,7 @@ const plane = Primitives.plane;
 
 class Piece extends THREE.Object3D {
   isPiece = true;
+  whichType = "";// center edge corner
   borderMat = null;
   borderWidth;
   borderColor=0xffaacc;
@@ -102,6 +103,7 @@ class Piece extends THREE.Object3D {
       p1.rotation.x = Math.PI * -0.5;
       p1.position.y = 1;
       this.add(p1);
+      this.whichType = "center";
       this.storePlane(p1,this.colors[0]);
       
       if(this.colors.length > 1){
@@ -109,6 +111,7 @@ class Piece extends THREE.Object3D {
         //let p3 = plane({scale:1,color:this.colors[1]});
         let pf = this.makePlane(this.colors[1]);
         this.add(pf);
+        this.whichType = "edge";
         this.storePlane(pf,this.colors[1]);
       
         pf.position.y = 0.5;
@@ -122,6 +125,7 @@ class Piece extends THREE.Object3D {
           pf.position.x = -0.5;
           let ps = this.makePlane(this.colors[2]);
           this.add(ps);
+          this.whichType = "corner";
           this.storePlane(ps,this.colors[2]);
     
           ps.position.z = -0.5;
@@ -512,15 +516,48 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   //   });
   // },2000);
 
-  const PiecesGroup1 = new CheapPool;
+  
+  class PiecesGroup extends CheapPool{
+    center;
+    constructor(){
+      super();
+    }
+    add(item){
+      super.add(item);
+      if(item.whichType === "center"){
+        this.center = item;
+      }
+    }
+  }
+  const PiecesGroup1 = new PiecesGroup();
+  
   magicCube.pieces.forEach((x)=>{
     if(x.position.y > 0){
       PiecesGroup1.add(x);
     }
   });
-  PiecesGroup1.forEach(x=>{
-    x.highlight({amp:0.4});
-  });
+
+  setTimeout(x=>{
+    PiecesGroup1.forEach(x=>{
+      x.highlight({amp:0.2});
+      if(x.whichType !== "center" && PiecesGroup1.center){
+        // well, it might jitter, but the rubix cube also has no center parent
+        // so whatever like
+        PiecesGroup1.center.add(x);
+      }
+    });
+    spinGroup();
+  },2000);
+
+  function spinGroup() {
+    requestAnimationFrame(spinGroup);
+    if(PiecesGroup1.center){
+      PiecesGroup1.center.rotation.y += 0.1;
+    }
+    
+  }
+  
+  
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

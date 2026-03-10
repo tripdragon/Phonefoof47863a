@@ -196,10 +196,8 @@ class Piece extends THREE.Object3D {
         const mat = p.plane?.material;
         if (mat?.uniforms?.uMainColor?.value) {
         //  mat.uniforms.uMainColor.value.setHex(0xffffff);
-                  p.color?.getHSL(this.cc);
-          
+                p.color?.getHSL(this.cc);
                mat.uniforms.uMainColor.value.setHSL(this.cc.h, this.cc.s, Math.min(this.cc.l + amp, 1));
-          
         }
         console.log("$9");
       });
@@ -210,7 +208,7 @@ class Piece extends THREE.Object3D {
         if (mat?.uniforms?.uMainColor?.value) {
            mat.uniforms.uMainColor.value.copy(p.color);
         }
-      }
+      });
     }
   }// Piece class
 

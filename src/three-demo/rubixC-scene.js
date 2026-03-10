@@ -591,7 +591,7 @@ function StartSpin(){
       if (!startTime) startTime = time;
       const elapsed = time - startTime;
       let t = elapsed / duration;
-  
+      console.log("t",t);
       if (t >= 1) {
           // Snap exactly at the end
           target.quaternion.copy(targetQuaternion);
@@ -606,6 +606,8 @@ function StartSpin(){
   
       requestAnimationFrame(spinGroup);
   }
+
+  requestAnimationFrame(spinGroup);
     
 }
 

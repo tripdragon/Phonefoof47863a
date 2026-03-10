@@ -194,15 +194,23 @@ class Piece extends THREE.Object3D {
        // p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
 
         const mat = p.plane?.material;
-if (mat?.uniforms?.uMainColor?.value) {
-//  mat.uniforms.uMainColor.value.setHex(0xffffff);
-          p.color?.getHSL(this.cc);
-  
-       mat.uniforms.uMainColor.value.setHSL(this.cc.h, this.cc.s, Math.min(this.cc.l + amp, 1));
-  
-}
+        if (mat?.uniforms?.uMainColor?.value) {
+        //  mat.uniforms.uMainColor.value.setHex(0xffffff);
+                  p.color?.getHSL(this.cc);
+          
+               mat.uniforms.uMainColor.value.setHSL(this.cc.h, this.cc.s, Math.min(this.cc.l + amp, 1));
+          
+        }
         console.log("$9");
       });
+    }// highlight
+    revertColor(){
+      this.planes.forEach((p) => {
+        const mat = p.plane?.material;
+        if (mat?.uniforms?.uMainColor?.value) {
+           mat.uniforms.uMainColor.value.copy(p.color);
+        }
+      }
     }
   }// Piece class
 
@@ -499,6 +507,12 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   magicCube.pieces.forEach(x=>{
     x.highlight({amp:0.4});
   });
+
+  setTimeout(x=>{
+    magicCube.pieces.forEach(x=>{
+      x.revertColor();
+    });
+  },2000);
   
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

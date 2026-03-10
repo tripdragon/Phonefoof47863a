@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    7364 5555bbb 4444m 2 
+    68273b 7364 5555bbb 4444m 2 
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -568,24 +568,41 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     
   // }
 
+  // ease-in/out
+function smoothstep(t) {
+    return t * t * (3 - 2 * t);
+}
+
+// Normalize Y to [0, 2π)
+function remapPiToPI2(v){
+  let y = v % (Math.PI * 2);
+  if (y < 0) y += Math.PI * 2;
+  return y;
+}
+
 function StartSpin({direction="counter"}={}){
   const target = PiecesGroup1.center;
   const startQuaternion = target.quaternion.clone();
+
+  
+
   
   // 2. Compute target quaternion by adding PI/2 to Y rotation
   const startEuler = new THREE.Euler().setFromQuaternion(startQuaternion);
-  const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);
+  const yy = remapPiToPI2(startEuler.y);
+  
+  const delta = Math.PI / 2 * (direction === "counter" ? 1 : -1);
+  const targetEuler = new THREE.Euler(startEuler.x, yy + delta, startEuler.z);
+  
+  // const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);
   const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
+
   
   
   const duration = 1000;
   let startTime = null;
   
-  // ease-in/out
-  function smoothstep(t) {
-      return t * t * (3 - 2 * t);
-  }
-  
+
   
   function spinGroup(time) {
       if (!startTime) startTime = time;
@@ -603,7 +620,7 @@ function StartSpin({direction="counter"}={}){
   
       // Apply easing
       const easedT = smoothstep(t);
-  
+
       // Interpolate rotation
       // THREE.Quaternion.slerp(startQuaternion, targetQuaternion, target.quaternion, easedT);
           target.quaternion.slerp(targetQuaternion, easedT);

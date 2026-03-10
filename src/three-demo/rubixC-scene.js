@@ -551,7 +551,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     StartSpin();
   },2000);
 
-  // let spinGroupID;
+  let spinGroupID;
   // let angle = -1;
   // let durration = 2000;
   // function spinGroup() {
@@ -568,7 +568,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     
   // }
 
-function StartSpin({direction:"counter"}){
+function StartSpin({direction:"counter"}={}){
   const target = PiecesGroup1.center;
   const startQuaternion = target.quaternion.clone();
   

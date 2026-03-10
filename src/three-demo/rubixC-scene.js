@@ -613,7 +613,7 @@ function StartSpin({direction="counter"}={}){
           // Snap exactly at the end
           target.quaternion.copy(targetQuaternion);
           setTimeout(x=>{
-            StartSpin();
+            StartSpin({direction:"counter"});
           },1000);
           return; // stop animation
       }

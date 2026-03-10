@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    4444m 2 
+    5555bbb 4444m 2 
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -547,16 +547,72 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
         
       }
     });
-    spinGroup();
+    // spinGroup();
+    StartSpin();
   },2000);
 
-  function spinGroup() {
-    requestAnimationFrame(spinGroup);
-    if(PiecesGroup1.center){
-      PiecesGroup1.center.rotation.y += 0.01;
-    }
+  // let spinGroupID;
+  // let angle = -1;
+  // let durration = 2000;
+  // function spinGroup() {
+  //   spinGroupID = requestAnimationFrame(spinGroup);
+  //   if(PiecesGroup1.center){
+      
+  //     PiecesGroup1.center.rotation.y += 0.01;
+  //     angle -= Math.sin();
+  //   }
     
+  //   if(angle <= 0){
+  //     cancelAnimationFrame(spinGroupID);
+  //   }
+    
+  // }
+
+function StartSpin(){
+  const target = PiecesGroup1.center;
+  const startQuaternion = target.quaternion.clone();
+  
+  // 2. Compute target quaternion by adding PI/2 to Y rotation
+  const startEuler = new THREE.Euler().setFromQuaternion(startQuaternion);
+  const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + -Math.PI / 2, startEuler.z);
+  const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
+  
+  
+  const duration = 1000;
+  let startTime = null;
+  
+  // ease-in/out
+  function smoothstep(t) {
+      return t * t * (3 - 2 * t);
   }
+  
+  
+  function spinGroup(time) {
+      if (!startTime) startTime = time;
+      const elapsed = time - startTime;
+      let t = elapsed / duration;
+  
+      if (t >= 1) {
+          // Snap exactly at the end
+          target.quaternion.copy(targetQuaternion);
+          return; // stop animation
+      }
+  
+      // Apply easing
+      const easedT = smoothstep(t);
+  
+      // Interpolate rotation
+      THREE.Quaternion.slerp(startQuaternion, targetQuaternion, target.quaternion, easedT);
+  
+      requestAnimationFrame(spinGroup);
+  }
+    
+}
+
+// Start animation
+// requestAnimationFrame(animate);
+
+  
   
   
   

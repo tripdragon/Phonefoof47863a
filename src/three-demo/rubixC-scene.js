@@ -1,7 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Primitives, CheapPool, colors as SColors, onConsole } from "superneatlib";
+import { Primitives, onConsole } from "superneatlib";
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
+import { RubixCubeLike } from "./rubixC/RubixCubeLike.js";
+import { PiecesGroup } from "./rubixC/PiecesGroup.js";
+import { smoothstep, remapPiToPI2 } from "./rubixC/math.js";
 
 export function renderRubixCRoute(container) {
   container.innerHTML = `
@@ -12,8 +15,7 @@ export function renderRubixCRoute(container) {
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
-const plane = Primitives.plane;
-  
+
   const canvasWrap = container.querySelector("#rubixc-canvas-wrap");
 
   const scene = new THREE.Scene();
@@ -41,15 +43,6 @@ const plane = Primitives.plane;
 
   const axesHelper = new THREE.AxesHelper( 5 );
   scene.add( axesHelper );
-  
-  const colors = {
-    w:0xffeffe,
-    r:0xff0000,
-    g:0x00bb00,
-    b:0x0000ff,
-    o:0xffbb00,
-    y:0xffff00
-  };
    
  //  const i1 = new THREE.Group();
  //  //scene.add(i1);
@@ -67,154 +60,6 @@ const plane = Primitives.plane;
   
  //  }
 
-class Piece extends THREE.Object3D {
-  isPiece = true;
-  whichType = "";// center edge corner
-  borderMat = null;
-  borderWidth;
-  borderColor=0xffaacc;
-  debug;
-  planes=[];// tuple {plane,color}
-  colors=[];//hex but js does not store as 0x
-  constructor({ colors = [],
-               borderColor=0x000000,
-               borderWidth=0.02546,
-               debug=false
-              } = {}) {
-    super();
-    this.colors = [...colors];
-    this.borderColor = borderColor;
-    this.borderWidth = borderWidth;
-    this.debug=debug;
-    this.debug=false;
-    this.build();
-    if(this.debug){
-      this.buildDebug();
-    }
-  }
-  storePlane(plane,color){
-    // this.planes.push({plane,color:color});
-    this.planes.push({plane,color:new THREE.Color(color)});
-  }
-  build(){
-    if(this.colors.length > 0){
-      // let p1 = plane({scale:1,color:this.colors[0]});
-      let p1 = this.makePlane(this.colors[0]);
-      p1.rotation.x = Math.PI * -0.5;
-      p1.position.y = 1;
-      this.add(p1);
-      this.whichType = "center";
-      this.storePlane(p1,this.colors[0]);
-      
-      if(this.colors.length > 1){
-        p1.position.z = -0.5;
-        //let p3 = plane({scale:1,color:this.colors[1]});
-        let pf = this.makePlane(this.colors[1]);
-        this.add(pf);
-        this.whichType = "edge";
-        this.storePlane(pf,this.colors[1]);
-      
-        pf.position.y = 0.5;
-        pf.position.z = -1;
-        
-        pf.rotation.y = Math.PI * 1.0;
-        pf.rotation.z = Math.PI * 0.5;
-        
-        if(this.colors.length > 2){
-          p1.position.x = -0.5;
-          pf.position.x = -0.5;
-          let ps = this.makePlane(this.colors[2]);
-          this.add(ps);
-          this.whichType = "corner";
-          this.storePlane(ps,this.colors[2]);
-    
-          ps.position.z = -0.5;
-          ps.rotation.y = Math.PI * -0.5;
-          ps.position.y = 0.5;
-          ps.position.x = -1;
-        }
-      }
-
-    }
-  }// build
-
-  buildDebug(){
-    const geometry = new THREE.SphereGeometry( 0.2, 8, 8 );
-    const material = new THREE.MeshBasicMaterial( { color: 0x8822ff } );
-    const sphere = new THREE.Mesh( geometry, material );
-    this.add( sphere );
-  }//buildDebug
-
-  makePlane(color=0xeeaa22){
-    const mat = new THREE.ShaderMaterial({
-      uniforms: {
-        uMainColor: { value: new THREE.Color(color) },
-        uBorderColor: { value: new THREE.Color(this.borderColor) },
-        uBorderWidth: { value: this.borderWidth } // 0.0 -> 0.5
-      },
-      vertexShader: `
-        varying vec2 vUv;
-
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 uMainColor;
-        uniform vec3 uBorderColor;
-        uniform float uBorderWidth;
-
-        varying vec2 vUv;
-
-        void main() {
-          float d = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
-          float borderMask = step(d, uBorderWidth);
-
-          vec3 color = mix(uMainColor, uBorderColor, borderMask);
-          gl_FragColor = vec4(color, 1.0);
-        }
-        `
-      });
-
-      const geometry = new THREE.PlaneGeometry(1.0, 1.0);
-      const plane = new THREE.Mesh(geometry, mat);
-      return plane;
-    }//makePlane
-  
-    // ai had to fix
-    cc = {h:0,s:0,l:0}
-    highlight({ duration = 1, amp = 0.2 }) {
-      this.planes.forEach((p) => {
-        //onConsole("c",p.color);
-        console.log("5$");
-       // console.log("c5",p.plane?.material?.uniforms?.uMainColor?.value);
-        //p.color.getHSL(this.cc);
-        // p.plane?.material?.color?.offsetHSL(0,0,amp);
-        // p.plane?.material?.color?.setHex(0xffffff);
-       //p.plane?.material?.uniforms?.uMainColor?.value?.setHex(0xffffff);
-       // p.plane?.material?.needsUpdate = true;
-        //const { h, s, l } = SColors.hexToHsl(p.color);
-       // p.plane?.material?.color?.setHSL(h, s, Math.min(l + amp, 1));
-
-        const mat = p.plane?.material;
-        if (mat?.uniforms?.uMainColor?.value) {
-        //  mat.uniforms.uMainColor.value.setHex(0xffffff);
-                p.color?.getHSL(this.cc);
-               mat.uniforms.uMainColor.value.setHSL(this.cc.h, this.cc.s, Math.min(this.cc.l + amp, 1));
-        }
-        console.log("$9");
-      });
-    }// highlight
-    revertColor(){
-      this.planes.forEach((p) => {
-        const mat = p.plane?.material;
-        if (mat?.uniforms?.uMainColor?.value) {
-           mat.uniforms.uMainColor.value.copy(p.color);
-        }
-      });
-    }
-  }// Piece class
 
 
   // const p_1 = new Piece({colors:[colors.w],debug:true});
@@ -265,243 +110,6 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     });
 
   
-  class LevelPieces extends CheapPool {
-    constructor(){
-      super();
-    }
-  }
-  const topLevel = new LevelPieces();
-
-  class RubixCubeLike extends THREE.Group{
-    pieces=[];
-    constructor(){
-      super();
-      this.buildTopLevel();
-      this.buildCenterLevel();
-      this.buildBottomLevel();
-    }
-    // routine for blocks of pieces
-    // starting from center, down, bottom right going in a counterclockwise circle
-    // top
-    buildTopLevel(){
-      const p0 = new Piece({colors:[colors.w],debug:true});
-      this.add(p0); this.pieces.push(p0);
-      p0.position.y = 0.5;
-      
-      const p1 = new Piece({colors:[colors.w,colors.b]});
-      this.add(p1);this.pieces.push(p1);
-      p1.position.z = -0.5;
-      p1.position.y = 0.5;
-      
-      const p2 = new Piece({colors:[colors.w,colors.b,colors.o]});
-      this.add(p2);this.pieces.push(p2);
-      p2.position.z = -0.5;
-      p2.position.x = -0.5;
-      p2.position.y = 0.5;
-      //
-      const p3 = new Piece({colors:[colors.w,colors.o]});
-      this.add(p3);this.pieces.push(p3);
-      p3.position.x = -0.5;
-      p3.rotation.y = Math.PI * 0.5;
-      p3.position.y = 0.5;
-      
-      const p4 = new Piece({colors:[colors.w,colors.o,colors.g]});
-      this.add(p4);this.pieces.push(p4);
-      p4.position.z = 0.5;
-      p4.position.x = -0.5;
-      p4.rotation.y = Math.PI * 0.5;
-      p4.position.y = 0.5;
-      //
-      const p5 = new Piece({colors:[colors.w,colors.g]});
-      this.add(p5);this.pieces.push(p5);
-      p5.position.z = 0.5;
-      p5.rotation.y = Math.PI;
-      p5.position.y = 0.5;
-      
-      const p6 = new Piece({colors:[colors.w,colors.g,colors.r]});
-      this.add(p6);this.pieces.push(p6);
-      p6.position.z = 0.5;
-      p6.position.x = 0.5;
-      p6.rotation.y = Math.PI;
-      p6.position.y = 0.5;
-      //
-      const p7 = new Piece({colors:[colors.w,colors.r]});
-      this.add(p7);this.pieces.push(p7);
-      p7.position.x = 0.5;
-      p7.rotation.y = Math.PI * 2.0 * 0.75;
-      p7.position.y = 0.5;
-      const p8 = new Piece({colors:[colors.w,colors.r,colors.b]});
-      this.add(p8);this.pieces.push(p8);
-      p8.position.z = -0.5;
-      p8.position.x = 0.5;
-      p8.rotation.y = Math.PI * 2.0 * 0.75;
-      p8.position.y = 0.5;
-    }
-
-    buildCenterLevel(){
-      // goes counterclockwise from front
-      const p1 = new Piece({colors:[colors.b],debug:true});
-      this.add(p1);this.pieces.push(p1);
-      p1.rotation.x = Math.PI *-0.5;
-      p1.position.z = -0.5;
-      //
-      const p2 = new Piece({colors:[colors.b,colors.o],debug:true});
-      this.add(p2);this.pieces.push(p2);
-      // rotations derived from testing on lilgui
-      p2.rotation.x = -Math.PI;
-      p2.rotation.y = Math.PI * 0.5;
-      p2.rotation.z = Math.PI * 0.5;
-      p2.position.x = -0.5;
-      p2.position.z = -0.5;
-      //
-      const p3 = new Piece({colors:[colors.o],debug:true});
-      this.add(p3);this.pieces.push(p3);
-      p3.rotation.z = -Math.PI * 2 * 0.75;
-      p3.position.x = -0.5;
-      // window.posdebug = p3;
-      //
-      const p4 = new Piece({colors:[colors.o,colors.g],debug:true});
-      this.add(p4);this.pieces.push(p4);
-      // rotations derived from testing on lilgui
-      p4.rotation.x = -Math.PI;
-      p4.rotation.y = 0;
-      p4.rotation.z = Math.PI * 0.5;
-      p4.position.x = -0.5;
-      p4.position.z = 0.5;
-      //
-      // window.spindebug = p4;
-      
-      const p5 = new Piece({colors:[colors.g],debug:true});
-      this.add(p5);this.pieces.push(p5);
-      p5.rotation.x = -Math.PI * 2 * 0.75;
-      p5.position.z = 0.5;
-      // window.spindebug = p5;
-      // window.posdebug = p5;
-      // 
-      const p6 = new Piece({colors:[colors.g,colors.r],debug:true});
-      this.add(p6);this.pieces.push(p6);
-      p6.rotation.x = Math.PI;
-      p6.rotation.y = Math.PI * 2 * 0.75;
-      p6.rotation.z = Math.PI * 0.5;
-      p6.position.x = 0.5;
-      p6.position.y = 0;
-      p6.position.z = 0.5;
-      //
-      // window.spindebug = p6;
-      // window.posdebug = p6;
-  
-      const p7 = new Piece({colors:[colors.r],debug:true});
-      this.add(p7);this.pieces.push(p7);
-      p7.rotation.z = Math.PI * 2 * 0.75;
-      p7.position.x = 0.5;
-      window.spindebug = p7;
-      window.posdebug = p7;
-      // 
-      const p8 = new Piece({colors:[colors.r,colors.b],debug:true});
-      this.add(p8);this.pieces.push(p8);
-      p8.rotation.x = -Math.PI;
-      p8.rotation.y = Math.PI;
-      p8.rotation.z = Math.PI * 0.5;
-      p8.position.x = 0.5;
-      p8.position.y = 0;
-      p8.position.z = -0.5;
-      //
-      // window.spindebug = p8;
-      // window.posdebug = p8;
-    }// buildTopLevel
-    
-    buildBottomLevel(){
-      const p0 = new Piece({colors:[colors.y],debug:true});
-      this.add(p0);this.pieces.push(p0);
-      p0.position.y = -0.5;
-      p0.rotation.z = Math.PI;
-      window.spindebug = p0;
-      
-      const p1 = new Piece({colors:[colors.y,colors.b]});
-      this.add(p1);this.pieces.push(p1);
-      p1.position.z = -0.5;
-      p1.position.y = -0.5;
-      p1.rotation.z = Math.PI;
-      
-      
-      const p2 = new Piece({colors:[colors.y,colors.o,colors.b]});
-      this.add(p2);this.pieces.push(p2);
-      p2.position.z = -0.5;
-      p2.position.x = -0.5;
-      p2.position.y = -0.5;
-      p2.rotation.x = Math.PI * 0.5;
-      p2.rotation.y = Math.PI * 0.5;
-      p2.rotation.z = Math.PI * 0.5;
-      // window.spindebug=p2;
-      // window.posdebug = p2;
-      //
-      const p3 = new Piece({colors:[colors.y,colors.o]});
-      this.add(p3);this.pieces.push(p3);
-      p3.position.x = -0.5;
-      p3.rotation.y = Math.PI * 0.5;
-      p3.rotation.z = -Math.PI;
-      p3.position.y = -0.5;
-  
-      const p4 = new Piece({colors:[colors.y,colors.g,colors.o]});
-      this.add(p4);this.pieces.push(p4);
-      p4.position.z = 0.5;
-      p4.position.x = -0.5;
-      p4.position.y = -0.5;
-      p4.rotation.x = 0;
-      p4.rotation.y = -Math.PI;
-      p4.rotation.z = Math.PI;
-      
-      //
-      const p5 = new Piece({colors:[colors.y,colors.g]});
-      this.add(p5);this.pieces.push(p5);
-      p5.position.z = 0.5;
-      p5.position.y = -0.5;
-      p5.rotation.x = 0;
-      p5.rotation.y = Math.PI;
-      p5.rotation.z = Math.PI;
-  
-      
-      
-      const p6 = new Piece({colors:[colors.y,colors.r,colors.g]});
-      this.add(p6);this.pieces.push(p6);
-      p6.position.x = 0.5;
-      p6.position.y = -0.5;
-      p6.position.z = 0.5;
-      p6.rotation.x = Math.PI;
-      p6.rotation.y = Math.PI * 2 * 0.75;
-      p6.rotation.z = 0;
-  
-      //
-      const p7 = new Piece({colors:[colors.y,colors.r]});
-      this.add(p7);this.pieces.push(p7);
-      p7.position.x = 0.5;
-      p7.position.y = -0.5;
-      p7.rotation.x = 0;
-      p7.rotation.y = -Math.PI * 0.5;
-      p7.rotation.z = Math.PI;
-  
-      
-      const p8 = new Piece({colors:[colors.y,colors.b,colors.r]});
-      this.add(p8);this.pieces.push(p8);
-      p8.position.x = 0.5;
-      p8.position.y = -0.5;
-      p8.position.z = -0.5;
-      p8.rotation.x = 0;
-      p8.rotation.y = 0;
-      p8.rotation.z = Math.PI;
-      
-  
-      
-      window.spindebug=p8;
-      window.posdebug = p8;
-      
-      return
-      
-    }// buildBottomLevel
-
-  }// RubixCubeLike
-
-
   const magicCube = new RubixCubeLike();
   scene.add(magicCube);
 //gui.hide();
@@ -516,19 +124,6 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   //   });
   // },2000);
 
-  
-  class PiecesGroup extends CheapPool{
-    center;
-    constructor(){
-      super();
-    }
-    add(item){
-      super.add(item);
-      if(item.whichType === "center"){
-        this.center = item;
-      }
-    }
-  }
   const PiecesGroup1 = new PiecesGroup();
   
   magicCube.pieces.forEach((x)=>{
@@ -567,18 +162,6 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   //   }
     
   // }
-
-  // ease-in/out
-function smoothstep(t) {
-    return t * t * (3 - 2 * t);
-}
-
-// Normalize Y to [0, 2π)
-function remapPiToPI2(v){
-  let y = v % (Math.PI * 2);
-  if (y < 0) y += Math.PI * 2;
-  return y;
-}
 
 function StartSpin({direction="counter"}={}){
   const target = PiecesGroup1.center;

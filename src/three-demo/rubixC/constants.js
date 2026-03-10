@@ -1,0 +1,8 @@
+export const colors = {
+  w: 0xffeffe,
+  r: 0xff0000,
+  g: 0x00bb00,
+  b: 0x0000ff,
+  o: 0xffbb00,
+  y: 0xffff00,
+};

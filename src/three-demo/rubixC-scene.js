@@ -7,7 +7,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    5555bbb 4444m 2 
+    7364 5555bbb 4444m 2 
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -568,13 +568,13 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     
   // }
 
-function StartSpin(){
+function StartSpin({direction:"counter"}){
   const target = PiecesGroup1.center;
   const startQuaternion = target.quaternion.clone();
   
   // 2. Compute target quaternion by adding PI/2 to Y rotation
   const startEuler = new THREE.Euler().setFromQuaternion(startQuaternion);
-  const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + -Math.PI / 2, startEuler.z);
+  const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);
   const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
   
   
@@ -595,6 +595,9 @@ function StartSpin(){
       if (t >= 1) {
           // Snap exactly at the end
           target.quaternion.copy(targetQuaternion);
+          setTimeout(x=>{
+            StartSpin();
+          },1000);
           return; // stop animation
       }
   

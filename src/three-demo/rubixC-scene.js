@@ -514,8 +514,8 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
 
   const PiecesGroup1 = new CheapPool;
   magicCube.pieces.forEach((x)=>{
-    if(x.position.y > 1){
-    PiecesGroup1.add(x);
+    if(x.position.y > 0){
+      PiecesGroup1.add(x);
     }
   });
   PiecesGroup1.forEach(x=>{

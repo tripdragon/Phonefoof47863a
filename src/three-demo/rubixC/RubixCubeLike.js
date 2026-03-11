@@ -3,43 +3,160 @@ import { Piece } from "./Piece.js";
 import { colors } from "./constants.js";
 import { CheapPool } from "superneatlib";
 import { PiecesGroup } from "./PiecesGroup.js";
+
 export class RubixCubeLike extends THREE.Group {
   pieces = [];
+
+  static EPSILON = 1e-5;
 
   // transitionalGroups
   // sides and slices of cube
   tGS = {
-    // these have length 9
-    top = new PiecesGroup(),
-    leftFront, rightFront,
-    leftBack, rightBack,
-    bottom, 
-    // length 8, cant settle on a name since
-    // they have no central axis
-    slice1,slice2,sliceCenter
-  }
-  
+    // faces / cornersets
+    top: new PiecesGroup(),        // y > 0  => 9
+    bottom: new PiecesGroup(),     // y < 0  => 9
+
+    leftFront: new PiecesGroup(),  // x < 0 && z < 0
+    rightFront: new PiecesGroup(), // x > 0 && z < 0
+    leftBack: new PiecesGroup(),   // x < 0 && z > 0
+    rightBack: new PiecesGroup(),  // x > 0 && z > 0
+
+    // 8-piece middle slices (no visible center cubie)
+    slice1: new PiecesGroup(),     // x ~= 0
+    slice2: new PiecesGroup(),     // z ~= 0
+    sliceCenter: new PiecesGroup() // y ~= 0
+  };
+
   constructor() {
     super();
     this.buildTopLevel();
     this.buildCenterLevel();
     this.buildBottomLevel();
+    this.refishGroups();
   }
 
-  refishGroups(){
-    this.fishTop()
+  nearZero(n, eps = RubixCubeLike.EPSILON) {
+    return Math.abs(n) <= eps;
   }
-  fishTop(){
-    // need to clear and keep the length for later fix
-    this.tGS.top.length = 0;
-    this.pieces.forEach(x=>{
-      if(x.position.y > 0){
+
+  gtZero(n, eps = RubixCubeLike.EPSILON) {
+    return n > eps;
+  }
+
+  ltZero(n, eps = RubixCubeLike.EPSILON) {
+    return n < -eps;
+  }
+
+  clearGroup(group) {
+    group.length = 0;
+  }
+
+  clearAllFish() {
+    Object.values(this.tGS).forEach(group => {
+      this.clearGroup(group);
+    });
+  }
+
+  refishGroups() {
+    this.clearAllFish();
+
+    this.fishTop();
+    this.fishBottom();
+
+    this.fishLeftFront();
+    this.fishRightFront();
+    this.fishLeftBack();
+    this.fishRightBack();
+
+    this.fishSlice1();
+    this.fishSlice2();
+    this.fishSliceCenter();
+  }
+
+  fishTop() {
+    this.clearGroup(this.tGS.top);
+    this.pieces.forEach((x) => {
+      if (this.gtZero(x.position.y)) {
         this.tGS.top.add(x);
       }
     });
   }
 
-  
+  fishBottom() {
+    this.clearGroup(this.tGS.bottom);
+    this.pieces.forEach((x) => {
+      if (this.ltZero(x.position.y)) {
+        this.tGS.bottom.add(x);
+      }
+    });
+  }
+
+  fishLeftFront() {
+    this.clearGroup(this.tGS.leftFront);
+    this.pieces.forEach((x) => {
+      if (this.ltZero(x.position.x) && this.ltZero(x.position.z)) {
+        this.tGS.leftFront.add(x);
+      }
+    });
+  }
+
+  fishRightFront() {
+    this.clearGroup(this.tGS.rightFront);
+    this.pieces.forEach((x) => {
+      if (this.gtZero(x.position.x) && this.ltZero(x.position.z)) {
+        this.tGS.rightFront.add(x);
+      }
+    });
+  }
+
+  fishLeftBack() {
+    this.clearGroup(this.tGS.leftBack);
+    this.pieces.forEach((x) => {
+      if (this.ltZero(x.position.x) && this.gtZero(x.position.z)) {
+        this.tGS.leftBack.add(x);
+      }
+    });
+  }
+
+  fishRightBack() {
+    this.clearGroup(this.tGS.rightBack);
+    this.pieces.forEach((x) => {
+      if (this.gtZero(x.position.x) && this.gtZero(x.position.z)) {
+        this.tGS.rightBack.add(x);
+      }
+    });
+  }
+
+  // middle vertical slice where x is effectively 0
+  fishSlice1() {
+    this.clearGroup(this.tGS.slice1);
+    this.pieces.forEach((x) => {
+      if (this.nearZero(x.position.x)) {
+        this.tGS.slice1.add(x);
+      }
+    });
+  }
+
+  // middle depth slice where z is effectively 0
+  fishSlice2() {
+    this.clearGroup(this.tGS.slice2);
+    this.pieces.forEach((x) => {
+      if (this.nearZero(x.position.z)) {
+        this.tGS.slice2.add(x);
+      }
+    });
+  }
+
+  // center ring where y is effectively 0
+  fishSliceCenter() {
+    this.clearGroup(this.tGS.sliceCenter);
+    this.pieces.forEach((x) => {
+      if (this.nearZero(x.position.y)) {
+        this.tGS.sliceCenter.add(x);
+      }
+    });
+  }
+
   buildTopLevel() {
     const p0 = new Piece({ colors: [colors.w], debug: true });
     this.add(p0);
@@ -255,4 +372,4 @@ export class RubixCubeLike extends THREE.Group {
     window.spindebug = p8;
     window.posdebug = p8;
   }
-}
+                          }

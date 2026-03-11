@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    new 222
+    7999654b ew 222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -124,21 +124,22 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   //   });
   // },2000);
 
-  const PiecesGroup1 = new PiecesGroup();
+ // const PiecesGroup1 = new PiecesGroup();
   
-  magicCube.pieces.forEach((x)=>{
-    if(x.position.y > 0){
-      PiecesGroup1.add(x);
-    }
-  });
+  //magicCube.pieces.forEach((x)=>{
+//    if(x.position.y > 0){
+//      PiecesGroup1.add(x);
+//    }
+//  });
 
   setTimeout(x=>{
-    PiecesGroup1.forEach(x=>{
+    let selected = magicCube.tGS.top;
+    selected.forEach(x=>{
       x.highlight({amp:0.2});
       if(x.whichType !== "center" && PiecesGroup1.center){
         // well, it might jitter, but the rubix cube also has no center parent
         // so whatever like
-        PiecesGroup1.center.attach(x);
+        selected.center.attach(x);
         
       }
     });
@@ -164,7 +165,9 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   // }
 
 function StartSpin({direction="counter"}={}){
-  const target = PiecesGroup1.center;
+      let selected = magicCube.tGS.top;
+  
+  const target = selected.center;
   const startQuaternion = target.quaternion.clone();
 
   

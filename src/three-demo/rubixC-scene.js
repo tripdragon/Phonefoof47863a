@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    bbb2 999654b ew 222
+  m5588 bb2 999654b ew 222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -119,10 +119,38 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   // });
 
  magicCube.tGS.top.forEach(x=>{
-     x.highlight({amp:0.4});
+    // x.highlight({amp:0.4});
   });
 
+const groups = [
+  "top",
+  "bottom",
+  "left",
+  "right",
+  "back",
+  "front",
+  "ringHorizontal",
+  "ringVertical",
+  "ringBow"
+];
 
+groups.forEach((g, i) => {
+  setTimeout(() => {
+
+    // revert everything first
+    magicCube.pieces.forEach(x => {
+      x.revertColor();
+    });
+
+    // highlight next group
+    magicCube.tGS[g].forEach(x => {
+      x.highlight({ amp: 0.4 });
+    });
+
+  }, i * 2000);
+});
+
+  
   
 
   // setTimeout(x=>{

@@ -118,6 +118,13 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   //   x.highlight({amp:0.4});
   // });
 
+ magicCube.tGS.top.forEach(x=>{
+     x.highlight({amp:0.4});
+  });
+
+
+  
+
   // setTimeout(x=>{
   //   magicCube.pieces.forEach(x=>{
   //     x.revertColor();
@@ -132,6 +139,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
 //    }
 //  });
 
+  /*
   setTimeout(x=>{
     let selected = magicCube.tGS.top;
     selected.forEach(x=>{
@@ -146,6 +154,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     // spinGroup();
    StartSpin();
   },2000);
+  */
   
 
   let spinGroupID;

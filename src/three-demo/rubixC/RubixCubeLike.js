@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { Piece } from "./Piece.js";
 import { colors } from "./constants.js";
-import { CheapPool } from "superneat";
+import { CheapPool } from "superneatlib";
+import { PiecesGroup } from "./PiecesGroup.js";
 export class RubixCubeLike extends THREE.Group {
   pieces = [];
 
@@ -9,7 +10,7 @@ export class RubixCubeLike extends THREE.Group {
   // sides and slices of cube
   tGS = {
     // these have length 9
-    top = new CheapPool(),
+    top = new PiecesGroup(),
     leftFront, rightFront,
     leftBack, rightBack,
     bottom, 
@@ -25,6 +26,20 @@ export class RubixCubeLike extends THREE.Group {
     this.buildBottomLevel();
   }
 
+  refishGroups(){
+    this.fishTop()
+  }
+  fishTop(){
+    // need to clear and keep the length for later fix
+    this.tGS.top.length = 0;
+    this.pieces.forEach(x=>{
+      if(x.position.y > 0){
+        this.tGS.top.add(x);
+      }
+    });
+  }
+
+  
   buildTopLevel() {
     const p0 = new Piece({ colors: [colors.w], debug: true });
     this.add(p0);

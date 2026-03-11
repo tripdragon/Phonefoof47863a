@@ -94,67 +94,74 @@ export class RubixCubeLike extends THREE.Group {
   }
 
   fishLeft() {
-    this.clearGroup(this.tGS.leftFront);
+    //this.clearGroup(this.tGS.leftFront);
+    this.tGS.left.clear();
     this.pieces.forEach((x) => {
       if (this.ltZero(x.position.x)) {
-        this.tGS.leftFront.add(x);
+        this.tGS.left.add(x);
       }
     });
   }
 
   fishRight() {
-    this.clearGroup(this.tGS.rightFront);
+    //this.clearGroup(this.tGS.right);
+    this.tGS.right();
     this.pieces.forEach((x) => {
       if (this.gtZero(x.position.x)) {
-        this.tGS.rightFront.add(x);
+        this.tGS.right.add(x);
       }
     });
   }
 
   fishFront() {
-    this.clearGroup(this.tGS.leftBack);
+    //this.clearGroup(this.tGS.front);
+    this.tGS.front.clear();
     this.pieces.forEach((x) => {
-      if (this.ltZero(x.position.x) && this.gtZero(x.position.z)) {
-        this.tGS.leftBack.add(x);
+      if (this.ltZero(x.position.z)) {
+        this.tGS.front.add(x);
       }
     });
   }
 
   fishBack() {
-    this.clearGroup(this.tGS.rightBack);
+   // this.clearGroup(this.tGS.rightBack);
+    this.tGS.back.clear();
     this.pieces.forEach((x) => {
-      if (this.gtZero(x.position.x) && this.gtZero(x.position.z)) {
-        this.tGS.rightBack.add(x);
+      if (this.gtZero(this.gtZero(x.position.z)) {
+        this.tGS.back.add(x);
       }
     });
   }
 
   // middle vertical slice where x is effectively 0
   fishRingHorizontal() {
-    this.clearGroup(this.tGS.slice1);
+    //this.clearGroup(this.tGS.slice1);
+    this.tGS.ringHorizontal.clear();
     this.pieces.forEach((x) => {
-      if (this.nearZero(x.position.x)) {
-        this.tGS.slice1.add(x);
+      if (this.nearZero(x.position.y)) {
+        this.tGS.ringHorizontal.add(x);
       }
     });
   }
 
   // middle depth slice where z is effectively 0
   fishRingVertical() {
-    this.clearGroup(this.tGS.slice2);
+    //this.clearGroup(this.tGS.slice2);
+    this.tGS.ringVertical.clear();
     this.pieces.forEach((x) => {
-      if (this.nearZero(x.position.z)) {
-        this.tGS.slice2.add(x);
+      if (this.nearZero(x.position.x)) {
+        this.tGS.ringVertical.add(x);
       }
     });
   }
 
   // center ring where y is effectively 0
   fishRingBow() {
-    this.clearGroup(this.tGS.sliceCenter);
+    //this.clearGroup(this.tGS.sliceCenter);
+    this.tGS.ringBow.clear();
     this.pieces.forEach((x) => {
-      if (this.nearZero(x.position.y)) {
-        this.tGS.sliceCenter.add(x);
+      if (this.nearZero(x.position.z)) {
+        this.tGS.ringBow.add(x);
       }
     });
   }

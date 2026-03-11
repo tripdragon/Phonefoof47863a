@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-    7999654b ew 222
+    bbb2 999654b ew 222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -131,7 +131,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
 //      PiecesGroup1.add(x);
 //    }
 //  });
-
+/*
   setTimeout(x=>{
     let selected = magicCube.tGS.top;
     selected.forEach(x=>{
@@ -144,8 +144,9 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       }
     });
     // spinGroup();
-   // StartSpin();
+   StartSpin();
   },2000);
+  */
 
   let spinGroupID;
   // let angle = -1;

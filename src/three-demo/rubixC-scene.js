@@ -131,7 +131,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
 //      PiecesGroup1.add(x);
 //    }
 //  });
-/*
+
   setTimeout(x=>{
     let selected = magicCube.tGS.top;
     selected.forEach(x=>{
@@ -146,7 +146,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
     // spinGroup();
    StartSpin();
   },2000);
-  */
+  
 
   let spinGroupID;
   // let angle = -1;

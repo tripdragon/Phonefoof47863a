@@ -75,7 +75,7 @@ export class RubixCubeLike extends THREE.Group {
 
   fishTop() {
     //this.clearGroup(this.tGS.top);
-    this.tGS.clear();
+    this.tGS.top.clear();
     this.pieces.forEach((x) => {
       if (this.gtZero(x.position.y)) {
         this.tGS.top.add(x);
@@ -127,7 +127,7 @@ export class RubixCubeLike extends THREE.Group {
    // this.clearGroup(this.tGS.rightBack);
     this.tGS.back.clear();
     this.pieces.forEach((x) => {
-      if (this.gtZero(this.gtZero(x.position.z)) {
+      if (this.gtZero(x.position.z)) {
         this.tGS.back.add(x);
       }
     });

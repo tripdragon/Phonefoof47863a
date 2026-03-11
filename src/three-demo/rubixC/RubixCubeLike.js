@@ -10,21 +10,21 @@ export class RubixCubeLike extends THREE.Group {
   static EPSILON = 1e-5;
 
   // transitionalGroups
-  // sides and slices of cube
+  // sides and rings of cube
   tGS = {
     // faces / cornersets
-    top: new PiecesGroup(),        // y > 0  => 9
-    bottom: new PiecesGroup(),     // y < 0  => 9
+    top: new PiecesGroup(),        // +y
+    bottom: new PiecesGroup(),     // -y
 
-    leftFront: new PiecesGroup(),  // x < 0 && z < 0
-    rightFront: new PiecesGroup(), // x > 0 && z < 0
-    leftBack: new PiecesGroup(),   // x < 0 && z > 0
-    rightBack: new PiecesGroup(),  // x > 0 && z > 0
+    left: new PiecesGroup(),  // -x
+    right: new PiecesGroup(), // +x
+    back: new PiecesGroup(),   // +z
+    front: new PiecesGroup(),  // -z
 
     // 8-piece middle slices (no visible center cubie)
-    slice1: new PiecesGroup(),     // x ~= 0
-    slice2: new PiecesGroup(),     // z ~= 0
-    sliceCenter: new PiecesGroup() // y ~= 0
+    ringHorizontal: new PiecesGroup(),     // x ~= 0
+    ringVertical: new PiecesGroup(),     // z ~= 0
+    ringBow: new PiecesGroup() // y ~= 0
   };
 
   constructor() {
@@ -63,14 +63,14 @@ export class RubixCubeLike extends THREE.Group {
     this.fishTop();
     this.fishBottom();
 
-    this.fishLeftFront();
-    this.fishRightFront();
-    this.fishLeftBack();
-    this.fishRightBack();
+    this.fishLeft();
+    this.fishRight();
+    this.fisBack();
+    this.fishFront();
 
-    this.fishSlice1();
-    this.fishSlice2();
-    this.fishSliceCenter();
+    this.fishRingHorizontal();
+    this.fishRingVertical();
+    this.fishRingBow();
   }
 
   fishTop() {
@@ -91,25 +91,25 @@ export class RubixCubeLike extends THREE.Group {
     });
   }
 
-  fishLeftFront() {
+  fishLeft() {
     this.clearGroup(this.tGS.leftFront);
     this.pieces.forEach((x) => {
-      if (this.ltZero(x.position.x) && this.ltZero(x.position.z)) {
+      if (this.ltZero(x.position.x)) {
         this.tGS.leftFront.add(x);
       }
     });
   }
 
-  fishRightFront() {
+  fishRight() {
     this.clearGroup(this.tGS.rightFront);
     this.pieces.forEach((x) => {
-      if (this.gtZero(x.position.x) && this.ltZero(x.position.z)) {
+      if (this.gtZero(x.position.x)) {
         this.tGS.rightFront.add(x);
       }
     });
   }
 
-  fishLeftBack() {
+  fishFront() {
     this.clearGroup(this.tGS.leftBack);
     this.pieces.forEach((x) => {
       if (this.ltZero(x.position.x) && this.gtZero(x.position.z)) {
@@ -118,7 +118,7 @@ export class RubixCubeLike extends THREE.Group {
     });
   }
 
-  fishRightBack() {
+  fishBack() {
     this.clearGroup(this.tGS.rightBack);
     this.pieces.forEach((x) => {
       if (this.gtZero(x.position.x) && this.gtZero(x.position.z)) {
@@ -128,7 +128,7 @@ export class RubixCubeLike extends THREE.Group {
   }
 
   // middle vertical slice where x is effectively 0
-  fishSlice1() {
+  fishRingHorizontal() {
     this.clearGroup(this.tGS.slice1);
     this.pieces.forEach((x) => {
       if (this.nearZero(x.position.x)) {
@@ -138,7 +138,7 @@ export class RubixCubeLike extends THREE.Group {
   }
 
   // middle depth slice where z is effectively 0
-  fishSlice2() {
+  fishRingVertical() {
     this.clearGroup(this.tGS.slice2);
     this.pieces.forEach((x) => {
       if (this.nearZero(x.position.z)) {
@@ -148,7 +148,7 @@ export class RubixCubeLike extends THREE.Group {
   }
 
   // center ring where y is effectively 0
-  fishSliceCenter() {
+  fishRingBow() {
     this.clearGroup(this.tGS.sliceCenter);
     this.pieces.forEach((x) => {
       if (this.nearZero(x.position.y)) {

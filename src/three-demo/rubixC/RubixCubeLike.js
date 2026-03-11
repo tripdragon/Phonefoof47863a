@@ -1,10 +1,23 @@
 import * as THREE from "three";
 import { Piece } from "./Piece.js";
 import { colors } from "./constants.js";
-
+import { CheapPool } from "superneat";
 export class RubixCubeLike extends THREE.Group {
   pieces = [];
 
+  // transitionalGroups
+  // sides and slices of cube
+  tGS = {
+    // these have length 9
+    top = new CheapPool(),
+    leftFront, rightFront,
+    leftBack, rightBack,
+    bottom, 
+    // length 8, cant settle on a name since
+    // they have no central axis
+    slice1,slice2,sliceCenter
+  }
+  
   constructor() {
     super();
     this.buildTopLevel();

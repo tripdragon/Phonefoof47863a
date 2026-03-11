@@ -3,7 +3,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Primitives, onConsole } from "superneatlib";
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
 import { RubixCubeLike } from "./rubixC/RubixCubeLike.js";
-import { smoothstep } from "./rubixC/math.js";
+import { PiecesGroup } from "./rubixC/PiecesGroup.js";
+import { smoothstep, remapPiToPI2 } from "./rubixC/math.js";
 
 export function renderRubixCRoute(container) {
   container.innerHTML = `
@@ -123,54 +124,107 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   //   });
   // },2000);
 
-  function animateYRotation(target, { direction = "counter", duration = 1000 } = {}) {
-    const delta = Math.PI / 2 * (direction === "counter" ? 1 : -1);
-    const startY = target.rotation.y;
-    const endY = startY + delta;
-    let startTime = null;
+  const PiecesGroup1 = new PiecesGroup();
+  
+  magicCube.pieces.forEach((x)=>{
+    if(x.position.y > 0){
+      PiecesGroup1.add(x);
+    }
+  });
 
-    function spin(time) {
+  setTimeout(x=>{
+    PiecesGroup1.forEach(x=>{
+      x.highlight({amp:0.2});
+      if(x.whichType !== "center" && PiecesGroup1.center){
+        // well, it might jitter, but the rubix cube also has no center parent
+        // so whatever like
+        PiecesGroup1.center.attach(x);
+        
+      }
+    });
+    // spinGroup();
+    StartSpin();
+  },2000);
+
+  let spinGroupID;
+  // let angle = -1;
+  // let durration = 2000;
+  // function spinGroup() {
+  //   spinGroupID = requestAnimationFrame(spinGroup);
+  //   if(PiecesGroup1.center){
+      
+  //     PiecesGroup1.center.rotation.y += 0.01;
+  //     angle -= Math.sin();
+  //   }
+    
+  //   if(angle <= 0){
+  //     cancelAnimationFrame(spinGroupID);
+  //   }
+    
+  // }
+
+function StartSpin({direction="counter"}={}){
+  const target = PiecesGroup1.center;
+  const startQuaternion = target.quaternion.clone();
+
+  
+
+  
+  // 2. Compute target quaternion by adding PI/2 to Y rotation
+  const startEuler = new THREE.Euler().setFromQuaternion(startQuaternion);
+  const yy = remapPiToPI2(startEuler.y);
+  
+  const delta = Math.PI / 2 * (direction === "counter" ? 1 : -1);
+ const startY = target.rotation.y;
+  const endY = startY + delta;
+  
+  const targetEuler = new THREE.Euler(startEuler.x, yy + delta, startEuler.z);
+  
+  // const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);
+  const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
+
+  
+  
+  const duration = 1000;
+  let startTime = null;
+  
+
+  
+  function spinGroup(time) {
       if (!startTime) startTime = time;
       const elapsed = time - startTime;
-      const t = Math.min(elapsed / duration, 1);
+      let t = elapsed / duration;
+      console.log("t",t);
+      if (t >= 1) {
+          // Snap exactly at the end
+          // target.quaternion.copy(targetQuaternion);
+        target.rotation.y = endY;
+        
+          setTimeout(x=>{
+            StartSpin({direction:"counter"});
+          },1000);
+          return; // stop animation
+      }
+  
+      // Apply easing
       const easedT = smoothstep(t);
-      target.rotation.y = startY + (endY - startY) * easedT;
 
-      if (t < 1) {
-        requestAnimationFrame(spin);
-      }
-    }
+      // Interpolate rotation
+      // THREE.Quaternion.slerp(startQuaternion, targetQuaternion, target.quaternion, easedT);
+          // target.quaternion.slerp(targetQuaternion, easedT);
 
-    requestAnimationFrame(spin);
+    
+        target.rotation.y = startY + (endY - startY) * easedT;
+
+
+  
+      requestAnimationFrame(spinGroup);
   }
 
-  function rotateTransitionGroup(group) {
-    if (!group || group.length === 0) {
-      return;
-    }
-
-    group.forEach((piece) => {
-      piece.highlight({ amp: 0.2 });
-      if (piece.whichType !== "center" && group.center) {
-        group.center.attach(piece);
-      }
-    });
-
-    if (group.center) {
-      animateYRotation(group.center, { direction: "counter", duration: 1000 });
-      return;
-    }
-
-    group.forEach((piece) => {
-      animateYRotation(piece, { direction: "counter", duration: 1000 });
-    });
-  }
-
-  Object.values(magicCube.tGS).forEach((group, index) => {
-    setTimeout(() => {
-      rotateTransitionGroup(group);
-    }, index * 1000);
-  });
+  // start
+  requestAnimationFrame(spinGroup);
+    
+}
 
   
   

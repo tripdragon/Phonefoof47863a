@@ -144,7 +144,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
       }
     });
     // spinGroup();
-    StartSpin();
+   // StartSpin();
   },2000);
 
   let spinGroupID;
@@ -225,7 +225,7 @@ function StartSpin({direction="counter"}={}){
   }
 
   // start
-  requestAnimationFrame(spinGroup);
+requestAnimationFrame(spinGroup);
     
 }
 

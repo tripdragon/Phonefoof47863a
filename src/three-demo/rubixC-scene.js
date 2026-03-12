@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-bb9952b
+vvvv486
       </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -130,8 +130,7 @@ gui.hide();
   });
 
   
-/*
-const groups = [
+const groupsNames = [
   "top",
   "bottom",
   "left",
@@ -142,6 +141,11 @@ const groups = [
   "ringVertical",
   "ringBow"
 ];
+
+  
+  
+/*
+
 
 groups.forEach((g, i) => {
   setTimeout(() => {
@@ -211,10 +215,14 @@ groups.forEach((g, i) => {
     
   // }
 
+let index = 0;
+
+
+  
 function StartSpin({selected,direction="counter"}={}){
      // let selected = magicCube.tGS.top;
-    magicCube.updateMatrixWorld(true);
-
+    //magicCube.updateMatrixWorld(true);
+//index++;
   detachAll();
   magicCube.updateMatrixWorld(true);
   magicCube.refishGroups();
@@ -268,8 +276,10 @@ selected.forEach(x=>{
         target.rotation.y = endY;
         
           setTimeout(x=>{
+            imdex++;
             //StartSpin({direction:"counter"});
-               StartSpin({direction:"counter", selected: magicCube.tGS.front});
+             //  StartSpin({direction:"counter", selected: magicCube.tGS.front});
+                           StartSpin({direction:"counter", selected: magicCube.tGS[groupsNames[index]});
             
           },1000);
           return; // stop animation

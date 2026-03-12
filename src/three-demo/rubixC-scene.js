@@ -112,7 +112,7 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
   
   const magicCube = new RubixCubeLike();
 
-  // magicCube.showNormals();
+magicCube.showNormals();
 
   window.magicCube = magicCube;
   

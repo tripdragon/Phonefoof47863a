@@ -238,7 +238,7 @@ export class RubixCubeLike extends THREE.Group {
     this.add(p1);
     this.pieces.push(p1);
     //p1.rotation.x = Math.PI * -0.5;
-    p1.quaternion.setFromAxisAngle( new THREE.Vector3( 0, 1, 0 ), 0.4 );
+    p1.quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), Math.PI * -0.5 );
 
     p1.position.z = -0.5;
 

@@ -385,10 +385,10 @@ export class RubixCubeLike extends THREE.Group {
 
   showNormals(){
     this.pieces.forEach(x=>{
-      if(x.whichType === "center"){
-        const axesHelper = new THREE.AxesHelper( 2 );
+        const axesHelper = new THREE.AxesHelper( 1 );
         x.add( axesHelper );
-      }
+      // if(x.whichType === "center"){
+      // }
     });
   }
 

@@ -131,10 +131,10 @@ gui.hide();
     // x.highlight({amp:0.4});
   });
 
-  resizeRenderer();
-  animate();
+  // resizeRenderer();
+  // animate();
 
-  return;
+  // return;
   
   
 const groupsNames = [

@@ -391,5 +391,10 @@ export class RubixCubeLike extends THREE.Group {
       }
     });
   }
-  
+
+  detachAll(){
+    this.pieces.forEach(x=>{
+      this.attach(x);
+    })
+  }
                           }

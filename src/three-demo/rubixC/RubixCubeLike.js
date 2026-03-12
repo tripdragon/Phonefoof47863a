@@ -3,7 +3,8 @@ import { Piece } from "./Piece.js";
 import { colors } from "./constants.js";
 import { CheapPool } from "superneatlib";
 import { PiecesGroup } from "./PiecesGroup.js";
-import { AxisHelperWithLetters } from "superneatlib";
+// import { AxisHelperWithLetters } from "superneatlib";
+import { ThickAxesHelper } from "./thickAxesHelper.js";
 
 export class RubixCubeLike extends THREE.Group {
   pieces = [];
@@ -388,7 +389,8 @@ export class RubixCubeLike extends THREE.Group {
     this.pieces.forEach(x=>{
         //const axesHelper = new THREE.AxesHelper( 2 );
         // x.add( axesHelper );
-      const yy = new AxisHelperWithLetters({size:2});
+      // const yy = new AxisHelperWithLetters({size:2});
+      const yy = new ThickAxesHelper({length : 2, radius : 0.05});
         x.add( yy );
       // if(x.whichType === "center"){
       // }

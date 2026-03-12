@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-yyyufg694
+cbcvc879
       </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -262,12 +262,18 @@ selected.forEach(x=>{
   const delta = Math.PI / 2 * (direction === "counter" ? 1 : -1);
  const startY = target.rotation.y;
   const endY = startY + delta;
+
+  const goY = startQuaternion.clone();
+  const eQ = new Three.Eular().setFromQuaternion(startQuaternion);
+  eQ.y += Math.PI / 2;
+  
   
   const targetEuler = new THREE.Euler(startEuler.x, yy + delta, startEuler.z);
   
   //const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);
-  const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
-
+  //const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
+  const targetQuaternion = new THREE.Quaternion().setFromEuler(eQ);
+  
   
   
   const duration = 1000;

@@ -232,7 +232,7 @@ let index = 0;
 function StartSpin({selected,direction="counter"}={}){
      // let selected = magicCube.tGS.top;
   magicCube.updateMatrixWorld(true);
-//index++;
+
   detachAll();
   magicCube.updateMatrixWorld(true);
   magicCube.refishGroups();
@@ -265,7 +265,7 @@ selected.forEach(x=>{
   
   const targetEuler = new THREE.Euler(startEuler.x, yy + delta, startEuler.z);
   
-  const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);
+  //const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);
   const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
 
   

@@ -381,4 +381,15 @@ export class RubixCubeLike extends THREE.Group {
     window.spindebug = p8;
     window.posdebug = p8;
   }
+
+
+  showNormals(){
+    this.pieces.forEach(x=>{
+      if(x.whichType === "center"){
+        const axesHelper = new THREE.AxesHelper( 2 );
+        x.add( axesHelper );
+      }
+    });
+  }
+  
                           }

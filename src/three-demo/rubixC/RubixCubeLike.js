@@ -11,6 +11,8 @@ export class RubixCubeLike extends THREE.Group {
 
   static EPSILON = 1e-5;
 
+  core;
+
   // transitionalGroups
   // sides and rings of cube
   tGS = {
@@ -34,6 +36,7 @@ export class RubixCubeLike extends THREE.Group {
     this.buildTopLevel();
     this.buildCenterLevel();
     this.buildBottomLevel();
+    this.buildCore();
     this.refishGroups();
   }
 
@@ -384,6 +387,11 @@ export class RubixCubeLike extends THREE.Group {
 
     window.spindebug = p8;
     window.posdebug = p8;
+  }
+
+  buildCore(){
+    this.core = new THREE.Object3D();
+    this.add(this.core);
   }
 
 

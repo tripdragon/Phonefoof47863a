@@ -390,10 +390,10 @@ export class RubixCubeLike extends THREE.Group {
         //const axesHelper = new THREE.AxesHelper( 2 );
         // x.add( axesHelper );
       // const yy = new AxisHelperWithLetters({size:2});
-      const yy = new ThickAxesHelper({length : 2, radius : 0.05});
+      if(x.whichType === "center"){
+      const yy = new ThickAxesHelper({length : 1.4, radius : 0.05});
         x.add( yy );
-      // if(x.whichType === "center"){
-      // }
+      }
     });
   }
 

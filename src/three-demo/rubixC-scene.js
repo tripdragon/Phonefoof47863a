@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-kjshdfdsf444
+yyyufg694
       </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -191,7 +191,7 @@ groups.forEach((g, i) => {
 
   
   setTimeout(x=>{
-    return
+    //return
    let selected = magicCube.tGS.top;
     selected.forEach(x=>{
       x.highlight({amp:0.2});
@@ -265,7 +265,7 @@ selected.forEach(x=>{
   
   const targetEuler = new THREE.Euler(startEuler.x, yy + delta, startEuler.z);
   
-  // const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);
+  const targetEuler = new THREE.Euler(startEuler.x, startEuler.y + Math.PI / 2, startEuler.z);
   const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
 
   
@@ -282,8 +282,8 @@ selected.forEach(x=>{
       console.log("t",t);
       if (t >= 1) {
           // Snap exactly at the end
-          // target.quaternion.copy(targetQuaternion);
-        target.rotation.y = endY;
+          target.quaternion.copy(targetQuaternion);
+      //  target.rotation.y = endY;
         
           setTimeout(x=>{
             index++;
@@ -300,10 +300,10 @@ selected.forEach(x=>{
 
       // Interpolate rotation
       // THREE.Quaternion.slerp(startQuaternion, targetQuaternion, target.quaternion, easedT);
-          // target.quaternion.slerp(targetQuaternion, easedT);
+          target.quaternion.slerp(targetQuaternion, easedT);
 
     
-        target.rotation.y = startY + (endY - startY) * easedT;
+        //target.rotation.y = startY + (endY - startY) * easedT;
 
 
   

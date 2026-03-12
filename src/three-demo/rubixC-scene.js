@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-  m5588 bb2 999654b ew 222
+  bbb224 5588 bb2 999654b ew 222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -122,6 +122,8 @@ gui.hide();
     // x.highlight({amp:0.4});
   });
 
+  
+/*
 const groups = [
   "top",
   "bottom",
@@ -150,7 +152,7 @@ groups.forEach((g, i) => {
   }, i * 2000);
 });
 
-  
+  */
   
 
   // setTimeout(x=>{
@@ -167,12 +169,12 @@ groups.forEach((g, i) => {
 //    }
 //  });
 
-  /*
+  
   setTimeout(x=>{
     let selected = magicCube.tGS.top;
     selected.forEach(x=>{
       x.highlight({amp:0.2});
-      if(x.whichType !== "center" && PiecesGroup1.center){
+      if(x.whichType !== "center" && selected.center){
         // well, it might jitter, but the rubix cube also has no center parent
         // so whatever like
         selected.center.attach(x);
@@ -182,7 +184,7 @@ groups.forEach((g, i) => {
     // spinGroup();
    StartSpin();
   },2000);
-  */
+  
   
 
   let spinGroupID;

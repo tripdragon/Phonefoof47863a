@@ -131,6 +131,11 @@ gui.hide();
     // x.highlight({amp:0.4});
   });
 
+  resizeRenderer();
+  animate();
+
+  return;
+  
   
 const groupsNames = [
   "top",

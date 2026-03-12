@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-bbbf54
+mmggtucyt4556
       </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -221,7 +221,7 @@ let index = 0;
   
 function StartSpin({selected,direction="counter"}={}){
      // let selected = magicCube.tGS.top;
-    //magicCube.updateMatrixWorld(true);
+  magicCube.updateMatrixWorld(true);
 //index++;
   detachAll();
   magicCube.updateMatrixWorld(true);

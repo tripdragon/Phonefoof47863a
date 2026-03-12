@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-  bbb224 5588 bb2 999654b ew 222
+  pppwed bbb224 5588 bb2 999654b ew 222
     </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -111,6 +111,13 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
 
   
   const magicCube = new RubixCubeLike();
+
+  magicCube.detachAll = function(){
+this.pieces.forEach(x=>{
+  this.attach(x);
+})
+}
+  
   scene.add(magicCube);
 gui.hide();
   onConsole("???");
@@ -171,7 +178,7 @@ groups.forEach((g, i) => {
 
   
   setTimeout(x=>{
-    let selected = magicCube.tGS.top;
+   // let selected = magicCube.tGS.top;
     selected.forEach(x=>{
       x.highlight({amp:0.2});
       if(x.whichType !== "center" && selected.center){
@@ -182,7 +189,7 @@ groups.forEach((g, i) => {
       }
     });
     // spinGroup();
-   StartSpin();
+   StartSpin({selected: magicCube.tGS.top});
   },2000);
   
   
@@ -204,9 +211,9 @@ groups.forEach((g, i) => {
     
   // }
 
-function StartSpin({direction="counter"}={}){
-      let selected = magicCube.tGS.top;
-  
+function StartSpin({selected,direction="counter"}={}){
+     // let selected = magicCube.tGS.top;
+  magicCube.detachAll()
   const target = selected.center;
   const startQuaternion = target.quaternion.clone();
 
@@ -244,7 +251,9 @@ function StartSpin({direction="counter"}={}){
         target.rotation.y = endY;
         
           setTimeout(x=>{
-            StartSpin({direction:"counter"});
+            //StartSpin({direction:"counter"});
+               StartSpin({direction:"counter", selected: magicCube.tGS.top});
+            
           },1000);
           return; // stop animation
       }

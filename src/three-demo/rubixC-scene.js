@@ -189,6 +189,7 @@ groups.forEach((g, i) => {
 
   
   setTimeout(x=>{
+    return
    let selected = magicCube.tGS.top;
     selected.forEach(x=>{
       x.highlight({amp:0.2});

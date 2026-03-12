@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-bbbbbb2
+mmm4924
       </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -276,11 +276,19 @@ selected.forEach(x=>{
   
   const startQ = startQuaternion.clone();
 
-
+  const axisV = new THREE.Vector3(0,1,0);
+if(groupsNames[index] === "ringBow"){
+ axisV.set(0,0,1)
+}
+  else if(groupsNames[index] === "ringVertical"){
+     axisV.set(1,0,0)
+    
+  }
   
 // 90 degrees around Y axis
 const deltaQ = new THREE.Quaternion().setFromAxisAngle(
-  new THREE.Vector3(0, 1, 0),
+ // new THREE.Vector3(0, 1, 0),
+  axisV,
   Math.PI / 2
 );
 

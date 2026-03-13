@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-bbbbbbn n7
+pikachu222
       </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -236,7 +236,12 @@ function StartSpin({selected,direction="counter"}={}){
   detachAll();
   magicCube.updateMatrixWorld(true);
   magicCube.refishGroups();
-  
+
+  magicCube.core.quaternion.identity();
+    magicCube.core.updateMatrix();
+    magicCube.core.updateMatrixWorld(true);
+    //everything should be detached here already
+    
 
 selected.forEach(x=>{
       //x.highlight({amp:0.2});
@@ -266,9 +271,6 @@ if(x.whichType !== "center" && selected.center){
          ){
     target = magicCube.core;
    // magicCube.core.rotation.identity()
-    magicCube.core.quaternion.identity();
-    magicCube.core.updateMatrix();
-    //everything should be detached here already
     
   }
   

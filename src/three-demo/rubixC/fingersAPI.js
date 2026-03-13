@@ -20,6 +20,8 @@ export class FingersAPI {
     this.arrow = null;
     this.arrowOrigin = new THREE.Vector3();
     this.arrowDirection = new THREE.Vector3(1, 0, 0);
+    this.toV = new THREE.Vector3();
+    this.outV = new THREE.Vector3();
 
     this.activePointerId = null;
     this.selectedPiece = null;
@@ -156,7 +158,6 @@ export class FingersAPI {
 
     this.updateArrow();
   }
-const toV = new THREE.Vector3();
   updateArrow() {
     if (!this.arrow) return;
     if (this.points.length < 2) {
@@ -179,8 +180,7 @@ const toV = new THREE.Vector3();
     this.arrow.setLength(Math.max(len, 0.01), 0.15, 0.08);
     this.arrow.visible = true;
   }
-  
-  const outV = new THREE.Vector3();
+
   movingAverage(endIndex) {
     //const out = new THREE.Vector3();
     this.outV.set(0,0,0);
@@ -190,7 +190,7 @@ const toV = new THREE.Vector3();
       this.outV.add(this.points[i]);
       count++;
     }
-    if (count > 0) out.multiplyScalar(1 / count);
+    if (count > 0) this.outV.multiplyScalar(1 / count);
     return this.outV;
   }
 

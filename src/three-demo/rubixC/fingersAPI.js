@@ -69,6 +69,24 @@ export class FingersAPI {
 
     this.resetGesture();
     this.selectPiece(hit.piece);
+const pool =[];
+if (this.selectedPiece) {
+  pool.length = 0;
+
+  this.cube.tGS.forEach(x => {
+    if (x.index === this.selectedPiece) {
+      pool.push(x);
+    }
+  });
+  
+  pool.forEach(x => {
+  x.forEach(y => {
+    y.highlight({ amp: 0.4 });
+  });
+});
+  
+}
+    
     this.addPoint(hit.point);
   }
 

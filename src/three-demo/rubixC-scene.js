@@ -5,6 +5,7 @@ import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
 import { RubixCubeLike } from "./rubixC/RubixCubeLike.js";
 import { PiecesGroup } from "./rubixC/PiecesGroup.js";
 import { smoothstep, remapPiToPI2 } from "./rubixC/math.js";
+import { FingersAPI } from "./rubixC/fingersAPI.js";
 
 export function renderRubixCRoute(container) {
   container.innerHTML = `
@@ -372,6 +373,16 @@ requestAnimationFrame(spinGroup);
   
   
   
+
+  const fingersAPI = new FingersAPI({
+    camera,
+    domElement: renderer.domElement,
+    scene,
+    controls,
+    cube: magicCube
+  });
+  fingersAPI.beginPointerEvents();
+
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;
   //scene.add(grid);
@@ -405,6 +416,7 @@ requestAnimationFrame(spinGroup);
     }
 
     window.removeEventListener("resize", resizeRenderer);
+    fingersAPI.dispose();
     controls.dispose();
     renderer.dispose();
     canvasWrap.innerHTML = "";

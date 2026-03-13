@@ -10,7 +10,7 @@ export function renderRubixCRoute(container) {
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
-bbbbbbbsiu7688
+narfffff222
       </h1>
     <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
@@ -256,9 +256,21 @@ if(x.whichType !== "center" && selected.center){
 }
   }
     });
-  
+
+
     
-  const target = selected.center;
+  let target = selected.center;
+  if(groupsNames[index] === "ringHorizontal"
+         || groupsNames[index] === "ringVertical"
+        || groupsNames[index] === "ringBow"
+         ){
+    target = magicCube.core;
+    magicCube.core.rotation.identity()
+    magicCube.core.updateMatrix();
+    //everything should be detached here already
+    
+  }
+  
   const startQuaternion = target.quaternion.clone();
 
   

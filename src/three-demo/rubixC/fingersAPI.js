@@ -128,7 +128,7 @@ export class FingersAPI {
 
     this.updateArrow();
   }
-
+const toV = new THREE.Vector3();
   updateArrow() {
     if (!this.arrow) return;
     if (this.points.length < 2) {
@@ -136,9 +136,9 @@ export class FingersAPI {
       return;
     }
 
-    const to = this.movingAverage(this.points.length - 1);
+    this.toV.copy(this.movingAverage(this.points.length - 1));
     const from = this.movingAverage(this.points.length - 2);
-    const dir = to.clone().sub(from);
+    const dir = this.toV.sub(from);
     const len = dir.length();
     if (len <= 1e-5) {
       this.arrow.visible = false;
@@ -151,17 +151,19 @@ export class FingersAPI {
     this.arrow.setLength(Math.max(len, 0.01), 0.15, 0.08);
     this.arrow.visible = true;
   }
-
+  
+  const outV = new THREE.Vector3();
   movingAverage(endIndex) {
-    const out = new THREE.Vector3();
+    //const out = new THREE.Vector3();
+    this.outV.set(0,0,0);
     const start = Math.max(0, endIndex - this.avgWindow + 1);
     let count = 0;
     for (let i = start; i <= endIndex; i++) {
-      out.add(this.points[i]);
+      this.outV.add(this.points[i]);
       count++;
     }
     if (count > 0) out.multiplyScalar(1 / count);
-    return out;
+    return this.outV;
   }
 
   raycastPlanes(ev) {

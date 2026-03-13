@@ -23,6 +23,7 @@ export class FingersAPI {
 
     this.activePointerId = null;
     this.selectedPiece = null;
+    this.highlightedPieces = new Set();
 
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
@@ -69,24 +70,7 @@ export class FingersAPI {
 
     this.resetGesture();
     this.selectPiece(hit.piece);
-const pool =[];
-if (this.selectedPiece) {
-  pool.length = 0;
 
-  this.cube.tGS.forEach(x => {
-    if (x.index === this.selectedPiece) {
-      pool.push(x);
-    }
-  });
-  
-  pool.forEach(x => {
-  x.forEach(y => {
-    y.highlight({ amp: 0.4 });
-  });
-});
-  
-}
-    
     this.addPoint(hit.point);
   }
 
@@ -118,11 +102,37 @@ if (this.selectedPiece) {
   }
 
   selectPiece(piece) {
-    if (this.selectedPiece && this.selectedPiece !== piece) {
-      this.selectedPiece.revertColor();
-    }
+    this.clearGroupHighlights();
     this.selectedPiece = piece;
-    this.selectedPiece?.highlight({ amp: 0.35 });
+
+    if (!this.selectedPiece) return;
+
+    this.selectedPiece.highlight({ amp: 0.35 });
+    this.highlightedPieces.add(this.selectedPiece);
+
+    const containingGroups = this.findGroupsForPiece(this.selectedPiece);
+    containingGroups.forEach((group) => {
+      group.forEach((groupPiece) => {
+        if (!groupPiece || groupPiece === this.selectedPiece) return;
+        groupPiece.highlight({ amp: 0.4 });
+        this.highlightedPieces.add(groupPiece);
+      });
+    });
+  }
+
+  findGroupsForPiece(piece) {
+    if (!piece || !this.cube?.tGS) return [];
+
+    return Object.values(this.cube.tGS).filter((group) =>
+      typeof group?.some === "function" ? group.some((candidate) => candidate === piece) : false
+    );
+  }
+
+  clearGroupHighlights() {
+    this.highlightedPieces.forEach((piece) => {
+      piece?.revertColor?.();
+    });
+    this.highlightedPieces.clear();
   }
 
   addPoint(point) {
@@ -241,5 +251,8 @@ const toV = new THREE.Vector3();
       this.arrow.cone?.material?.dispose?.();
       this.arrow = null;
     }
+
+    this.clearGroupHighlights();
+    this.selectedPiece = null;
   }
 }

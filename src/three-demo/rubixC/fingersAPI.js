@@ -12,14 +12,23 @@ export class FingersAPI {
     this.raycaster = new THREE.Raycaster();
     this.pointerNdc = new THREE.Vector2();
     this.hitPointPool = [];
+    this.projectedPointPool = [];
     this.activeMarkers = [];
+    this.activeProjectedMarkers = [];
     this.points = [];
+    this.projectedPoints = [];
     this.maxPoints = 64;
     this.avgWindow = 6;
 
     this.arrow = null;
+    this.faceArrow = null;
+    this.faceGridHelper = null;
+    this.faceMathPlane = null;
     this.arrowOrigin = new THREE.Vector3();
     this.arrowDirection = new THREE.Vector3(1, 0, 0);
+    this.faceNormal = new THREE.Vector3();
+    this.tmpProjectedPoint = new THREE.Vector3();
+    this.normalMatrix = new THREE.Matrix3();
     this.toV = new THREE.Vector3();
     this.outV = new THREE.Vector3();
 
@@ -38,16 +47,30 @@ export class FingersAPI {
     if (!this.scene) return;
     const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);
     const markerMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+    const projectedMarkerMat = new THREE.MeshBasicMaterial({ color: 0xff8c00 });
     for (let i = 0; i < this.markerCount; i++) {
       const marker = new THREE.Mesh(markerGeo, markerMat);
       marker.visible = false;
       this.hitPointPool.push(marker);
       this.scene.add(marker);
+
+      const projectedMarker = new THREE.Mesh(markerGeo, projectedMarkerMat);
+      projectedMarker.visible = false;
+      this.projectedPointPool.push(projectedMarker);
+      this.scene.add(projectedMarker);
     }
 
     this.arrow = new THREE.ArrowHelper(this.arrowDirection, this.arrowOrigin, 0.01, 0x111111, 0.15, 0.08);
     this.arrow.visible = false;
     this.scene.add(this.arrow);
+
+    this.faceArrow = new THREE.ArrowHelper(this.arrowDirection, this.arrowOrigin, 0.6, 0x2d7fff, 0.18, 0.1);
+    this.faceArrow.visible = false;
+    this.scene.add(this.faceArrow);
+
+    this.faceGridHelper = new THREE.GridHelper(3, 12, 0x2d7fff, 0x2d7fff);
+    this.faceGridHelper.visible = false;
+    this.scene.add(this.faceGridHelper);
   }
 
   beginPointerEvents() {
@@ -73,6 +96,7 @@ export class FingersAPI {
     this.resetGesture();
     this.selectPiece(hit.piece);
 
+    this.prepareFaceDebug(hit);
     this.addPoint(hit.point);
   }
 
@@ -94,12 +118,45 @@ export class FingersAPI {
 
   resetGesture() {
     this.points.length = 0;
+    this.projectedPoints.length = 0;
     this.activeMarkers.forEach((marker) => {
       marker.visible = false;
     });
     this.activeMarkers.length = 0;
+    this.activeProjectedMarkers.forEach((marker) => {
+      marker.visible = false;
+    });
+    this.activeProjectedMarkers.length = 0;
     if (this.arrow) {
       this.arrow.visible = false;
+    }
+    if (this.faceArrow) {
+      this.faceArrow.visible = false;
+    }
+    if (this.faceGridHelper) {
+      this.faceGridHelper.visible = false;
+    }
+    this.faceMathPlane = null;
+  }
+
+  prepareFaceDebug(hit) {
+    if (!hit?.normal || !hit?.point) return;
+
+    this.faceNormal.copy(hit.normal).normalize();
+    const faceOrigin = hit.point.clone().addScaledVector(this.faceNormal, 0.03);
+    this.faceMathPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(this.faceNormal, faceOrigin);
+
+    if (this.faceArrow) {
+      this.faceArrow.position.copy(faceOrigin);
+      this.faceArrow.setDirection(this.faceNormal);
+      this.faceArrow.setLength(0.6, 0.18, 0.1);
+      this.faceArrow.visible = true;
+    }
+
+    if (this.faceGridHelper) {
+      this.faceGridHelper.position.copy(faceOrigin);
+      this.faceGridHelper.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), this.faceNormal);
+      this.faceGridHelper.visible = true;
     }
   }
 
@@ -153,6 +210,26 @@ export class FingersAPI {
       if (this.activeMarkers.length > this.hitPointPool.length) {
         const oldMarker = this.activeMarkers.shift();
         oldMarker.visible = false;
+      }
+    }
+
+    if (this.faceMathPlane) {
+      this.faceMathPlane.projectPoint(point, this.tmpProjectedPoint);
+      this.projectedPoints.push(this.tmpProjectedPoint.clone());
+      if (this.projectedPoints.length > this.maxPoints) {
+        this.projectedPoints.shift();
+      }
+
+      const projectedMarker =
+        this.projectedPointPool[this.activeProjectedMarkers.length % this.projectedPointPool.length];
+      if (projectedMarker) {
+        projectedMarker.position.copy(this.tmpProjectedPoint);
+        projectedMarker.visible = true;
+        this.activeProjectedMarkers.push(projectedMarker);
+        if (this.activeProjectedMarkers.length > this.projectedPointPool.length) {
+          const oldProjectedMarker = this.activeProjectedMarkers.shift();
+          oldProjectedMarker.visible = false;
+        }
       }
     }
 
@@ -217,7 +294,13 @@ export class FingersAPI {
     const piece = this.findPieceParent(firstHit.object);
     if (!piece) return null;
 
-    return { piece, point: firstHit.point };
+    let normal = null;
+    if (firstHit.face) {
+      this.normalMatrix.getNormalMatrix(firstHit.object.matrixWorld);
+      normal = firstHit.face.normal.clone().applyNormalMatrix(this.normalMatrix).normalize();
+    }
+
+    return { piece, point: firstHit.point, normal };
   }
 
   findPieceParent(object) {
@@ -243,6 +326,13 @@ export class FingersAPI {
     });
     this.hitPointPool.length = 0;
 
+    this.projectedPointPool.forEach((marker) => {
+      this.scene?.remove(marker);
+      marker.geometry?.dispose?.();
+      marker.material?.dispose?.();
+    });
+    this.projectedPointPool.length = 0;
+
     if (this.arrow) {
       this.scene?.remove(this.arrow);
       this.arrow.line?.geometry?.dispose?.();
@@ -250,6 +340,22 @@ export class FingersAPI {
       this.arrow.cone?.geometry?.dispose?.();
       this.arrow.cone?.material?.dispose?.();
       this.arrow = null;
+    }
+
+    if (this.faceArrow) {
+      this.scene?.remove(this.faceArrow);
+      this.faceArrow.line?.geometry?.dispose?.();
+      this.faceArrow.line?.material?.dispose?.();
+      this.faceArrow.cone?.geometry?.dispose?.();
+      this.faceArrow.cone?.material?.dispose?.();
+      this.faceArrow = null;
+    }
+
+    if (this.faceGridHelper) {
+      this.scene?.remove(this.faceGridHelper);
+      this.faceGridHelper.geometry?.dispose?.();
+      this.faceGridHelper.material?.dispose?.();
+      this.faceGridHelper = null;
     }
 
     this.clearGroupHighlights();

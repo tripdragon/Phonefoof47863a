@@ -3,6 +3,14 @@ const DEFAULT_BRUSH_SIZE = 1;
 const DEFAULT_SMOOTH_DRAWING = true;
 const DISPLAY_SIZE = 512;
 
+const HORSE_NAME_WORD_BANKS = [
+  ["Amber", "Autumn", "Azure", "Blazing", "Blue", "Bold", "Bright", "Cinder", "Copper", "Crimson", "Dancing", "Dusty", "Emerald", "Golden", "Grand", "Iron", "Ivory", "Lucky", "Midnight", "Moon", "Noble", "Rapid", "Royal", "Scarlet", "Silver", "Starlit", "Storm", "Summer", "Sun", "Velvet", "Whispering", "Wild"],
+  ["Arrow", "Banner", "Beacon", "Breeze", "Charge", "Comet", "Crown", "Dancer", "Dash", "Dream", "Echo", "Ember", "Fable", "Falcon", "Flame", "Fortune", "Glory", "Harbor", "Harmony", "Jubilee", "Legend", "Meadow", "Mirage", "Promise", "Runner", "Shadow", "Song", "Spirit", "Star", "Thunder", "Trail", "Victory"],
+  ["Bluff", "Brook", "Canyon", "Creek", "Garden", "Glen", "Harbor", "Heights", "Hollow", "Lagoon", "Manor", "Mesa", "Oasis", "Park", "Ridge", "River", "Springs", "Summit", "Valley", "Vista", "Way", "Wharf"]
+];
+const MIN_HORSE_NAME_WORDS = 1;
+const MAX_HORSE_NAME_WORDS = 10;
+
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
@@ -84,6 +92,22 @@ function paintLine(grid, startPoint, endPoint, brushSize) {
     const interpolatedY = Math.round(startPoint.y + deltaY * progress);
     paintAt(grid, interpolatedX, interpolatedY, brushSize);
   }
+}
+
+function pickRandomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function createRaceHorseFilename() {
+  const wordCount = Math.floor(
+    Math.random() * (MAX_HORSE_NAME_WORDS - MIN_HORSE_NAME_WORDS + 1)
+  ) + MIN_HORSE_NAME_WORDS;
+  const words = Array.from({ length: wordCount }, (_, index) => {
+    const bank = HORSE_NAME_WORD_BANKS[index % HORSE_NAME_WORD_BANKS.length];
+    return pickRandomItem(bank);
+  });
+
+  return words.join("-").toLowerCase();
 }
 
 function rasterizeText(grid, text) {
@@ -285,7 +309,7 @@ export function renderPixelStudio(container) {
 
     const link = document.createElement("a");
     link.href = exportCanvas.toDataURL("image/png");
-    link.download = `pixel-studio-${resolution}x${resolution}.png`;
+    link.download = `${createRaceHorseFilename()}.png`;
     link.click();
   };
 

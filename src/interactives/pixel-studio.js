@@ -10,7 +10,7 @@ function createGrid(resolution) {
   return Array.from({ length: resolution }, () => Array(resolution).fill(0));
 }
 
-function drawGrid(ctx, grid) {
+function drawGrid(ctx, grid, showGrid = true) {
   const resolution = grid.length;
   const cellSize = ctx.canvas.width / resolution;
 
@@ -27,6 +27,10 @@ function drawGrid(ctx, grid) {
       ctx.fillStyle = "#312e81";
       ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
+  }
+
+  if (!showGrid) {
+    return;
   }
 
   ctx.strokeStyle = "rgba(99, 102, 241, 0.16)";
@@ -120,6 +124,8 @@ export function renderPixelStudio(container) {
             </select>
           </label>
 
+          <button id="pixel-grid-toggle" class="action" type="button" aria-pressed="true">Hide grid</button>
+          <button id="pixel-download" class="action" type="button">Download PNG</button>
           <button id="pixel-clear" class="action" type="button">Clear canvas</button>
         </div>
 
@@ -143,6 +149,8 @@ export function renderPixelStudio(container) {
   const brushInput = container.querySelector("#pixel-brush-size");
   const brushOutput = container.querySelector("#pixel-brush-size-output");
   const resolutionSelect = container.querySelector("#pixel-resolution");
+  const gridToggleButton = container.querySelector("#pixel-grid-toggle");
+  const downloadButton = container.querySelector("#pixel-download");
   const clearButton = container.querySelector("#pixel-clear");
   const textForm = container.querySelector("#pixel-text-form");
   const textInput = container.querySelector("#pixel-text-input");
@@ -151,9 +159,15 @@ export function renderPixelStudio(container) {
   let brushSize = DEFAULT_BRUSH_SIZE;
   let grid = createGrid(resolution);
   let isDrawing = false;
+  let showGrid = true;
 
   const render = () => {
-    drawGrid(context, grid);
+    drawGrid(context, grid, showGrid);
+  };
+
+  const updateGridToggleLabel = () => {
+    gridToggleButton.textContent = showGrid ? "Hide grid" : "Show grid";
+    gridToggleButton.setAttribute("aria-pressed", String(showGrid));
   };
 
   const updateBrushLabel = () => {
@@ -210,6 +224,30 @@ export function renderPixelStudio(container) {
     render();
   };
 
+  const handleGridToggle = () => {
+    showGrid = !showGrid;
+    updateGridToggleLabel();
+    render();
+  };
+
+  const handleDownload = () => {
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = canvas.width;
+    exportCanvas.height = canvas.height;
+    const exportContext = exportCanvas.getContext("2d");
+
+    if (!exportContext) {
+      return;
+    }
+
+    drawGrid(exportContext, grid, false);
+
+    const link = document.createElement("a");
+    link.href = exportCanvas.toDataURL("image/png");
+    link.download = `pixel-studio-${resolution}x${resolution}.png`;
+    link.click();
+  };
+
   const handleClear = () => {
     grid = createGrid(resolution);
     render();
@@ -223,6 +261,8 @@ export function renderPixelStudio(container) {
 
   brushInput.addEventListener("input", handleBrushChange);
   resolutionSelect.addEventListener("change", handleResolutionChange);
+  gridToggleButton.addEventListener("click", handleGridToggle);
+  downloadButton.addEventListener("click", handleDownload);
   clearButton.addEventListener("click", handleClear);
   textForm.addEventListener("submit", handleSubmit);
   canvas.addEventListener("pointerdown", handlePointerDown);
@@ -232,11 +272,14 @@ export function renderPixelStudio(container) {
   canvas.addEventListener("pointercancel", stopDrawing);
 
   updateBrushLabel();
+  updateGridToggleLabel();
   render();
 
   return () => {
     brushInput.removeEventListener("input", handleBrushChange);
     resolutionSelect.removeEventListener("change", handleResolutionChange);
+    gridToggleButton.removeEventListener("click", handleGridToggle);
+    downloadButton.removeEventListener("click", handleDownload);
     clearButton.removeEventListener("click", handleClear);
     textForm.removeEventListener("submit", handleSubmit);
     canvas.removeEventListener("pointerdown", handlePointerDown);

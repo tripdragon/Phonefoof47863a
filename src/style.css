@@ -27,6 +27,8 @@ main {
   border-radius: 20px;
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
   padding: clamp(1.5rem, 4vw, 3rem);
+
+  
 }
 
 .menu {
@@ -35,6 +37,8 @@ main {
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
+
+  display: none;
 }
 
 .brand {

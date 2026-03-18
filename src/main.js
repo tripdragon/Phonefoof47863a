@@ -8,6 +8,7 @@ import { renderRubixCRoute } from "./three-demo/rubixC-scene";
 import { renderSentenceStructureAnalysis } from "./sentence-structure";
 import { renderBotanyInteractive, renderBotanyLatex } from "./interactives/botany";
 import { renderCameraInteractive } from "./interactives/camera";
+import { renderPixelStudio } from "./interactives/pixel-studio";
 
 const appVersion = `v${__APP_VERSION__}`;
 
@@ -27,6 +28,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
           <li><a class="menu-link" data-route="/botany" href="#/botany">Botany</a></li>
           <li><a class="menu-link" data-route="/camera" href="#/camera">Camera</a></li>
+          <li><a class="menu-link" data-route="/pixel-studio" href="#/pixel-studio">Pixel Studio</a></li>
           <li><a class="menu-link" data-route="/recursion-tree" href="#/recursion-tree">Recursion Tree</a></li>
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
@@ -1284,6 +1286,10 @@ function renderCameraRoute() {
   };
 }
 
+function renderPixelStudioRoute() {
+  return renderPixelStudio(routeContent);
+}
+
 function renderPianoRoute() {
   routeContent.innerHTML = `
     <p class="hero-label">Piano Guide</p>
@@ -1893,6 +1899,7 @@ const routes = {
   "/shows-crud": renderShowsCrudRoute,
   "/botany": renderBotanyRoute,
   "/camera": renderCameraRoute,
+  "/pixel-studio": renderPixelStudioRoute,
   "/recursion-tree": renderRecursionTreeRoute,
   "/piano": renderPianoRoute,
   "/three-demo": renderThreeRoute,

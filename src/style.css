@@ -38,7 +38,6 @@ main {
   gap: 1rem;
   margin-bottom: 1.5rem;
 
-  display: none;
 }
 
 .brand {
@@ -1736,6 +1735,84 @@ code {
 
 @media (max-width: 760px) {
   .rubix-step-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.pixel-studio {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.pixel-studio__panel {
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+}
+
+.pixel-studio__controls {
+  width: min(100%, 720px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.pixel-studio__field {
+  display: grid;
+  gap: 0.45rem;
+  color: #312e81;
+  font-weight: 600;
+}
+
+.pixel-studio__field input,
+.pixel-studio__field select {
+  width: 100%;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  font: inherit;
+  color: #1f2937;
+  background: #fff;
+}
+
+.pixel-studio__field output {
+  font-size: 0.92rem;
+  color: #475569;
+}
+
+.pixel-studio__canvas-wrap {
+  width: min(100%, 560px);
+  display: flex;
+  justify-content: center;
+}
+
+.pixel-studio__canvas {
+  width: min(100%, 512px);
+  aspect-ratio: 1 / 1;
+  display: block;
+  border-radius: 16px;
+  border: 1px solid #c7d2fe;
+  background: #fff;
+  box-shadow: 0 20px 45px rgba(79, 70, 229, 0.14);
+  touch-action: none;
+}
+
+.pixel-studio__text-form {
+  width: min(100%, 720px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.pixel-studio__field--wide {
+  width: 100%;
+}
+
+@media (max-width: 700px) {
+  .pixel-studio__text-form {
     grid-template-columns: 1fr;
   }
 }

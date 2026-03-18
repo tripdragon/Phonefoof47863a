@@ -1,5 +1,6 @@
 const DEFAULT_RESOLUTION = 32;
 const DEFAULT_BRUSH_SIZE = 1;
+const DEFAULT_SMOOTH_DRAWING = true;
 const DISPLAY_SIZE = 512;
 
 function clamp(value, min, max) {
@@ -67,6 +68,24 @@ function paintAt(grid, x, y, brushSize) {
   }
 }
 
+function paintLine(grid, startPoint, endPoint, brushSize) {
+  const deltaX = endPoint.x - startPoint.x;
+  const deltaY = endPoint.y - startPoint.y;
+  const steps = Math.max(Math.abs(deltaX), Math.abs(deltaY));
+
+  if (steps === 0) {
+    paintAt(grid, startPoint.x, startPoint.y, brushSize);
+    return;
+  }
+
+  for (let step = 0; step <= steps; step += 1) {
+    const progress = step / steps;
+    const interpolatedX = Math.round(startPoint.x + deltaX * progress);
+    const interpolatedY = Math.round(startPoint.y + deltaY * progress);
+    paintAt(grid, interpolatedX, interpolatedY, brushSize);
+  }
+}
+
 function rasterizeText(grid, text) {
   const resolution = grid.length;
   const offscreenCanvas = document.createElement("canvas");
@@ -124,6 +143,12 @@ export function renderPixelStudio(container) {
             </select>
           </label>
 
+          <label class="pixel-studio__toggle" for="pixel-smooth-drawing">
+            <span>Smooth drawing</span>
+            <input id="pixel-smooth-drawing" type="checkbox" checked />
+            <small>Fill skipped cells while dragging.</small>
+          </label>
+
           <button id="pixel-grid-toggle" class="action" type="button" aria-pressed="true">Hide grid</button>
           <button id="pixel-download" class="action" type="button">Download PNG</button>
           <button id="pixel-clear" class="action" type="button">Clear canvas</button>
@@ -149,6 +174,7 @@ export function renderPixelStudio(container) {
   const brushInput = container.querySelector("#pixel-brush-size");
   const brushOutput = container.querySelector("#pixel-brush-size-output");
   const resolutionSelect = container.querySelector("#pixel-resolution");
+  const smoothDrawingInput = container.querySelector("#pixel-smooth-drawing");
   const gridToggleButton = container.querySelector("#pixel-grid-toggle");
   const downloadButton = container.querySelector("#pixel-download");
   const clearButton = container.querySelector("#pixel-clear");
@@ -160,6 +186,8 @@ export function renderPixelStudio(container) {
   let grid = createGrid(resolution);
   let isDrawing = false;
   let showGrid = true;
+  let smoothDrawingEnabled = DEFAULT_SMOOTH_DRAWING;
+  let lastPaintedCell = null;
 
   const render = () => {
     drawGrid(context, grid, showGrid);
@@ -191,8 +219,9 @@ export function renderPixelStudio(container) {
   const handlePointerDown = (event) => {
     isDrawing = true;
     canvas.setPointerCapture(event.pointerId);
-    const { x, y } = getCellFromEvent(event);
-    paintAt(grid, x, y, brushSize);
+    const cell = getCellFromEvent(event);
+    paintAt(grid, cell.x, cell.y, brushSize);
+    lastPaintedCell = cell;
     render();
   };
 
@@ -201,13 +230,21 @@ export function renderPixelStudio(container) {
       return;
     }
 
-    const { x, y } = getCellFromEvent(event);
-    paintAt(grid, x, y, brushSize);
+    const cell = getCellFromEvent(event);
+
+    if (smoothDrawingEnabled && lastPaintedCell) {
+      paintLine(grid, lastPaintedCell, cell, brushSize);
+    } else {
+      paintAt(grid, cell.x, cell.y, brushSize);
+    }
+
+    lastPaintedCell = cell;
     render();
   };
 
   const stopDrawing = (event) => {
     isDrawing = false;
+    lastPaintedCell = null;
     if (event?.pointerId != null && canvas.hasPointerCapture(event.pointerId)) {
       canvas.releasePointerCapture(event.pointerId);
     }
@@ -216,6 +253,10 @@ export function renderPixelStudio(container) {
   const handleBrushChange = (event) => {
     brushSize = Number(event.target.value);
     updateBrushLabel();
+  };
+
+  const handleSmoothDrawingChange = (event) => {
+    smoothDrawingEnabled = event.target.checked;
   };
 
   const handleResolutionChange = (event) => {
@@ -259,7 +300,10 @@ export function renderPixelStudio(container) {
     render();
   };
 
+  smoothDrawingInput.checked = smoothDrawingEnabled;
+
   brushInput.addEventListener("input", handleBrushChange);
+  smoothDrawingInput.addEventListener("change", handleSmoothDrawingChange);
   resolutionSelect.addEventListener("change", handleResolutionChange);
   gridToggleButton.addEventListener("click", handleGridToggle);
   downloadButton.addEventListener("click", handleDownload);
@@ -277,6 +321,7 @@ export function renderPixelStudio(container) {
 
   return () => {
     brushInput.removeEventListener("input", handleBrushChange);
+    smoothDrawingInput.removeEventListener("change", handleSmoothDrawingChange);
     resolutionSelect.removeEventListener("change", handleResolutionChange);
     gridToggleButton.removeEventListener("click", handleGridToggle);
     downloadButton.removeEventListener("click", handleDownload);

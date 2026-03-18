@@ -150,40 +150,56 @@ export function renderPixelStudio(container) {
       <p class="hero-subtitle">Pick a brush size, choose the canvas resolution, sketch in the center panel, stamp text into the canvas, or record touch-down points for playback.</p>
 
       <div class="pixel-studio__panel">
-        <div class="pixel-studio__controls" role="group" aria-label="Canvas controls">
-          <label class="pixel-studio__field">
-            <span>Brush size</span>
-            <input id="pixel-brush-size" type="range" min="1" max="5" step="1" value="${DEFAULT_BRUSH_SIZE}" />
-            <output id="pixel-brush-size-output">${DEFAULT_BRUSH_SIZE} px blocks</output>
-          </label>
+        <div class="pixel-studio__workspace">
+          <div class="pixel-studio__controls" role="group" aria-label="Canvas controls">
+            <div class="pixel-studio__control-card pixel-studio__control-card--inputs">
+              <label class="pixel-studio__field">
+                <span>Brush size</span>
+                <input id="pixel-brush-size" type="range" min="1" max="5" step="1" value="${DEFAULT_BRUSH_SIZE}" />
+                <output id="pixel-brush-size-output">${DEFAULT_BRUSH_SIZE} px blocks</output>
+              </label>
 
-          <label class="pixel-studio__field">
-            <span>Canvas resolution</span>
-            <select id="pixel-resolution">
-              <option value="16">16 × 16</option>
-              <option value="24">24 × 24</option>
-              <option value="32" selected>32 × 32</option>
-              <option value="48">48 × 48</option>
-              <option value="64">64 × 64</option>
-            </select>
-          </label>
+              <label class="pixel-studio__field">
+                <span>Canvas resolution</span>
+                <select id="pixel-resolution">
+                  <option value="16">16 × 16</option>
+                  <option value="24">24 × 24</option>
+                  <option value="32" selected>32 × 32</option>
+                  <option value="48">48 × 48</option>
+                  <option value="64">64 × 64</option>
+                </select>
+              </label>
 
-          <label class="pixel-studio__toggle" for="pixel-smooth-drawing">
-            <span>Smooth drawing</span>
-            <input id="pixel-smooth-drawing" type="checkbox" checked />
-            <small>Fill skipped cells while dragging.</small>
-          </label>
+              <label class="pixel-studio__toggle" for="pixel-smooth-drawing">
+                <span>Smooth drawing</span>
+                <input id="pixel-smooth-drawing" type="checkbox" checked />
+                <small>Fill skipped cells while dragging.</small>
+              </label>
+            </div>
 
-          <button id="pixel-grid-toggle" class="action" type="button" aria-pressed="true">Hide grid</button>
-          <button id="pixel-download" class="action" type="button">Download PNG</button>
-          <button id="pixel-clear" class="action" type="button">Clear canvas</button>
-        </div>
+            <div class="pixel-studio__control-card pixel-studio__control-card--actions">
+              <p class="pixel-studio__section-label">Canvas actions</p>
+              <div class="pixel-studio__button-row" role="group" aria-label="Canvas actions">
+                <button id="pixel-grid-toggle" class="pixel-studio__button pixel-studio__button--secondary" type="button" aria-pressed="true">Hide grid</button>
+                <button id="pixel-download" class="pixel-studio__button pixel-studio__button--secondary" type="button">Download PNG</button>
+                <button id="pixel-clear" class="pixel-studio__button pixel-studio__button--ghost" type="button">Clear canvas</button>
+              </div>
+            </div>
+          </div>
 
-        <div class="pixel-studio__recording" role="group" aria-label="Recording controls">
-          <button id="pixel-record-toggle" class="action" type="button" aria-pressed="false">Start recording</button>
-          <button id="pixel-playback" class="action" type="button">Play back</button>
-          <button id="pixel-step" class="action" type="button">Step each</button>
-          <output id="pixel-recording-status" class="pixel-studio__recording-status" aria-live="polite">Recorder idle. 0 touch-down items stored.</output>
+          <div class="pixel-studio__recording" role="group" aria-label="Recording controls">
+            <div class="pixel-studio__recording-header">
+              <div>
+                <p class="pixel-studio__section-label">Recording</p>
+                <output id="pixel-recording-status" class="pixel-studio__recording-status" aria-live="polite">Recorder idle. 0 touch-down items stored.</output>
+              </div>
+              <button id="pixel-record-toggle" class="pixel-studio__button pixel-studio__button--record" type="button" aria-pressed="false">Start recording</button>
+            </div>
+            <div class="pixel-studio__button-row pixel-studio__button-row--recording" role="group" aria-label="Playback controls">
+              <button id="pixel-playback" class="pixel-studio__button pixel-studio__button--secondary" type="button">Play back</button>
+              <button id="pixel-step" class="pixel-studio__button pixel-studio__button--ghost" type="button">Step each</button>
+            </div>
+          </div>
         </div>
 
         <div class="pixel-studio__canvas-wrap">
@@ -195,7 +211,7 @@ export function renderPixelStudio(container) {
             <span>Text to pixel-render</span>
             <input id="pixel-text-input" type="text" maxlength="24" placeholder="Type text to stamp into the canvas" />
           </label>
-          <button class="action" type="submit">Send to canvas</button>
+          <button class="pixel-studio__button pixel-studio__button--secondary" type="submit">Send to canvas</button>
         </form>
       </div>
     </section>
@@ -277,8 +293,11 @@ export function renderPixelStudio(container) {
   };
 
   const updateRecordButton = () => {
-    recordToggleButton.textContent = isRecording ? "Stop recording" : "Start recording";
+    const buttonLabel = isRecording ? "Stop recording" : "Start recording";
+    recordToggleButton.textContent = buttonLabel;
     recordToggleButton.setAttribute("aria-pressed", String(isRecording));
+    recordToggleButton.setAttribute("aria-label", `${buttonLabel} pixel session capture`);
+    recordToggleButton.classList.toggle("is-recording", isRecording);
   };
 
   const updateGridToggleLabel = () => {

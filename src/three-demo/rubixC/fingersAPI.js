@@ -4,7 +4,8 @@ import { SlightlyPriceyPool } from './slightlyPriceyPool.js';
 
 export class FingersAPI {
 
-  planePool;
+  planePool; // CheapPoolIsh
+  planePoolGrid; // stupid names
   planePoolHolder3D;
   debuggersObject3D;
   planeHitsMax;
@@ -79,17 +80,24 @@ export class FingersAPI {
 
     if (!this.scene) return;
     this.planePoolHolder3D = new THREE.Group();
-    this.planePool  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
     this.scene.add(this.planePoolHolder3D);
+    this.planePool  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
+    this.planePoolGrid  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
     
     const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);
     const markerMat = new THREE.MeshBasicMaterial({ color: 0xffff22 });
+    const markerMat2 = new THREE.MeshBasicMaterial({ color: 0x00ffaa });
     
     for (let i = 0; i < this.planeHitsMax; i++) {
       const marker = new THREE.Mesh(markerGeo, markerMat);
       marker.visible = false;
       this.planePool.add(marker);
       this.planePoolHolder3D.add(marker);
+      // other type for the face grid
+      const markerB = new THREE.Mesh(markerGeo, markerMat2);
+      markerB.visible = false;
+      this.planePoolGrid.add(markerB);
+      this.planePoolHolder3D.add(markerB);
     }
 
   }
@@ -125,20 +133,33 @@ export class FingersAPI {
     console.log(this.hits1);
     
     const ball = this.planePool.requestItem();
+    const ballGrid = this.planePoolGrid.requestItem();
     if(this.hits1.length > 0){
       this.IS_DOWN = true;
       this.controls.enabled = false;
+      
       ball.visible = true;
       ball.position.copy(this.hits1[0].point);
-      // ball.position.copy(this.hits1[0].point.clone().sub(this.hits1[0].barycoord));
-      this.selectPiece();
+
+
       if(this.useFaceArrowDebugger){
         this.displayFaceArrow(this.hits1[0]);
       }
       if(this.useFaceGridDebugger){
         this.displayFaceGrid(this.hits1[0]);
       }
+      
+      ballGrid.visible = true;
+      // ballGrid.position.copy(this.hits1[0].point).add(new THREE.Vector3(0.1,0.1,0.1));
+      ballGrid.position.copy(this.hits1[0].point);
+      this.selectPiece();
+
+
     }
+
+  }
+
+  runBallOnCube(){
 
   }
 

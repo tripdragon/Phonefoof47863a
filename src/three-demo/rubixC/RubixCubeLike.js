@@ -17,18 +17,17 @@ export class RubixCubeLike extends THREE.Group {
   // sides and rings of cube
   tGS = {
     // faces / cornersets
-    top: new PiecesGroup(),        // +y
-    bottom: new PiecesGroup(),     // -y
-
-    left: new PiecesGroup(),  // -x
-    right: new PiecesGroup(), // +x
-    back: new PiecesGroup(),   // +z
-    front: new PiecesGroup(),  // -z
+    top: new PiecesGroup("top"),        // +y
+    bottom: new PiecesGroup("bottom"),     // -y
+    left: new PiecesGroup("left"),  // -x
+    right: new PiecesGroup("right"), // +x
+    back: new PiecesGroup("back"),   // +z
+    front: new PiecesGroup("front"),  // -z
 
     // 8-piece middle slices (no visible center cubie)
-    ringHorizontal: new PiecesGroup(),     // x ~= 0
-    ringVertical: new PiecesGroup(),     // z ~= 0
-    ringBow: new PiecesGroup() // y ~= 0
+    ringHorizontal: new PiecesGroup("ringHorizontal"),     // x ~= 0
+    ringVertical: new PiecesGroup("ringVertical"),     // z ~= 0
+    ringBow: new PiecesGroup("ringBow") // y ~= 0
   };
 
   constructor() {

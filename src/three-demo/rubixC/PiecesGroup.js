@@ -2,9 +2,9 @@ import { CheapPool } from "superneatlib";
 
 export class PiecesGroup extends CheapPool {
   center;
-
-  constructor() {
+  constructor(name="?") {
     super();
+    this.name = name;
   }
 
   add(item) {

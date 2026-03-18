@@ -13,17 +13,23 @@ export function renderRubixCRoute(container) {
     <h1 class="hero-title">
 machi544
       </h1>
-    <p class="hero-subtitle">A simple cube scene with orbit controls.</p>
+    <p class="hero-subtitle">For every one face turn, you affect 4 others. But not its reflection side.</p>
+    <p class="hero-subtitle">Corner pieces are in 3 groups. Center and edge pieces are in 2 groups. </p>
     <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
   `;
 
   const canvasWrap = container.querySelector("#rubixc-canvas-wrap");
 
+  window.THREE = THREE;
+
   const scene = new THREE.Scene();
+  window.scene = scene;
   scene.background = new THREE.Color("#e2e8f0");
 
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
-  camera.position.set(-3, 2.5, -3.5);
+  // camera.position.set(-3, 2.5, -3.5);
+  // camera.position.set(0, 2.5, 3.5);
+  camera.position.set(3, 2.5, 3.5);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -112,6 +118,14 @@ gui.add(guiobj, "pz", -1, 1).onChange(v=>{
 
   
   const magicCube = new RubixCubeLike();
+magicCube.rotation.y = Math.PI;
+  
+// let iim = 0;
+// need a delta clock
+// magicCube.onBeforeRender = function(renderer, scene, camera, geometry, material, group){
+//   this.rotation.y += 0.2;
+//   iim++;
+// }
 
 magicCube.showNormals();
 
@@ -190,9 +204,11 @@ groups.forEach((g, i) => {
 //    }
 //  });
 
-  
+
+
+  // this starts the spin animation
   setTimeout(x=>{
-    //return
+    return
    let selected = magicCube.tGS.top;
     selected.forEach(x=>{
       x.highlight({amp:0.2});

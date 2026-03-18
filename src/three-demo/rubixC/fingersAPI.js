@@ -1,55 +1,53 @@
 import * as THREE from "three";
+import { SlightlyPriceyPool } from './slightlyPriceyPool.js';
+// A lot of this might should be from superneatlike pointer events
 
 export class FingersAPI {
-  constructor({ camera, domElement, scene, controls, cube, markerCount = 96 } = {}) {
+
+  planePool;
+  planePoolHolder3D;
+  debuggersObject3D;
+  planeHitsMax;
+  hits1 = [];
+  raycaster = new THREE.Raycaster();
+
+  screenCoordsV = new THREE.Vector2();
+  selectedPiece = null;
+
+  faceArrow;
+  faceGridHelper;
+  useFaceArrowDebugger = true;
+  useFaceGridDebugger = true;
+  arrowDirectionV = new THREE.Vector3();
+  arrowOriginV = new THREE.Vector3();
+
+  IS_DOWN = false;
+
+  // reuseables
+  normalMatrix = new THREE.Matrix3();
+  worldNormal = new THREE.Vector3();
+  box1 = new THREE.Box3();
+  centerV = new THREE.Vector3();
+  sizeV = new THREE.Vector3();
+
+  constructor({ camera, domElement, scene, controls, cube, planeHitsMax = 42 } = {}) {
+
+    this.scene = scene;
     this.camera = camera;
     this.domElement = domElement;
-    this.scene = scene;
     this.controls = controls;
     this.cube = cube;
-    this.markerCount = markerCount;
-
-    this.raycaster = new THREE.Raycaster();
-    this.pointerNdc = new THREE.Vector2();
-    this.hitPointPool = [];
-    this.activeMarkers = [];
-    this.points = [];
-    this.maxPoints = 64;
-    this.avgWindow = 6;
-
-    this.arrow = null;
-    this.arrowOrigin = new THREE.Vector3();
-    this.arrowDirection = new THREE.Vector3(1, 0, 0);
-    this.toV = new THREE.Vector3();
-    this.outV = new THREE.Vector3();
-
-    this.activePointerId = null;
-    this.selectedPiece = null;
-    this.highlightedPieces = new Set();
+    this.planeHitsMax = planeHitsMax;
+    // this.planeHitsMax = 4;
 
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
+    
+    this.buildPlanePool();
+    this.buildVisualHelpers();
 
-    this.buildPool();
   }
-
-  buildPool() {
-    if (!this.scene) return;
-    const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);
-    const markerMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
-    for (let i = 0; i < this.markerCount; i++) {
-      const marker = new THREE.Mesh(markerGeo, markerMat);
-      marker.visible = false;
-      this.hitPointPool.push(marker);
-      this.scene.add(marker);
-    }
-
-    this.arrow = new THREE.ArrowHelper(this.arrowDirection, this.arrowOrigin, 0.01, 0x111111, 0.15, 0.08);
-    this.arrow.visible = false;
-    this.scene.add(this.arrow);
-  }
-
   beginPointerEvents() {
     if (!this.domElement) return;
     this.domElement.style.touchAction = "none";
@@ -60,199 +58,148 @@ export class FingersAPI {
     this.domElement.addEventListener("pointerleave", this.onPointerUp);
   }
 
-  onPointerDown(ev) {
-    if (this.activePointerId !== null) return;
-
-    const hit = this.raycastPlanes(ev);
-    if (!hit) return;
-
-    this.activePointerId = ev.pointerId;
-    this.domElement.setPointerCapture?.(ev.pointerId);
-    this.controls.enabled = false;
-
-    this.resetGesture();
-    this.selectPiece(hit.piece);
-
-    this.addPoint(hit.point);
+  onPointerDown(ev){
+    // this.IS_DOWN = true;
+    // this.controls.enabled = false;
+    this.trySelectingPiece(ev);
   }
-
-  onPointerMove(ev) {
-    if (this.activePointerId !== ev.pointerId) return;
-    const hit = this.raycastPlanes(ev);
-    if (!hit) return;
-
-    this.addPoint(hit.point);
+  onPointerMove(ev){
+    if (!this.IS_DOWN) return;
+    this.trySelectingPiece(ev);
   }
-
-  onPointerUp(ev) {
-    if (this.activePointerId !== ev.pointerId) return;
-
-    this.activePointerId = null;
+  onPointerUp(ev){
+    // if (this.hits1.length > 0) {
+    // }
     this.controls.enabled = true;
-    this.domElement.releasePointerCapture?.(ev.pointerId);
+    this.IS_DOWN = false;
+    this.selectedPiece = null;
   }
 
-  resetGesture() {
-    this.points.length = 0;
-    this.activeMarkers.forEach((marker) => {
+  buildPlanePool(){
+
+    if (!this.scene) return;
+    this.planePoolHolder3D = new THREE.Group();
+    this.planePool  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
+    this.scene.add(this.planePoolHolder3D);
+    
+    const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);
+    const markerMat = new THREE.MeshBasicMaterial({ color: 0xffff22 });
+    
+    for (let i = 0; i < this.planeHitsMax; i++) {
+      const marker = new THREE.Mesh(markerGeo, markerMat);
       marker.visible = false;
-    });
-    this.activeMarkers.length = 0;
-    if (this.arrow) {
-      this.arrow.visible = false;
-    }
-  }
-
-  selectPiece(piece) {
-    this.clearGroupHighlights();
-    this.selectedPiece = piece;
-
-    if (!this.selectedPiece) return;
-
-    this.selectedPiece.highlight({ amp: 0.35 });
-    this.highlightedPieces.add(this.selectedPiece);
-
-    const containingGroups = this.findGroupsForPiece(this.selectedPiece);
-    containingGroups.forEach((group) => {
-      group.forEach((groupPiece) => {
-        if (!groupPiece || groupPiece === this.selectedPiece) return;
-        groupPiece.highlight({ amp: 0.4 });
-        this.highlightedPieces.add(groupPiece);
-      });
-    });
-  }
-
-  findGroupsForPiece(piece) {
-    if (!piece || !this.cube?.tGS) return [];
-
-    return Object.values(this.cube.tGS).filter((group) =>
-      typeof group?.some === "function" ? group.some((candidate) => candidate === piece) : false
-    );
-  }
-
-  clearGroupHighlights() {
-    this.highlightedPieces.forEach((piece) => {
-      piece?.revertColor?.();
-    });
-    this.highlightedPieces.clear();
-  }
-
-  addPoint(point) {
-    if (!point) return;
-
-    this.points.push(point.clone());
-    if (this.points.length > this.maxPoints) {
-      this.points.shift();
+      this.planePool.add(marker);
+      this.planePoolHolder3D.add(marker);
     }
 
-    const marker = this.hitPointPool[this.activeMarkers.length % this.hitPointPool.length];
-    if (marker) {
-      marker.position.copy(point);
-      marker.visible = true;
-      this.activeMarkers.push(marker);
-      if (this.activeMarkers.length > this.hitPointPool.length) {
-        const oldMarker = this.activeMarkers.shift();
-        oldMarker.visible = false;
+  }
+  
+  buildVisualHelpers(){
+    // this.arrowOut = new THREE.ArrowHelper(this.arrowDirection, this.arrowOrigin, 0.01, 0x111111, 0.15, 0.08);
+    // this.arrowOut.visible = false;
+    // this.planePoolHolder3D.add(this.arrowOut);
+
+    this.debuggersObject3D = new THREE.Group();
+    this.scene.add(this.debuggersObject3D);
+
+    this.faceArrow = new THREE.ArrowHelper(this.arrowDirectionV, this.arrowOriginV, 1.1, 0x2d7fff, 0.18, 0.1);
+    this.faceArrow.visible = false;
+    this.debuggersObject3D.add(this.faceArrow);
+
+    this.faceGridHelper = new THREE.GridHelper(3, 12, 0x2d7fff, 0x2d7fff);
+    this.faceGridHelper.visible = false;
+    this.debuggersObject3D.add(this.faceGridHelper);
+  }
+
+
+  
+  trySelectingPiece(ev){
+    // if (!this.IS_DOWN) return;
+    if (!this.camera || !this.cube || !this.domElement) return null;
+    const v1 = this.getScreenCoords(ev);
+    this.raycaster.setFromCamera(v1, this.camera);
+
+    const zones = this.cube.pieces.flatMap(piece => piece.hitZone);
+
+    this.hits1 = this.raycaster.intersectObjects(zones, false);
+    console.log(this.hits1);
+    
+    const ball = this.planePool.requestItem();
+    if(this.hits1.length > 0){
+      this.IS_DOWN = true;
+      this.controls.enabled = false;
+      ball.visible = true;
+      ball.position.copy(this.hits1[0].point);
+      // ball.position.copy(this.hits1[0].point.clone().sub(this.hits1[0].barycoord));
+      this.selectPiece();
+      if(this.useFaceArrowDebugger){
+        this.displayFaceArrow(this.hits1[0]);
+      }
+      if(this.useFaceGridDebugger){
+        this.displayFaceGrid(this.hits1[0]);
       }
     }
 
-    this.updateArrow();
-  }
-  updateArrow() {
-    if (!this.arrow) return;
-    if (this.points.length < 2) {
-      this.arrow.visible = false;
-      return;
-    }
-
-    this.toV.copy(this.movingAverage(this.points.length - 1));
-    const from = this.movingAverage(this.points.length - 2);
-    const dir = this.toV.sub(from);
-    const len = dir.length();
-    if (len <= 1e-5) {
-      this.arrow.visible = false;
-      return;
-    }
-
-    dir.normalize();
-    this.arrow.position.copy(from);
-    this.arrow.setDirection(dir);
-    this.arrow.setLength(Math.max(len, 0.01), 0.15, 0.08);
-    this.arrow.visible = true;
   }
 
-  movingAverage(endIndex) {
-    //const out = new THREE.Vector3();
-    this.outV.set(0,0,0);
-    const start = Math.max(0, endIndex - this.avgWindow + 1);
-    let count = 0;
-    for (let i = start; i <= endIndex; i++) {
-      this.outV.add(this.points[i]);
-      count++;
-    }
-    if (count > 0) this.outV.multiplyScalar(1 / count);
-    return this.outV;
+  // moves the faceArrow into the face of the selected hitzone
+  displayFaceArrow(hit){
+    this.faceArrow.visible = true;
+    this.faceArrow.position.copy(hit.point);
+    // this.faceArrow.setDirection(hit.normal)
+
+    // --- get world normal ---
+    this.normalMatrix.getNormalMatrix(hit.object.matrixWorld);
+    this.worldNormal.copy(hit.face.normal).applyMatrix3(this.normalMatrix).normalize();
+
+    this.box1.setFromObject(hit.object);
+    this.box1.getCenter(this.centerV);
+    // project onto face using normal
+    this.centerV.addScaledVector(this.worldNormal, this.box1.getSize(this.sizeV).length() / 6);
+
+    // --- position arrow at hit point ---
+    // this.faceArrow.position.copy(hit.point);
+    this.faceArrow.position.copy(this.centerV);
+    // --- orient arrow ---
+    this.faceArrow.setDirection(this.worldNormal);
+    
   }
 
-  raycastPlanes(ev) {
-    if (!this.camera || !this.cube || !this.domElement) return null;
+  upV = new THREE.Vector3(0,1,0);
+  displayFaceGrid(hit){
+    this.faceGridHelper.position.copy(hit.point);
+        // --- get world normal ---
+    this.normalMatrix.getNormalMatrix(hit.object.matrixWorld);
+    this.worldNormal.copy(hit.face.normal).applyMatrix3(this.normalMatrix).normalize();
 
+    // this.faceGridHelper.quaternion.setFromUnitVectors(this.upV, hit.normal);
+    this.faceGridHelper.quaternion.setFromUnitVectors(this.upV, this.worldNormal);
+    this.faceGridHelper.visible = true;
+  }
+
+  selectPiece(){
+    if(this.selectedPiece === null){
+      this.selectedPiece = this.hits1[0].object;
+      // console.log(this.selectedPiece);
+      
+      this.cube.pieces.forEach(x=>{
+        x.revertColor();
+      })
+
+      if(this.selectedPiece.parent?.isPiece){
+        this.selectedPiece.parent.highlight();
+      }
+    }
+  }
+
+// utilites
+
+  getScreenCoords(ev){
     const rect = this.domElement.getBoundingClientRect();
     const x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
-    this.pointerNdc.set(x, y);
-
-    const planes = [];
-    this.cube.pieces.forEach((piece) => {
-      piece.planes.forEach((entry) => {
-        if (entry?.plane) planes.push(entry.plane);
-      });
-    });
-
-    this.raycaster.setFromCamera(this.pointerNdc, this.camera);
-    const hits = this.raycaster.intersectObjects(planes, false);
-    if (!hits.length) return null;
-
-    const firstHit = hits[0];
-    const piece = this.findPieceParent(firstHit.object);
-    if (!piece) return null;
-
-    return { piece, point: firstHit.point };
+    return this.screenCoordsV.set(x, y);
   }
 
-  findPieceParent(object) {
-    let current = object;
-    while (current) {
-      if (current.isPiece) return current;
-      current = current.parent;
-    }
-    return null;
-  }
-
-  dispose() {
-    this.domElement?.removeEventListener("pointerdown", this.onPointerDown);
-    this.domElement?.removeEventListener("pointermove", this.onPointerMove);
-    this.domElement?.removeEventListener("pointerup", this.onPointerUp);
-    this.domElement?.removeEventListener("pointercancel", this.onPointerUp);
-    this.domElement?.removeEventListener("pointerleave", this.onPointerUp);
-
-    this.hitPointPool.forEach((marker) => {
-      this.scene?.remove(marker);
-      marker.geometry?.dispose?.();
-      marker.material?.dispose?.();
-    });
-    this.hitPointPool.length = 0;
-
-    if (this.arrow) {
-      this.scene?.remove(this.arrow);
-      this.arrow.line?.geometry?.dispose?.();
-      this.arrow.line?.material?.dispose?.();
-      this.arrow.cone?.geometry?.dispose?.();
-      this.arrow.cone?.material?.dispose?.();
-      this.arrow = null;
-    }
-
-    this.clearGroupHighlights();
-    this.selectedPiece = null;
-  }
 }
+

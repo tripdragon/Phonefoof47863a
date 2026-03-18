@@ -2,6 +2,7 @@ const DEFAULT_RESOLUTION = 32;
 const DEFAULT_BRUSH_SIZE = 1;
 const DEFAULT_SMOOTH_DRAWING = true;
 const DISPLAY_SIZE = 512;
+const PLAYBACK_INTERVAL_MS = 250;
 
 const HORSE_NAME_WORD_BANKS = [
   ["Amber", "Autumn", "Azure", "Blazing", "Blue", "Bold", "Bright", "Cinder", "Copper", "Crimson", "Dancing", "Dusty", "Emerald", "Golden", "Grand", "Iron", "Ivory", "Lucky", "Midnight", "Moon", "Noble", "Rapid", "Royal", "Scarlet", "Silver", "Starlit", "Storm", "Summer", "Sun", "Velvet", "Whispering", "Wild"],
@@ -145,8 +146,8 @@ export function renderPixelStudio(container) {
   container.innerHTML = `
     <section class="pixel-studio" aria-label="Pixel drawing studio">
       <p class="hero-label">Pixel Studio</p>
-      <h1 class="hero-title">Draw and stamp text into a pixel canvas</h1>
-      <p class="hero-subtitle">Pick a brush size, choose the canvas resolution, sketch in the center panel, or turn text into blocky pixel art.</p>
+      <h1 class="hero-title">Draw, record, and replay pixel sessions</h1>
+      <p class="hero-subtitle">Pick a brush size, choose the canvas resolution, sketch in the center panel, stamp text into the canvas, or record touch-down points for playback.</p>
 
       <div class="pixel-studio__panel">
         <div class="pixel-studio__controls" role="group" aria-label="Canvas controls">
@@ -178,6 +179,13 @@ export function renderPixelStudio(container) {
           <button id="pixel-clear" class="action" type="button">Clear canvas</button>
         </div>
 
+        <div class="pixel-studio__recording" role="group" aria-label="Recording controls">
+          <button id="pixel-record-toggle" class="action" type="button" aria-pressed="false">Start recording</button>
+          <button id="pixel-playback" class="action" type="button">Play back</button>
+          <button id="pixel-step" class="action" type="button">Step each</button>
+          <output id="pixel-recording-status" class="pixel-studio__recording-status" aria-live="polite">Recorder idle. 0 touch-down items stored.</output>
+        </div>
+
         <div class="pixel-studio__canvas-wrap">
           <canvas id="pixel-canvas" class="pixel-studio__canvas" width="${DISPLAY_SIZE}" height="${DISPLAY_SIZE}" aria-label="Pixel drawing canvas"></canvas>
         </div>
@@ -202,6 +210,10 @@ export function renderPixelStudio(container) {
   const gridToggleButton = container.querySelector("#pixel-grid-toggle");
   const downloadButton = container.querySelector("#pixel-download");
   const clearButton = container.querySelector("#pixel-clear");
+  const recordToggleButton = container.querySelector("#pixel-record-toggle");
+  const playbackButton = container.querySelector("#pixel-playback");
+  const stepButton = container.querySelector("#pixel-step");
+  const recordingStatus = container.querySelector("#pixel-recording-status");
   const textForm = container.querySelector("#pixel-text-form");
   const textInput = container.querySelector("#pixel-text-input");
 
@@ -212,9 +224,61 @@ export function renderPixelStudio(container) {
   let showGrid = true;
   let smoothDrawingEnabled = DEFAULT_SMOOTH_DRAWING;
   let lastPaintedCell = null;
+  let isRecording = false;
+  let recordedTouches = [];
+  let playbackIndex = 0;
+  let playbackTimerId = null;
 
   const render = () => {
     drawGrid(context, grid, showGrid);
+  };
+
+  const stopPlayback = () => {
+    if (playbackTimerId) {
+      window.clearInterval(playbackTimerId);
+      playbackTimerId = null;
+    }
+  };
+
+  const applyRecordedTouch = (touch) => {
+    if (!touch || touch.resolution !== resolution) {
+      return false;
+    }
+
+    paintAt(grid, touch.x, touch.y, touch.brushSize);
+    render();
+    return true;
+  };
+
+  const resetPlaybackGrid = () => {
+    grid = createGrid(resolution);
+    render();
+  };
+
+  const updateRecordingStatus = () => {
+    const itemLabel = `${recordedTouches.length} touch-down item${recordedTouches.length === 1 ? "" : "s"}`;
+
+    if (isRecording) {
+      recordingStatus.textContent = `Recording live. ${itemLabel} stored for ${resolution} × ${resolution}.`;
+      return;
+    }
+
+    if (!recordedTouches.length) {
+      recordingStatus.textContent = "Recorder idle. 0 touch-down items stored.";
+      return;
+    }
+
+    if (playbackTimerId) {
+      recordingStatus.textContent = `Playing back item ${Math.min(playbackIndex, recordedTouches.length)} of ${recordedTouches.length}.`;
+      return;
+    }
+
+    recordingStatus.textContent = `Recorder idle. ${itemLabel} stored. Next step: ${Math.min(playbackIndex + 1, recordedTouches.length)}.`;
+  };
+
+  const updateRecordButton = () => {
+    recordToggleButton.textContent = isRecording ? "Stop recording" : "Start recording";
+    recordToggleButton.setAttribute("aria-pressed", String(isRecording));
   };
 
   const updateGridToggleLabel = () => {
@@ -241,11 +305,25 @@ export function renderPixelStudio(container) {
   };
 
   const handlePointerDown = (event) => {
+    stopPlayback();
+    updateRecordingStatus();
     isDrawing = true;
     canvas.setPointerCapture(event.pointerId);
     const cell = getCellFromEvent(event);
     paintAt(grid, cell.x, cell.y, brushSize);
     lastPaintedCell = cell;
+
+    if (isRecording) {
+      recordedTouches.push({
+        x: cell.x,
+        y: cell.y,
+        brushSize,
+        resolution,
+      });
+      playbackIndex = recordedTouches.length;
+      updateRecordingStatus();
+    }
+
     render();
   };
 
@@ -284,8 +362,12 @@ export function renderPixelStudio(container) {
   };
 
   const handleResolutionChange = (event) => {
+    stopPlayback();
     resolution = Number(event.target.value);
     grid = createGrid(resolution);
+    recordedTouches = [];
+    playbackIndex = 0;
+    updateRecordingStatus();
     render();
   };
 
@@ -314,12 +396,89 @@ export function renderPixelStudio(container) {
   };
 
   const handleClear = () => {
+    stopPlayback();
     grid = createGrid(resolution);
+    playbackIndex = 0;
     render();
+    updateRecordingStatus();
+  };
+
+  const handleRecordToggle = () => {
+    isRecording = !isRecording;
+
+    if (isRecording) {
+      stopPlayback();
+      recordedTouches = [];
+      playbackIndex = 0;
+    }
+
+    updateRecordButton();
+    updateRecordingStatus();
+  };
+
+  const handlePlayback = () => {
+    stopPlayback();
+
+    if (!recordedTouches.length) {
+      updateRecordingStatus();
+      return;
+    }
+
+    resetPlaybackGrid();
+    playbackIndex = 0;
+    updateRecordingStatus();
+
+    playbackTimerId = window.setInterval(() => {
+      const touch = recordedTouches[playbackIndex];
+
+      if (!touch) {
+        stopPlayback();
+        updateRecordingStatus();
+        return;
+      }
+
+      applyRecordedTouch(touch);
+      playbackIndex += 1;
+      updateRecordingStatus();
+
+      if (playbackIndex >= recordedTouches.length) {
+        stopPlayback();
+        updateRecordingStatus();
+      }
+    }, PLAYBACK_INTERVAL_MS);
+  };
+
+  const handleStep = () => {
+    stopPlayback();
+
+    if (!recordedTouches.length) {
+      updateRecordingStatus();
+      return;
+    }
+
+    if (playbackIndex === 0) {
+      resetPlaybackGrid();
+    }
+
+    const touch = recordedTouches[playbackIndex];
+
+    if (!touch) {
+      playbackIndex = 0;
+      resetPlaybackGrid();
+      updateRecordingStatus();
+      return;
+    }
+
+    if (applyRecordedTouch(touch)) {
+      playbackIndex += 1;
+    }
+
+    updateRecordingStatus();
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    stopPlayback();
     rasterizeText(grid, textInput.value);
     render();
   };
@@ -332,6 +491,9 @@ export function renderPixelStudio(container) {
   gridToggleButton.addEventListener("click", handleGridToggle);
   downloadButton.addEventListener("click", handleDownload);
   clearButton.addEventListener("click", handleClear);
+  recordToggleButton.addEventListener("click", handleRecordToggle);
+  playbackButton.addEventListener("click", handlePlayback);
+  stepButton.addEventListener("click", handleStep);
   textForm.addEventListener("submit", handleSubmit);
   canvas.addEventListener("pointerdown", handlePointerDown);
   canvas.addEventListener("pointermove", handlePointerMove);
@@ -341,15 +503,21 @@ export function renderPixelStudio(container) {
 
   updateBrushLabel();
   updateGridToggleLabel();
+  updateRecordButton();
+  updateRecordingStatus();
   render();
 
   return () => {
+    stopPlayback();
     brushInput.removeEventListener("input", handleBrushChange);
     smoothDrawingInput.removeEventListener("change", handleSmoothDrawingChange);
     resolutionSelect.removeEventListener("change", handleResolutionChange);
     gridToggleButton.removeEventListener("click", handleGridToggle);
     downloadButton.removeEventListener("click", handleDownload);
     clearButton.removeEventListener("click", handleClear);
+    recordToggleButton.removeEventListener("click", handleRecordToggle);
+    playbackButton.removeEventListener("click", handlePlayback);
+    stepButton.removeEventListener("click", handleStep);
     textForm.removeEventListener("submit", handleSubmit);
     canvas.removeEventListener("pointerdown", handlePointerDown);
     canvas.removeEventListener("pointermove", handlePointerMove);

@@ -3,7 +3,7 @@ const DEFAULT_BRUSH_SIZE = 1;
 const DEFAULT_SMOOTH_DRAWING = true;
 const DISPLAY_SIZE = 512;
 const PLAYBACK_INTERVAL_MS = 250;
-const PAINT_COLOR = "#312e81";
+const DEFAULT_PAINT_COLOR = "#312e81";
 
 class PaintAction {
   constructor({ resolution, brushSize, color }) {
@@ -34,7 +34,7 @@ function clamp(value, min, max) {
 }
 
 function createGrid(resolution) {
-  return Array.from({ length: resolution }, () => Array(resolution).fill(0));
+  return Array.from({ length: resolution }, () => Array(resolution).fill(null));
 }
 
 function drawGrid(ctx, grid, showGrid = true) {
@@ -47,11 +47,12 @@ function drawGrid(ctx, grid, showGrid = true) {
 
   for (let y = 0; y < resolution; y += 1) {
     for (let x = 0; x < resolution; x += 1) {
-      if (!grid[y][x]) {
+      const cellColor = grid[y][x];
+      if (!cellColor) {
         continue;
       }
 
-      ctx.fillStyle = PAINT_COLOR;
+      ctx.fillStyle = cellColor;
       ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
   }
@@ -77,7 +78,7 @@ function drawGrid(ctx, grid, showGrid = true) {
   }
 }
 
-function paintAt(grid, x, y, brushSize) {
+function paintAt(grid, x, y, brushSize, color = DEFAULT_PAINT_COLOR) {
   const radius = Math.max(0, Math.floor(brushSize) - 1);
   const paintedCoords = [];
 
@@ -90,7 +91,7 @@ function paintAt(grid, x, y, brushSize) {
         continue;
       }
 
-      grid[nextY][nextX] = 1;
+      grid[nextY][nextX] = color;
       paintedCoords.push({ x: nextX, y: nextY });
     }
   }
@@ -98,21 +99,21 @@ function paintAt(grid, x, y, brushSize) {
   return paintedCoords;
 }
 
-function paintLine(grid, startPoint, endPoint, brushSize) {
+function paintLine(grid, startPoint, endPoint, brushSize, color = DEFAULT_PAINT_COLOR) {
   const paintedCoords = [];
   const deltaX = endPoint.x - startPoint.x;
   const deltaY = endPoint.y - startPoint.y;
   const steps = Math.max(Math.abs(deltaX), Math.abs(deltaY));
 
   if (steps === 0) {
-    return paintAt(grid, startPoint.x, startPoint.y, brushSize);
+    return paintAt(grid, startPoint.x, startPoint.y, brushSize, color);
   }
 
   for (let step = 0; step <= steps; step += 1) {
     const progress = step / steps;
     const interpolatedX = Math.round(startPoint.x + deltaX * progress);
     const interpolatedY = Math.round(startPoint.y + deltaY * progress);
-    paintedCoords.push(...paintAt(grid, interpolatedX, interpolatedY, brushSize));
+    paintedCoords.push(...paintAt(grid, interpolatedX, interpolatedY, brushSize, color));
   }
 
   return paintedCoords;
@@ -160,7 +161,7 @@ function rasterizeText(grid, text) {
       const alphaIndex = (y * resolution + x) * 4 + 3;
       const redIndex = alphaIndex - 3;
       const hasInk = data[redIndex] < 200 && data[alphaIndex] > 0;
-      grid[y][x] = hasInk ? 1 : grid[y][x];
+      grid[y][x] = hasInk ? DEFAULT_PAINT_COLOR : grid[y][x];
     }
   }
 }
@@ -170,7 +171,7 @@ export function renderPixelStudio(container) {
     <section class="pixel-studio" aria-label="Pixel drawing studio">
       <p class="hero-label">Pixel Studio</p>
       <h1 class="hero-title">Draw, record, and replay pixel sessions</h1>
-      <p class="hero-subtitle">Pick a brush size, choose the canvas resolution, sketch in the center panel, stamp text into the canvas, or record touch-down points for playback.</p>
+      <p class="hero-subtitle">Pick a brush size, choose the canvas resolution, sketch in the center panel, stamp text into the canvas, or record drawing actions for playback.</p>
 
       <div class="pixel-studio__panel">
         <div class="pixel-studio__workspace">
@@ -214,7 +215,7 @@ export function renderPixelStudio(container) {
             <div class="pixel-studio__recording-header">
               <div>
                 <p class="pixel-studio__section-label">Recording</p>
-                <output id="pixel-recording-status" class="pixel-studio__recording-status" aria-live="polite">Recorder idle. 0 touch-down items stored.</output>
+                <output id="pixel-recording-status" class="pixel-studio__recording-status" aria-live="polite">Recorder idle. 0 paint actions stored.</output>
               </div>
               <button id="pixel-record-toggle" class="pixel-studio__button pixel-studio__button--record" type="button" aria-pressed="false">Start recording</button>
             </div>
@@ -286,7 +287,11 @@ export function renderPixelStudio(container) {
     }
 
     action.coords.forEach(({ x, y }) => {
-      paintAt(grid, x, y, action.brushSize);
+      if (!grid[y] || typeof grid[y][x] === "undefined") {
+        return;
+      }
+
+      grid[y][x] = action.color;
     });
     render();
     return true;
@@ -312,7 +317,7 @@ export function renderPixelStudio(container) {
     }
 
     if (playbackTimerId) {
-      recordingStatus.textContent = `Playing back action ${Math.min(playbackIndex, actionCount)} of ${actionCount}.`;
+      recordingStatus.textContent = `Playing back action ${Math.min(playbackIndex + 1, actionCount)} of ${actionCount}.`;
       return;
     }
 
@@ -356,14 +361,14 @@ export function renderPixelStudio(container) {
     isDrawing = true;
     canvas.setPointerCapture(event.pointerId);
     const cell = getCellFromEvent(event);
-    const paintedCoords = paintAt(grid, cell.x, cell.y, brushSize);
+    const paintedCoords = paintAt(grid, cell.x, cell.y, brushSize, DEFAULT_PAINT_COLOR);
     lastPaintedCell = cell;
 
     if (isRecording) {
       currentPaintAction = new PaintAction({
         resolution,
         brushSize,
-        color: PAINT_COLOR,
+        color: DEFAULT_PAINT_COLOR,
       });
       currentPaintAction.coords.push(...paintedCoords);
       drawingSession.actions.push(currentPaintAction);
@@ -381,8 +386,8 @@ export function renderPixelStudio(container) {
 
     const cell = getCellFromEvent(event);
     const paintedCoords = smoothDrawingEnabled && lastPaintedCell
-      ? paintLine(grid, lastPaintedCell, cell, brushSize)
-      : paintAt(grid, cell.x, cell.y, brushSize);
+      ? paintLine(grid, lastPaintedCell, cell, brushSize, currentPaintAction?.color ?? DEFAULT_PAINT_COLOR)
+      : paintAt(grid, cell.x, cell.y, brushSize, currentPaintAction?.color ?? DEFAULT_PAINT_COLOR);
 
     if (currentPaintAction) {
       currentPaintAction.coords.push(...paintedCoords);

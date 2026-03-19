@@ -30,6 +30,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/botany" href="#/botany">Botany</a></li>
           <li><a class="menu-link" data-route="/camera" href="#/camera">Camera</a></li>
           <li><a class="menu-link" data-route="/pixel-studio" href="#/pixel-studio">Pixel Studio</a></li>
+          <li><a class="menu-link" data-route="/kanji-look-up" href="#/kanji-look-up">Kanji look up</a></li>
           <li><a class="menu-link" data-route="/recursion-tree" href="#/recursion-tree">Recursion Tree</a></li>
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
@@ -1292,6 +1293,24 @@ function renderPixelStudioRoute() {
   return renderPixelStudio(routeContent);
 }
 
+function renderKanjiLookUpRoute() {
+  return renderPixelStudio(routeContent, {
+    copy: {
+      eyebrow: "Kanji Study Canvas",
+      title: "kanji look up",
+      subtitle: "Sketch kanji ideas, rough radicals, or stroke-order notes on a dedicated Pixel Studio canvas built for quick reference practice.",
+      toolsLabel: "Kanji tools",
+      toolsHint: "Smooth paint stays ready for tracing connected strokes while the toolbar keeps the canvas tidy between lookups.",
+      actionsLabel: "Kanji toolbar",
+      actionsGroupLabel: "Kanji toolbar actions",
+      recordingLabel: "Stroke recording",
+      playbackLabel: "Stroke playback",
+      playbackGroupLabel: "Stroke playback controls",
+    },
+    initialBrushSize: 2,
+  });
+}
+
 function renderPianoRoute() {
   routeContent.innerHTML = `
     <p class="hero-label">Piano Guide</p>
@@ -1905,6 +1924,7 @@ const routes = {
   "/botany": renderBotanyRoute,
   "/camera": renderCameraRoute,
   "/pixel-studio": renderPixelStudioRoute,
+  "/kanji-look-up": renderKanjiLookUpRoute,
   "/recursion-tree": renderRecursionTreeRoute,
   "/piano": renderPianoRoute,
   "/three-demo": renderThreeRoute,

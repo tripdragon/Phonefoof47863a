@@ -4,11 +4,30 @@ import { renderPixelStudioToolButtons } from "./tool-buttons";
 const DEFAULT_COPY = {
   eyebrow: "Pixel Studio",
   title: "Draw, record, and replay pixel sessions",
-  subtitle: "Pick a brush size, choose the canvas resolution, sketch in the center panel, stamp text into the canvas, or record drawing actions for playback."
+  subtitle:
+    "Pick a brush size, choose the canvas resolution, sketch in the center panel, stamp text into the canvas, or record drawing actions for playback.",
+  toolsLabel: "Tools",
+  toolsHint: "Use smooth paint for connected strokes, then manage the canvas with the quick actions.",
+  actionsLabel: "Canvas actions",
+  actionsGroupLabel: "Canvas actions",
+  recordingLabel: "Recording",
+  playbackLabel: "Playback tools",
+  playbackGroupLabel: "Playback controls",
 };
 
 export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
-  const { eyebrow, title, subtitle } = { ...DEFAULT_COPY, ...copy };
+  const {
+    eyebrow,
+    title,
+    subtitle,
+    toolsLabel,
+    toolsHint,
+    actionsLabel,
+    actionsGroupLabel,
+    recordingLabel,
+    playbackLabel,
+    playbackGroupLabel,
+  } = { ...DEFAULT_COPY, ...copy };
 
   return `
     <section class="pixel-studio" aria-label="Pixel drawing studio">
@@ -20,6 +39,11 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
         <div class="pixel-studio__workspace">
           <div class="pixel-studio__controls" role="group" aria-label="Canvas controls">
             <div class="pixel-studio__control-card pixel-studio__control-card--inputs">
+              <div class="pixel-studio__tools-header">
+                <p class="pixel-studio__section-label">${toolsLabel}</p>
+                <p class="pixel-studio__tools-hint">${toolsHint}</p>
+              </div>
+
               <label class="pixel-studio__field">
                 <span>Brush size</span>
                 <input id="pixel-brush-size" type="range" min="1" max="5" step="1" value="${DEFAULT_BRUSH_SIZE}" />
@@ -37,40 +61,40 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
                 </select>
               </label>
 
-              <label class="pixel-studio__toggle" for="pixel-smooth-drawing">
-                <span>Smooth drawing</span>
+              <label class="pixel-studio__toggle pixel-studio__toggle--toolbar" for="pixel-smooth-drawing">
+                <span>Smooth paint</span>
                 <input id="pixel-smooth-drawing" type="checkbox" checked />
                 <small>Fill skipped cells while dragging.</small>
               </label>
             </div>
 
             ${renderPixelStudioToolButtons({
-              sectionLabel: "Canvas actions",
-              groupLabel: "Canvas actions",
+              sectionLabel: actionsLabel,
+              groupLabel: actionsGroupLabel,
               buttons: [
                 { id: "pixel-grid-toggle", label: "Hide grid", variant: "secondary", pressed: true },
                 { id: "pixel-download", label: "Download PNG", variant: "secondary" },
-                { id: "pixel-clear", label: "Clear canvas", variant: "ghost" }
-              ]
+                { id: "pixel-clear", label: "Clear canvas", variant: "ghost" },
+              ],
             })}
           </div>
 
           <div class="pixel-studio__recording" role="group" aria-label="Recording controls">
             <div class="pixel-studio__recording-header">
               <div>
-                <p class="pixel-studio__section-label">Recording</p>
+                <p class="pixel-studio__section-label">${recordingLabel}</p>
                 <output id="pixel-recording-status" class="pixel-studio__recording-status" aria-live="polite">Recorder idle. 0 paint actions stored.</output>
               </div>
               <button id="pixel-record-toggle" class="pixel-studio__button pixel-studio__button--record" type="button" aria-pressed="false">Start recording</button>
             </div>
             ${renderPixelStudioToolButtons({
-              sectionLabel: "Playback tools",
-              groupLabel: "Playback controls",
+              sectionLabel: playbackLabel,
+              groupLabel: playbackGroupLabel,
               rowClassName: "pixel-studio__button-row--recording",
               buttons: [
                 { id: "pixel-playback", label: "Play back", variant: "secondary" },
-                { id: "pixel-step", label: "Step each", variant: "ghost" }
-              ]
+                { id: "pixel-step", label: "Step each", variant: "ghost" },
+              ],
             })}
           </div>
         </div>

@@ -3,6 +3,7 @@ const DEFAULT_BRUSH_SIZE = 1;
 const DEFAULT_SMOOTH_DRAWING = true;
 const DISPLAY_SIZE = 512;
 const PLAYBACK_INTERVAL_MS = 250;
+const DEFAULT_PAINT_COLOR = "#312e81";
 
 const HORSE_NAME_WORD_BANKS = [
   ["Amber", "Autumn", "Azure", "Blazing", "Blue", "Bold", "Bright", "Cinder", "Copper", "Crimson", "Dancing", "Dusty", "Emerald", "Golden", "Grand", "Iron", "Ivory", "Lucky", "Midnight", "Moon", "Noble", "Rapid", "Royal", "Scarlet", "Silver", "Starlit", "Storm", "Summer", "Sun", "Velvet", "Whispering", "Wild"],
@@ -17,7 +18,7 @@ function clamp(value, min, max) {
 }
 
 function createGrid(resolution) {
-  return Array.from({ length: resolution }, () => Array(resolution).fill(0));
+  return Array.from({ length: resolution }, () => Array(resolution).fill(null));
 }
 
 function drawGrid(ctx, grid, showGrid = true) {
@@ -34,7 +35,7 @@ function drawGrid(ctx, grid, showGrid = true) {
         continue;
       }
 
-      ctx.fillStyle = "#312e81";
+      ctx.fillStyle = grid[y][x];
       ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
   }
@@ -60,7 +61,7 @@ function drawGrid(ctx, grid, showGrid = true) {
   }
 }
 
-function paintAt(grid, x, y, brushSize) {
+function paintAt(grid, x, y, brushSize, color) {
   const radius = Math.max(0, Math.floor(brushSize) - 1);
 
   for (let offsetY = -radius; offsetY <= radius; offsetY += 1) {
@@ -72,18 +73,18 @@ function paintAt(grid, x, y, brushSize) {
         continue;
       }
 
-      grid[nextY][nextX] = 1;
+      grid[nextY][nextX] = color;
     }
   }
 }
 
-function paintLine(grid, startPoint, endPoint, brushSize) {
+function paintLine(grid, startPoint, endPoint, brushSize, color) {
   const deltaX = endPoint.x - startPoint.x;
   const deltaY = endPoint.y - startPoint.y;
   const steps = Math.max(Math.abs(deltaX), Math.abs(deltaY));
 
   if (steps === 0) {
-    paintAt(grid, startPoint.x, startPoint.y, brushSize);
+    paintAt(grid, startPoint.x, startPoint.y, brushSize, color);
     return;
   }
 
@@ -91,7 +92,7 @@ function paintLine(grid, startPoint, endPoint, brushSize) {
     const progress = step / steps;
     const interpolatedX = Math.round(startPoint.x + deltaX * progress);
     const interpolatedY = Math.round(startPoint.y + deltaY * progress);
-    paintAt(grid, interpolatedX, interpolatedY, brushSize);
+    paintAt(grid, interpolatedX, interpolatedY, brushSize, color);
   }
 }
 
@@ -111,7 +112,16 @@ function createRaceHorseFilename() {
   return words.join("-").toLowerCase();
 }
 
-function rasterizeText(grid, text) {
+/**
+ * @typedef {Object} PaintAction
+ * @property {number} x
+ * @property {number} y
+ * @property {number} brushSize
+ * @property {number} resolution
+ * @property {string} color
+ */
+
+function rasterizeText(grid, text, color) {
   const resolution = grid.length;
   const offscreenCanvas = document.createElement("canvas");
   offscreenCanvas.width = resolution;
@@ -137,7 +147,7 @@ function rasterizeText(grid, text) {
       const alphaIndex = (y * resolution + x) * 4 + 3;
       const redIndex = alphaIndex - 3;
       const hasInk = data[redIndex] < 200 && data[alphaIndex] > 0;
-      grid[y][x] = hasInk ? 1 : grid[y][x];
+      grid[y][x] = hasInk ? color : grid[y][x];
     }
   }
 }
@@ -168,6 +178,11 @@ export function renderPixelStudio(container) {
                   <option value="48">48 × 48</option>
                   <option value="64">64 × 64</option>
                 </select>
+              </label>
+
+              <label class="pixel-studio__field">
+                <span>Paint color</span>
+                <input id="pixel-paint-color" type="color" value="${DEFAULT_PAINT_COLOR}" aria-label="Paint color" />
               </label>
 
               <label class="pixel-studio__toggle" for="pixel-smooth-drawing">
@@ -222,6 +237,7 @@ export function renderPixelStudio(container) {
   const brushInput = container.querySelector("#pixel-brush-size");
   const brushOutput = container.querySelector("#pixel-brush-size-output");
   const resolutionSelect = container.querySelector("#pixel-resolution");
+  const paintColorInput = container.querySelector("#pixel-paint-color");
   const smoothDrawingInput = container.querySelector("#pixel-smooth-drawing");
   const gridToggleButton = container.querySelector("#pixel-grid-toggle");
   const downloadButton = container.querySelector("#pixel-download");
@@ -235,12 +251,14 @@ export function renderPixelStudio(container) {
 
   let resolution = DEFAULT_RESOLUTION;
   let brushSize = DEFAULT_BRUSH_SIZE;
+  let currentPaintColor = DEFAULT_PAINT_COLOR;
   let grid = createGrid(resolution);
   let isDrawing = false;
   let showGrid = true;
   let smoothDrawingEnabled = DEFAULT_SMOOTH_DRAWING;
   let lastPaintedCell = null;
   let isRecording = false;
+  /** @type {PaintAction[]} */
   let recordedTouches = [];
   let playbackIndex = 0;
   let playbackTimerId = null;
@@ -261,7 +279,7 @@ export function renderPixelStudio(container) {
       return false;
     }
 
-    paintAt(grid, touch.x, touch.y, touch.brushSize);
+    paintAt(grid, touch.x, touch.y, touch.brushSize, touch.color);
     render();
     return true;
   };
@@ -329,7 +347,7 @@ export function renderPixelStudio(container) {
     isDrawing = true;
     canvas.setPointerCapture(event.pointerId);
     const cell = getCellFromEvent(event);
-    paintAt(grid, cell.x, cell.y, brushSize);
+    paintAt(grid, cell.x, cell.y, brushSize, currentPaintColor);
     lastPaintedCell = cell;
 
     if (isRecording) {
@@ -338,6 +356,7 @@ export function renderPixelStudio(container) {
         y: cell.y,
         brushSize,
         resolution,
+        color: currentPaintColor,
       });
       playbackIndex = recordedTouches.length;
       updateRecordingStatus();
@@ -354,9 +373,9 @@ export function renderPixelStudio(container) {
     const cell = getCellFromEvent(event);
 
     if (smoothDrawingEnabled && lastPaintedCell) {
-      paintLine(grid, lastPaintedCell, cell, brushSize);
+      paintLine(grid, lastPaintedCell, cell, brushSize, currentPaintColor);
     } else {
-      paintAt(grid, cell.x, cell.y, brushSize);
+      paintAt(grid, cell.x, cell.y, brushSize, currentPaintColor);
     }
 
     lastPaintedCell = cell;
@@ -378,6 +397,10 @@ export function renderPixelStudio(container) {
 
   const handleSmoothDrawingChange = (event) => {
     smoothDrawingEnabled = event.target.checked;
+  };
+
+  const handlePaintColorChange = (event) => {
+    currentPaintColor = event.target.value;
   };
 
   const handleResolutionChange = (event) => {
@@ -498,13 +521,15 @@ export function renderPixelStudio(container) {
   const handleSubmit = (event) => {
     event.preventDefault();
     stopPlayback();
-    rasterizeText(grid, textInput.value);
+    rasterizeText(grid, textInput.value, currentPaintColor);
     render();
   };
 
   smoothDrawingInput.checked = smoothDrawingEnabled;
+  paintColorInput.value = currentPaintColor;
 
   brushInput.addEventListener("input", handleBrushChange);
+  paintColorInput.addEventListener("input", handlePaintColorChange);
   smoothDrawingInput.addEventListener("change", handleSmoothDrawingChange);
   resolutionSelect.addEventListener("change", handleResolutionChange);
   gridToggleButton.addEventListener("click", handleGridToggle);
@@ -529,6 +554,7 @@ export function renderPixelStudio(container) {
   return () => {
     stopPlayback();
     brushInput.removeEventListener("input", handleBrushChange);
+    paintColorInput.removeEventListener("input", handlePaintColorChange);
     smoothDrawingInput.removeEventListener("change", handleSmoothDrawingChange);
     resolutionSelect.removeEventListener("change", handleResolutionChange);
     gridToggleButton.removeEventListener("click", handleGridToggle);

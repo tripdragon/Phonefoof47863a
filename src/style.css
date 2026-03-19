@@ -1831,6 +1831,12 @@ code {
   color: #334155;
 }
 
+.pixel-studio__field input[type="color"] {
+  min-height: 3.2rem;
+  padding: 0.35rem;
+  cursor: pointer;
+}
+
 .pixel-studio__toggle {
   display: grid;
   gap: 0.45rem;

@@ -3,6 +3,23 @@ const DEFAULT_BRUSH_SIZE = 1;
 const DEFAULT_SMOOTH_DRAWING = true;
 const DISPLAY_SIZE = 512;
 const PLAYBACK_INTERVAL_MS = 250;
+const PAINT_COLOR = "#312e81";
+
+class PaintAction {
+  constructor({ resolution, brushSize, color }) {
+    this.type = "paint";
+    this.resolution = resolution;
+    this.brushSize = brushSize;
+    this.color = color;
+    this.coords = [];
+  }
+}
+
+class DrawingSession {
+  constructor() {
+    this.actions = [];
+  }
+}
 
 const HORSE_NAME_WORD_BANKS = [
   ["Amber", "Autumn", "Azure", "Blazing", "Blue", "Bold", "Bright", "Cinder", "Copper", "Crimson", "Dancing", "Dusty", "Emerald", "Golden", "Grand", "Iron", "Ivory", "Lucky", "Midnight", "Moon", "Noble", "Rapid", "Royal", "Scarlet", "Silver", "Starlit", "Storm", "Summer", "Sun", "Velvet", "Whispering", "Wild"],
@@ -34,7 +51,7 @@ function drawGrid(ctx, grid, showGrid = true) {
         continue;
       }
 
-      ctx.fillStyle = "#312e81";
+      ctx.fillStyle = PAINT_COLOR;
       ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
   }
@@ -62,6 +79,7 @@ function drawGrid(ctx, grid, showGrid = true) {
 
 function paintAt(grid, x, y, brushSize) {
   const radius = Math.max(0, Math.floor(brushSize) - 1);
+  const paintedCoords = [];
 
   for (let offsetY = -radius; offsetY <= radius; offsetY += 1) {
     for (let offsetX = -radius; offsetX <= radius; offsetX += 1) {
@@ -73,26 +91,31 @@ function paintAt(grid, x, y, brushSize) {
       }
 
       grid[nextY][nextX] = 1;
+      paintedCoords.push({ x: nextX, y: nextY });
     }
   }
+
+  return paintedCoords;
 }
 
 function paintLine(grid, startPoint, endPoint, brushSize) {
+  const paintedCoords = [];
   const deltaX = endPoint.x - startPoint.x;
   const deltaY = endPoint.y - startPoint.y;
   const steps = Math.max(Math.abs(deltaX), Math.abs(deltaY));
 
   if (steps === 0) {
-    paintAt(grid, startPoint.x, startPoint.y, brushSize);
-    return;
+    return paintAt(grid, startPoint.x, startPoint.y, brushSize);
   }
 
   for (let step = 0; step <= steps; step += 1) {
     const progress = step / steps;
     const interpolatedX = Math.round(startPoint.x + deltaX * progress);
     const interpolatedY = Math.round(startPoint.y + deltaY * progress);
-    paintAt(grid, interpolatedX, interpolatedY, brushSize);
+    paintedCoords.push(...paintAt(grid, interpolatedX, interpolatedY, brushSize));
   }
+
+  return paintedCoords;
 }
 
 function pickRandomItem(items) {
@@ -241,7 +264,8 @@ export function renderPixelStudio(container) {
   let smoothDrawingEnabled = DEFAULT_SMOOTH_DRAWING;
   let lastPaintedCell = null;
   let isRecording = false;
-  let recordedTouches = [];
+  let drawingSession = new DrawingSession();
+  let currentPaintAction = null;
   let playbackIndex = 0;
   let playbackTimerId = null;
 
@@ -256,12 +280,14 @@ export function renderPixelStudio(container) {
     }
   };
 
-  const applyRecordedTouch = (touch) => {
-    if (!touch || touch.resolution !== resolution) {
+  const applyPaintAction = (action) => {
+    if (!action || action.type !== "paint" || action.resolution !== resolution) {
       return false;
     }
 
-    paintAt(grid, touch.x, touch.y, touch.brushSize);
+    action.coords.forEach(({ x, y }) => {
+      paintAt(grid, x, y, action.brushSize);
+    });
     render();
     return true;
   };
@@ -272,24 +298,25 @@ export function renderPixelStudio(container) {
   };
 
   const updateRecordingStatus = () => {
-    const itemLabel = `${recordedTouches.length} touch-down item${recordedTouches.length === 1 ? "" : "s"}`;
+    const actionCount = drawingSession.actions.length;
+    const itemLabel = `${actionCount} paint action${actionCount === 1 ? "" : "s"}`;
 
     if (isRecording) {
       recordingStatus.textContent = `Recording live. ${itemLabel} stored for ${resolution} × ${resolution}.`;
       return;
     }
 
-    if (!recordedTouches.length) {
-      recordingStatus.textContent = "Recorder idle. 0 touch-down items stored.";
+    if (!actionCount) {
+      recordingStatus.textContent = "Recorder idle. 0 paint actions stored.";
       return;
     }
 
     if (playbackTimerId) {
-      recordingStatus.textContent = `Playing back item ${Math.min(playbackIndex, recordedTouches.length)} of ${recordedTouches.length}.`;
+      recordingStatus.textContent = `Playing back action ${Math.min(playbackIndex, actionCount)} of ${actionCount}.`;
       return;
     }
 
-    recordingStatus.textContent = `Recorder idle. ${itemLabel} stored. Next step: ${Math.min(playbackIndex + 1, recordedTouches.length)}.`;
+    recordingStatus.textContent = `Recorder idle. ${itemLabel} stored. Next step: ${Math.min(playbackIndex + 1, actionCount)}.`;
   };
 
   const updateRecordButton = () => {
@@ -329,17 +356,18 @@ export function renderPixelStudio(container) {
     isDrawing = true;
     canvas.setPointerCapture(event.pointerId);
     const cell = getCellFromEvent(event);
-    paintAt(grid, cell.x, cell.y, brushSize);
+    const paintedCoords = paintAt(grid, cell.x, cell.y, brushSize);
     lastPaintedCell = cell;
 
     if (isRecording) {
-      recordedTouches.push({
-        x: cell.x,
-        y: cell.y,
-        brushSize,
+      currentPaintAction = new PaintAction({
         resolution,
+        brushSize,
+        color: PAINT_COLOR,
       });
-      playbackIndex = recordedTouches.length;
+      currentPaintAction.coords.push(...paintedCoords);
+      drawingSession.actions.push(currentPaintAction);
+      playbackIndex = drawingSession.actions.length;
       updateRecordingStatus();
     }
 
@@ -352,11 +380,12 @@ export function renderPixelStudio(container) {
     }
 
     const cell = getCellFromEvent(event);
+    const paintedCoords = smoothDrawingEnabled && lastPaintedCell
+      ? paintLine(grid, lastPaintedCell, cell, brushSize)
+      : paintAt(grid, cell.x, cell.y, brushSize);
 
-    if (smoothDrawingEnabled && lastPaintedCell) {
-      paintLine(grid, lastPaintedCell, cell, brushSize);
-    } else {
-      paintAt(grid, cell.x, cell.y, brushSize);
+    if (currentPaintAction) {
+      currentPaintAction.coords.push(...paintedCoords);
     }
 
     lastPaintedCell = cell;
@@ -366,6 +395,7 @@ export function renderPixelStudio(container) {
   const stopDrawing = (event) => {
     isDrawing = false;
     lastPaintedCell = null;
+    currentPaintAction = null;
     if (event?.pointerId != null && canvas.hasPointerCapture(event.pointerId)) {
       canvas.releasePointerCapture(event.pointerId);
     }
@@ -384,7 +414,8 @@ export function renderPixelStudio(container) {
     stopPlayback();
     resolution = Number(event.target.value);
     grid = createGrid(resolution);
-    recordedTouches = [];
+    drawingSession = new DrawingSession();
+    currentPaintAction = null;
     playbackIndex = 0;
     updateRecordingStatus();
     render();
@@ -427,7 +458,8 @@ export function renderPixelStudio(container) {
 
     if (isRecording) {
       stopPlayback();
-      recordedTouches = [];
+      drawingSession = new DrawingSession();
+      currentPaintAction = null;
       playbackIndex = 0;
     }
 
@@ -438,7 +470,7 @@ export function renderPixelStudio(container) {
   const handlePlayback = () => {
     stopPlayback();
 
-    if (!recordedTouches.length) {
+    if (!drawingSession.actions.length) {
       updateRecordingStatus();
       return;
     }
@@ -448,19 +480,19 @@ export function renderPixelStudio(container) {
     updateRecordingStatus();
 
     playbackTimerId = window.setInterval(() => {
-      const touch = recordedTouches[playbackIndex];
+      const action = drawingSession.actions[playbackIndex];
 
-      if (!touch) {
+      if (!action) {
         stopPlayback();
         updateRecordingStatus();
         return;
       }
 
-      applyRecordedTouch(touch);
+      applyPaintAction(action);
       playbackIndex += 1;
       updateRecordingStatus();
 
-      if (playbackIndex >= recordedTouches.length) {
+      if (playbackIndex >= drawingSession.actions.length) {
         stopPlayback();
         updateRecordingStatus();
       }
@@ -470,7 +502,7 @@ export function renderPixelStudio(container) {
   const handleStep = () => {
     stopPlayback();
 
-    if (!recordedTouches.length) {
+    if (!drawingSession.actions.length) {
       updateRecordingStatus();
       return;
     }
@@ -479,16 +511,16 @@ export function renderPixelStudio(container) {
       resetPlaybackGrid();
     }
 
-    const touch = recordedTouches[playbackIndex];
+    const action = drawingSession.actions[playbackIndex];
 
-    if (!touch) {
+    if (!action) {
       playbackIndex = 0;
       resetPlaybackGrid();
       updateRecordingStatus();
       return;
     }
 
-    if (applyRecordedTouch(touch)) {
+    if (applyPaintAction(action)) {
       playbackIndex += 1;
     }
 

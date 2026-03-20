@@ -10,6 +10,7 @@ import { renderBotanyInteractive, renderBotanyLatex } from "./interactives/botan
 import { renderCameraInteractive } from "./interactives/camera";
 import { renderPixelStudio } from "./interactives/pixel-studio";
 import { renderGroceryTranslationsRoute } from "./grocery-translations";
+import { JAPANESE_CHARACTER_STROKES } from "./interactives/pixel-studio/character-strokes";
 
 const appVersion = `v${__APP_VERSION__}`;
 
@@ -1306,8 +1307,20 @@ function renderKanjiLookUpRoute() {
       recordingLabel: "Stroke recording",
       playbackLabel: "Stroke playback",
       playbackGroupLabel: "Stroke playback controls",
+      sessionLabel: "Stroke-count session",
+      sessionHint: "Start a guided stroke-count session, then compare your live line total with common kana and kanji.",
+      sessionButtonLabel: "Start drawing session",
+      sessionStopLabel: "Stop session",
+      sessionIdle: "Session idle. Start drawing to count your lines live.",
+      sessionActive: "Session active. Each new line updates the live stroke count.",
+      sessionCountLabel: "Lines drawn",
+      matchesLabel: "Matching characters",
+      matchesHint: "This mini grid filters the shared character database to the same stroke count as your drawing session.",
+      matchesEmpty: "No live count yet. Start a session and draw to see matching characters.",
+      clearButtonLabel: "Reset session + grid",
     },
     initialBrushSize: 2,
+    characterDatabase: JAPANESE_CHARACTER_STROKES,
   });
 }
 

@@ -1300,6 +1300,7 @@ function renderKanjiLookUpRoute() {
       eyebrow: "Kanji Study Canvas",
       title: "kanji look up",
       subtitle: "Sketch kanji ideas, rough radicals, or stroke-order notes on a dedicated Pixel Studio canvas built for quick reference practice.",
+      explainerLabel: "Kanji page explainer",
       toolsLabel: "Kanji tools",
       toolsHint: "Smooth paint stays ready for tracing connected strokes while the toolbar keeps the canvas tidy between lookups.",
       actionsLabel: "Kanji toolbar",
@@ -1320,6 +1321,7 @@ function renderKanjiLookUpRoute() {
       clearButtonLabel: "Reset session + grid",
     },
     initialBrushSize: 2,
+    initialResolution: 64,
     characterDatabase: JAPANESE_CHARACTER_STROKES,
   });
 }

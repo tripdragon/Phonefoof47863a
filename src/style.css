@@ -1866,23 +1866,55 @@ code {
 }
 
 .pixel-studio__control-card,
-.pixel-studio__recording {
-  padding: 1rem;
+.pixel-studio__recording,
+.pixel-studio__disclosure {
+  width: 100%;
   border: 1px solid #c7d2fe;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 12px 28px rgba(79, 70, 229, 0.08);
 }
 
-.pixel-studio__control-card--inputs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+.pixel-studio__disclosure-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 1rem;
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.pixel-studio__disclosure-summary::-webkit-details-marker {
+  display: none;
+}
+
+.pixel-studio__disclosure-content {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1rem 1rem;
+}
+
+.pixel-studio__disclosure-icon {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-right: 2px solid #4338ca;
+  border-bottom: 2px solid #4338ca;
+  transform: rotate(45deg);
+  transition: transform 140ms ease;
+  flex: 0 0 auto;
+}
+
+.pixel-studio__disclosure[open] .pixel-studio__disclosure-icon {
+  transform: rotate(-135deg);
+}
+
+.pixel-studio__control-card--inputs .pixel-studio__disclosure-content {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   align-items: end;
 }
 
-.pixel-studio__control-card--actions {
-  display: grid;
+.pixel-studio__control-card--actions .pixel-studio__disclosure-content {
   gap: 0.9rem;
   align-content: start;
 }
@@ -2015,8 +2047,7 @@ code {
   background: #991b1b;
 }
 
-.pixel-studio__recording {
-  display: grid;
+.pixel-studio__recording .pixel-studio__disclosure-content {
   gap: 0.9rem;
 }
 
@@ -2053,7 +2084,7 @@ code {
 }
 
 .pixel-studio__text-form {
-  width: min(100%, 880px);
+  width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 1rem;
@@ -2076,7 +2107,8 @@ code {
 }
 
 .pixel-studio__session-header,
-.pixel-studio__session-stats {
+.pixel-studio__session-stats,
+.pixel-studio__session-actions {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
@@ -2189,4 +2221,18 @@ code {
   border: 1px solid #cbd5e1;
   border-radius: 14px;
   background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+}
+
+
+.pixel-studio__disclosure--explainer {
+  width: min(100%, 880px);
+}
+
+.pixel-studio__explainer-copy {
+  margin: 0;
+  max-width: none;
+}
+
+.pixel-studio__session-actions {
+  flex-wrap: wrap;
 }

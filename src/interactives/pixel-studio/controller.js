@@ -22,6 +22,8 @@ export function mountPixelStudio(container, options = {}) {
 
   const canvas = container.querySelector("#pixel-canvas");
   const context = canvas.getContext("2d");
+  const guessCanvas = container.querySelector("#pixel-guess-canvas");
+  const guessContext = guessCanvas?.getContext("2d");
   const brushInput = container.querySelector("#pixel-brush-size");
   const brushOutput = container.querySelector("#pixel-brush-size-output");
   const resolutionSelect = container.querySelector("#pixel-resolution");
@@ -46,6 +48,7 @@ export function mountPixelStudio(container, options = {}) {
   const kanjiFilterInput = container.querySelector("#pixel-filter-kanji");
   const hiraganaFilterInput = container.querySelector("#pixel-filter-hiragana");
   const katakanaFilterInput = container.querySelector("#pixel-filter-katakana");
+  const showGuessInput = container.querySelector("#pixel-show-guess");
   const loadDatabaseButton = container.querySelector("#pixel-load-database");
   const databaseGrid = container.querySelector("#pixel-database-grid");
 
@@ -63,6 +66,8 @@ export function mountPixelStudio(container, options = {}) {
   let playbackTimerId = null;
   let sessionActive = true;
   let liveStrokeCount = 0;
+  let showGuessOverlay = false;
+  let currentGuess = null;
   const activeCharacterFilters = {
     lines: false,
     kanji: true,
@@ -84,6 +89,14 @@ export function mountPixelStudio(container, options = {}) {
   const characterLookup = new Map(characterDatabase.map((entry) => [entry.character, entry]));
 
   const createEmptyGrid = (size) => Array.from({ length: size }, () => Array(size).fill(0));
+
+  const clearGuessOverlay = () => {
+    if (!guessContext || !guessCanvas) {
+      return;
+    }
+
+    guessContext.clearRect(0, 0, guessCanvas.width, guessCanvas.height);
+  };
 
   const formatReadings = (readings = {}) => {
     const onReadings = readings.on?.length ? `On: ${readings.on.join(", ")}` : "";
@@ -300,6 +313,36 @@ export function mountPixelStudio(container, options = {}) {
     return union ? intersection / union : 0;
   };
 
+  const renderGuessOverlay = (guess) => {
+    clearGuessOverlay();
+
+    if (!guessContext || !guessCanvas || !showGuessOverlay || !guess?.template) {
+      return;
+    }
+
+    const cellSize = guessCanvas.width / guess.template.length;
+    guessContext.fillStyle = "rgba(129, 140, 248, 0.55)";
+
+    for (let y = 0; y < guess.template.length; y += 1) {
+      for (let x = 0; x < guess.template[y].length; x += 1) {
+        if (!guess.template[y][x]) {
+          continue;
+        }
+
+        guessContext.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      }
+    }
+  };
+
+  const syncGuessOverlay = () => {
+    if (!showGuessOverlay) {
+      clearGuessOverlay();
+      return;
+    }
+
+    renderGuessOverlay(currentGuess);
+  };
+
   const renderBestGuess = () => {
     if (!bestGuess) {
       return;
@@ -309,6 +352,8 @@ export function mountPixelStudio(container, options = {}) {
     const filledCells = normalizedGrid.flat().reduce((sum, value) => sum + value, 0);
 
     if (!filledCells) {
+      currentGuess = null;
+      clearGuessOverlay();
       bestGuess.innerHTML = `<p class="pixel-studio__match-empty">${copy.bestGuessEmpty}</p>`;
       return;
     }
@@ -316,16 +361,25 @@ export function mountPixelStudio(container, options = {}) {
     const guessCandidates = getFilteredCharacters();
 
     if (!guessCandidates.length) {
+      currentGuess = null;
+      clearGuessOverlay();
       bestGuess.innerHTML = `<p class="pixel-studio__match-empty">${copy.bestGuessNoFilteredMatch}</p>`;
       return;
     }
 
     const guess = guessCandidates
-      .map((entry) => ({
-        ...entry,
-        score: scoreTemplateMatch(normalizedGrid, getTemplateForCharacter(entry.character)),
-      }))
+      .map((entry) => {
+        const template = getTemplateForCharacter(entry.character);
+        return {
+          ...entry,
+          template,
+          score: scoreTemplateMatch(normalizedGrid, template),
+        };
+      })
       .sort((left, right) => right.score - left.score)[0];
+
+    currentGuess = guess;
+    syncGuessOverlay();
 
     const confidence = Math.round(guess.score * 100);
 
@@ -355,6 +409,9 @@ export function mountPixelStudio(container, options = {}) {
   }
   if (katakanaFilterInput) {
     katakanaFilterInput.checked = activeCharacterFilters.katakana;
+  }
+  if (showGuessInput) {
+    showGuessInput.checked = showGuessOverlay;
   }
 
   const render = () => {
@@ -687,6 +744,11 @@ export function mountPixelStudio(container, options = {}) {
     updateLookupDetails();
   };
 
+  const handleShowGuessChange = (event) => {
+    showGuessOverlay = event.target.checked;
+    syncGuessOverlay();
+  };
+
   const handleFilterChange = (event) => {
     const { filter } = event.target.dataset;
 
@@ -731,6 +793,7 @@ export function mountPixelStudio(container, options = {}) {
   kanjiFilterInput?.addEventListener("change", handleFilterChange);
   hiraganaFilterInput?.addEventListener("change", handleFilterChange);
   katakanaFilterInput?.addEventListener("change", handleFilterChange);
+  showGuessInput?.addEventListener("change", handleShowGuessChange);
   bestGuess?.addEventListener("click", handleBestGuessClick);
   loadDatabaseButton?.addEventListener("click", handleLoadDatabase);
   databaseGrid?.addEventListener("click", handleMatchClick);
@@ -767,6 +830,7 @@ export function mountPixelStudio(container, options = {}) {
     kanjiFilterInput?.removeEventListener("change", handleFilterChange);
     hiraganaFilterInput?.removeEventListener("change", handleFilterChange);
     katakanaFilterInput?.removeEventListener("change", handleFilterChange);
+    showGuessInput?.removeEventListener("change", handleShowGuessChange);
     bestGuess?.removeEventListener("click", handleBestGuessClick);
     loadDatabaseButton?.removeEventListener("click", handleLoadDatabase);
     databaseGrid?.removeEventListener("click", handleMatchClick);

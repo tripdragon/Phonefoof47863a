@@ -13,6 +13,16 @@ const DEFAULT_COPY = {
   recordingLabel: "Recording",
   playbackLabel: "Playback tools",
   playbackGroupLabel: "Playback controls",
+  sessionLabel: "Drawing session",
+  sessionHint: "Track each stroke you draw and compare it against common Japanese characters.",
+  sessionButtonLabel: "Start drawing session",
+  sessionIdle: "Session idle. Press start to count live strokes.",
+  sessionActive: "Session active. Stroke count updates live while you draw.",
+  sessionCountLabel: "Lines drawn",
+  matchesLabel: "Stroke count matches",
+  matchesHint: "Characters shown here share the same stroke count as your live session.",
+  matchesEmpty: "Draw a few lines to see matching kana and kanji.",
+  clearButtonLabel: "Clear canvas",
 };
 
 export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
@@ -27,6 +37,15 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
     recordingLabel,
     playbackLabel,
     playbackGroupLabel,
+    sessionLabel,
+    sessionHint,
+    sessionButtonLabel,
+    sessionIdle,
+    sessionCountLabel,
+    matchesLabel,
+    matchesHint,
+    matchesEmpty,
+    clearButtonLabel,
   } = { ...DEFAULT_COPY, ...copy };
 
   return `
@@ -74,7 +93,7 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
               buttons: [
                 { id: "pixel-grid-toggle", label: "Hide grid", variant: "secondary", pressed: true },
                 { id: "pixel-download", label: "Download PNG", variant: "secondary" },
-                { id: "pixel-clear", label: "Clear canvas", variant: "ghost" },
+                { id: "pixel-clear", label: clearButtonLabel, variant: "ghost" },
               ],
             })}
           </div>
@@ -110,6 +129,32 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
           </label>
           <button class="pixel-studio__button pixel-studio__button--secondary" type="submit">Send to canvas</button>
         </form>
+
+        <section class="pixel-studio__session" aria-label="${sessionLabel}">
+          <div class="pixel-studio__session-header">
+            <div>
+              <p class="pixel-studio__section-label">${sessionLabel}</p>
+              <p class="pixel-studio__tools-hint">${sessionHint}</p>
+            </div>
+            <button id="pixel-session-toggle" class="pixel-studio__button pixel-studio__button--secondary" type="button" aria-pressed="false">${sessionButtonLabel}</button>
+          </div>
+          <div class="pixel-studio__session-stats">
+            <div class="pixel-studio__session-count">
+              <span>${sessionCountLabel}</span>
+              <output id="pixel-stroke-count" aria-live="polite">0</output>
+            </div>
+            <output id="pixel-session-status" class="pixel-studio__recording-status" aria-live="polite">${sessionIdle}</output>
+          </div>
+          <div class="pixel-studio__matches">
+            <div class="pixel-studio__tools-header">
+              <p class="pixel-studio__section-label">${matchesLabel}</p>
+              <p class="pixel-studio__tools-hint">${matchesHint}</p>
+            </div>
+            <div id="pixel-character-matches" class="pixel-studio__match-grid" role="list">
+              <p class="pixel-studio__match-empty">${matchesEmpty}</p>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
   `;

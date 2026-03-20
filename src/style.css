@@ -2067,6 +2067,7 @@ code {
 }
 
 .pixel-studio__canvas-wrap {
+  position: relative;
   width: min(100%, 560px);
   display: flex;
   justify-content: center;
@@ -2081,6 +2082,19 @@ code {
   background: #fff;
   box-shadow: 0 22px 45px rgba(49, 46, 129, 0.18);
   touch-action: none;
+}
+
+.pixel-studio__canvas--guess {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+  opacity: 0.72;
+  transition: opacity 180ms ease;
 }
 
 .pixel-studio__text-form {

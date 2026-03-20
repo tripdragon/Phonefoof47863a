@@ -197,6 +197,7 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
 
           <div class="pixel-studio__canvas-wrap">
             <canvas id="pixel-canvas" class="pixel-studio__canvas" width="${DISPLAY_SIZE}" height="${DISPLAY_SIZE}" aria-label="Pixel drawing canvas"></canvas>
+            <canvas id="pixel-guess-canvas" class="pixel-studio__canvas pixel-studio__canvas--guess" width="${DISPLAY_SIZE}" height="${DISPLAY_SIZE}" aria-hidden="true"></canvas>
           </div>
         </div>
 
@@ -222,6 +223,10 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
               <label class="pixel-studio__toggle pixel-studio__toggle--compact" for="pixel-filter-katakana">
                 <span>Katakana</span>
                 <input id="pixel-filter-katakana" type="checkbox" aria-label="Show katakana" checked />
+              </label>
+              <label class="pixel-studio__toggle pixel-studio__toggle--compact" for="pixel-show-guess">
+                <span>Show guess</span>
+                <input id="pixel-show-guess" type="checkbox" aria-label="Show guessed character overlay" />
               </label>
             </div>
             <div id="pixel-best-guess" class="pixel-studio__guess-card" aria-live="polite">

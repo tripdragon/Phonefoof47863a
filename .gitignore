@@ -1,2 +1,4 @@
 node_modules/
 dist/
+public/sqlite/*.sqlite
+public/sqlite/*.wasm

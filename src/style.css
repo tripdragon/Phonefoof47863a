@@ -2443,13 +2443,27 @@ code {
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
 }
 
+.french-page {
+  width: 100%;
+}
+
+.french-page__actions {
+  margin-top: 1.5rem;
+}
+
+.french-page__back-link {
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
 .french-search,
 .french-database {
   margin-top: 1.5rem;
   padding: 1.25rem;
   border-radius: 18px;
   border: 1px solid #dbe3f4;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: #ffffff;
 }
 
 .french-search__controls {
@@ -2522,8 +2536,8 @@ code {
 .french-result-card {
   padding: 1rem;
   border-radius: 16px;
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
+  background: #f8fafc;
+  border: 1px solid #dbe3f4;
 }
 
 .french-result-card p,
@@ -2572,13 +2586,72 @@ code {
 }
 
 .french-database__table th {
-  color: #4338ca;
-  background: #eef2ff;
+  color: #334155;
+  background: #f8fafc;
 }
 
 @media (max-width: 720px) {
+  .french-search,
+  .french-database {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+
   .french-search__filters {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .french-search__filters label {
+    width: 100%;
+  }
+
+  .french-results__meta {
+    flex-direction: column;
+  }
+
+  .french-results__list {
+    grid-template-columns: 1fr;
+  }
+
+  .french-database__table {
+    min-width: 0;
+  }
+
+  .french-database__table thead {
+    display: none;
+  }
+
+  .french-database__table,
+  .french-database__table tbody,
+  .french-database__table tr,
+  .french-database__table td {
+    display: block;
+    width: 100%;
+  }
+
+  .french-database__table tr {
+    padding: 0.9rem;
+    margin-bottom: 0.85rem;
+    border: 1px solid #dbe3f4;
+    border-radius: 14px;
+    background: #f8fafc;
+  }
+
+  .french-database__table td {
+    padding: 0.35rem 0;
+    border-bottom: 0;
+  }
+
+  .french-database__table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.1rem;
   }
 }

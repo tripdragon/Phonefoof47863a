@@ -138,59 +138,61 @@ export function renderFrenchTalkingRoute(container) {
     .map(
       (phrase, index) => `
         <tr>
-          <td>${index + 1}</td>
-          <td>${phrase.english}</td>
-          <td>${phrase.french}</td>
-          <td>${phrase.phonetic}</td>
-          <td>${phrase.category}</td>
+          <td data-label="#">${index + 1}</td>
+          <td data-label="English">${phrase.english}</td>
+          <td data-label="French">${phrase.french}</td>
+          <td data-label="Phonetic">${phrase.phonetic}</td>
+          <td data-label="Category">${phrase.category}</td>
         </tr>
       `,
     )
     .join("");
 
   container.innerHTML = `
-    <p class="hero-label">French talking</p>
-    <h1 class="hero-title">French mini tourist phrases for walking around town</h1>
-    <p class="hero-subtitle">
-      Search forty useful travel phrases with live phonetic-friendly matching, then study the full phrase bank at the bottom.
-    </p>
+    <div class="french-page">
+      <p class="hero-label">French talking</p>
+      <h1 class="hero-title">French mini tourist phrases for walking around town</h1>
+      <p class="hero-subtitle">
+        Search forty useful travel phrases with live phonetic-friendly matching, then study the full phrase bank at the bottom.
+      </p>
 
-    <section class="french-search" aria-label="French phrase search">
-      <div class="french-search__controls">
-        <label class="french-search__label" for="french-search-input">Search by meaning or sound</label>
-        <input id="french-search-input" class="french-search__input" type="search" placeholder="Try: bathroom, bonjoor, taxi, say kombyen..." autocomplete="off" />
-      </div>
-      <fieldset class="french-search__filters">
-        <legend>Filter lookup</legend>
-        <label><input type="radio" name="lookup-mode" value="all" checked /> All fields</label>
-        <label><input type="radio" name="lookup-mode" value="english" /> English translation</label>
-        <label><input type="radio" name="lookup-mode" value="sounds" /> French sounds</label>
-      </fieldset>
-      <div id="french-results" class="french-results" aria-live="polite"></div>
-    </section>
+      <section class="french-search" aria-label="French phrase search">
+        <div class="french-search__controls">
+          <label class="french-search__label" for="french-search-input">Search by meaning or sound</label>
+          <input id="french-search-input" class="french-search__input" type="search" placeholder="Try: bathroom, bonjoor, taxi, say kombyen..." autocomplete="off" />
+        </div>
+        <fieldset class="french-search__filters">
+          <legend>Filter lookup</legend>
+          <label><input type="radio" name="lookup-mode" value="all" checked /> All fields</label>
+          <label><input type="radio" name="lookup-mode" value="english" /> English translation</label>
+          <label><input type="radio" name="lookup-mode" value="sounds" /> French sounds</label>
+        </fieldset>
+        <div id="french-results" class="french-results" aria-live="polite"></div>
+      </section>
 
-    <section class="french-database" aria-label="French tourist phrase database">
-      <div class="french-database__heading">
-        <h2>Phrase database</h2>
-        <p>English meaning, natural French wording, and a simple phonetic guide.</p>
+      <section class="french-database" aria-label="French tourist phrase database">
+        <div class="french-database__heading">
+          <h2>Phrase database</h2>
+          <p>English meaning, natural French wording, and a simple phonetic guide.</p>
+        </div>
+        <div class="french-database__table-wrap">
+          <table class="french-database__table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>English</th>
+                <th>French</th>
+                <th>Phonetic</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody>${phraseTable}</tbody>
+          </table>
+        </div>
+      </section>
+      <div class="hero-controls french-page__actions">
+        <a class="action french-page__back-link" href="#/">Back home</a>
       </div>
-      <div class="french-database__table-wrap">
-        <table class="french-database__table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>English</th>
-              <th>French</th>
-              <th>Phonetic</th>
-              <th>Category</th>
-            </tr>
-          </thead>
-          <tbody>${phraseTable}</tbody>
-        </table>
-      </div>
-    </section>
-    <div class="hero-controls">
-      <a class="action" href="#/">Back home</a>
     </div>
   `;
 

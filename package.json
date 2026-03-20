@@ -1,14 +1,16 @@
 {
   "name": "phonefoof47863a",
   "private": true,
-  "version": "1.0.32",
+  "version": "1.0.35",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "prebuild": "node scripts/bump-version.mjs",
-    "test": "node --test"
+    "prebuild": "npm run build:french-db && node scripts/bump-version.mjs",
+    "test": "node --test",
+    "build:french-db": "node scripts/generate-french-sqlite.mjs",
+    "predev": "npm run build:french-db"
   },
   "devDependencies": {
     "vite": "^7.1.3"
@@ -17,6 +19,7 @@
     "chart.js": "^4.5.1",
     "compromise": "^14.14.5",
     "katex": "^0.16.28",
+    "sql.js": "^1.14.1",
     "three": "^0.182.0"
   }
 }

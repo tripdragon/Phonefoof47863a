@@ -2457,8 +2457,11 @@ code {
   border: 1px solid #cbd5e1;
 }
 
+.french-note,
 .french-search,
-.french-database {
+.french-database,
+.french-conversation,
+.french-dialogues {
   margin-top: 1.5rem;
   padding: 1.25rem;
   border-radius: 18px;
@@ -2562,6 +2565,90 @@ code {
   margin-top: 0.35rem !important;
 }
 
+
+.french-note {
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #eef2ff, #f8fafc);
+}
+
+.french-note p {
+  margin: 0;
+  color: #334155;
+}
+
+.french-chip-grid,
+.french-dialogue-grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.french-chip-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.french-chip-card,
+.french-dialogue-card {
+  border: 1px solid #dbe3f4;
+  border-radius: 16px;
+  background: #f8fafc;
+  padding: 1rem;
+}
+
+.french-chip-card p,
+.french-dialogue-card p,
+.french-dialogue-card h3 {
+  margin: 0;
+}
+
+.french-chip-card__french,
+.french-dialogue-card__speaker {
+  font-weight: 800;
+  color: #312e81;
+}
+
+.french-chip-card__english,
+.french-dialogue-card__english,
+.french-dialogue-card__header p {
+  margin-top: 0.25rem;
+  color: #475569;
+}
+
+.french-chip-card__phonetic,
+.french-dialogue-card__french {
+  margin-top: 0.3rem;
+}
+
+.french-dialogue-card__header {
+  margin-bottom: 0.8rem;
+}
+
+.french-dialogue-card__header h3 {
+  color: #1e1b4b;
+}
+
+.french-dialogue-card__lines {
+  list-style: none;
+  display: grid;
+  gap: 0.8rem;
+  padding: 0;
+  margin: 0;
+}
+
+.french-dialogue-card__lines li {
+  padding-top: 0.8rem;
+  border-top: 1px solid #dbe3f4;
+}
+
+.french-results__warning {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #9a3412;
+}
+
 .french-database__heading h2 {
   margin: 0;
   color: #1e1b4b;
@@ -2591,8 +2678,11 @@ code {
 }
 
 @media (max-width: 720px) {
+  .french-note,
   .french-search,
-  .french-database {
+  .french-database,
+  .french-conversation,
+  .french-dialogues {
     padding: 1rem;
     border-radius: 16px;
   }

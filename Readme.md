@@ -42,6 +42,8 @@ docker run --rm -p 8080:80 phonefoof-app
 
 ## Deploy with GitHub Pages
 
+The French talking page now generates a static SQLite database into `public/sqlite/` during local dev/build and loads it in the browser, which keeps the feature compatible with GitHub Pages hosting without committing binary assets.
+
 This repository includes a GitHub Actions workflow at `.github/workflows/deploy-pages.yml` that builds with Vite and deploys the `dist/` output to GitHub Pages whenever changes are pushed to `main`.
 
 ### One-time repository setup

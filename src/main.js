@@ -11,6 +11,7 @@ import { renderCameraInteractive } from "./interactives/camera";
 import { renderPixelStudio } from "./interactives/pixel-studio";
 import { renderGroceryTranslationsRoute } from "./grocery-translations";
 import { renderFrenchTalkingRoute } from "./french-talking";
+import { renderSpanishTalkingRoute } from "./spanish-talking";
 import { JAPANESE_CHARACTER_STROKES } from "./interactives/pixel-studio/character-strokes";
 
 const appVersion = `v${__APP_VERSION__}`;
@@ -39,6 +40,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/languages" href="#/languages">languages</a></li>
           <li><a class="menu-link" data-route="/grocery-translations" href="#/grocery-translations">Grocery Words</a></li>
           <li><a class="menu-link" data-route="/french-talking" href="#/french-talking">French talking</a></li>
+          <li><a class="menu-link" data-route="/spanish-talking" href="#/spanish-talking">Spanish talking</a></li>
           <li><a class="menu-link" data-route="/rubix-cube" href="#/rubix-cube">Rubix Cube</a></li>
 <li><a class="menu-link" data-route="/bunnyblast-full" href="bunnyblast-full.html">claude1</a></li>
 <li><a class="menu-link" data-route="/learn-univers_1" href="learn-univers_1.html">learn uni 1</a></li>
@@ -1946,6 +1948,10 @@ function renderFrenchTalkingPageRoute() {
   return renderFrenchTalkingRoute(routeContent);
 }
 
+function renderSpanishTalkingPageRoute() {
+  return renderSpanishTalkingRoute(routeContent);
+}
+
 const routes = {
   "/": renderHomeRoute,
   "/shows": renderShowsRoute,
@@ -1961,6 +1967,7 @@ const routes = {
   "/languages": renderLanguagesRoute,
   "/grocery-translations": renderGroceryRoute,
   "/french-talking": renderFrenchTalkingPageRoute,
+  "/spanish-talking": renderSpanishTalkingPageRoute,
   "/rubix-cube": renderRubixCubeRoute,
   "/rubixC": renderRubixCPageRoute,
 };

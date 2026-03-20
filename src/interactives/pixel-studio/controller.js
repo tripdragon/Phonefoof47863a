@@ -42,6 +42,9 @@ export function mountPixelStudio(container, options = {}) {
   const matchPronunciation = container.querySelector("#pixel-match-pronunciation");
   const matchTranslation = container.querySelector("#pixel-match-translation");
   const bestGuess = container.querySelector("#pixel-best-guess");
+  const bestGuessFilterInput = container.querySelector("#pixel-best-guess-filter");
+  const loadDatabaseButton = container.querySelector("#pixel-load-database");
+  const databaseGrid = container.querySelector("#pixel-database-grid");
 
   let resolution = options.initialResolution ?? DEFAULT_RESOLUTION;
   let brushSize = options.initialBrushSize ?? DEFAULT_BRUSH_SIZE;
@@ -57,12 +60,15 @@ export function mountPixelStudio(container, options = {}) {
   let playbackTimerId = null;
   let sessionActive = true;
   let liveStrokeCount = 0;
+  let limitBestGuessToStrokeCount = false;
   const characterDatabase = options.characterDatabase ?? JAPANESE_CHARACTER_STROKES;
   const copy = {
     sessionIdle: "New session ready. Stroke count updates while you draw.",
     sessionActive: "Session active. Stroke count updates live while you draw.",
     matchesEmpty: "Draw a few lines to see matching kana and kanji.",
     bestGuessEmpty: "Draw on the canvas to generate a best-guess character.",
+    bestGuessNoFilteredMatch: "No saved character fits the current line count filter.",
+    databaseEmpty: "Load the database to browse every saved character by line count.",
     ...options.copy,
   };
   const templateResolution = 24;
@@ -122,6 +128,47 @@ export function mountPixelStudio(container, options = {}) {
 
     matchTextInput.value = `${matchTextInput.value}${character}`;
     updateLookupDetails();
+  };
+
+  const renderCharacterCard = ({ character, name, type, strokeCount, readings }) => `
+    <button class="pixel-studio__match-card" type="button" role="listitem" aria-label="${character} ${name}" data-character="${character}">
+      <span class="pixel-studio__match-character">${character}</span>
+      <span class="pixel-studio__match-name">${name}</span>
+      ${formatReadings(readings) ? `<span class="pixel-studio__match-readings">${formatReadings(readings)}</span>` : ""}
+      <span class="pixel-studio__match-meta">${type} · ${strokeCount} strokes</span>
+    </button>
+  `;
+
+  const renderDatabaseGrid = () => {
+    if (!databaseGrid) {
+      return;
+    }
+
+    const groupedEntries = characterDatabase.reduce((groups, entry) => {
+      const key = entry.strokeCount;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key).push(entry);
+      return groups;
+    }, new Map());
+
+    const sections = Array.from(groupedEntries.entries())
+      .sort((left, right) => left[0] - right[0])
+      .map(([strokeCount, entries]) => `
+        <section class="pixel-studio__database-slice" aria-label="${strokeCount} line characters">
+          <div class="pixel-studio__database-slice-header">
+            <p class="pixel-studio__lookup-label">${strokeCount} line${strokeCount === 1 ? "" : "s"}</p>
+            <p class="pixel-studio__database-count">${entries.length} character${entries.length === 1 ? "" : "s"}</p>
+          </div>
+          <div class="pixel-studio__match-grid" role="list">
+            ${entries.map(renderCharacterCard).join("")}
+          </div>
+        </section>
+      `)
+      .join("");
+
+    databaseGrid.innerHTML = sections || `<p class="pixel-studio__match-empty">${copy.databaseEmpty}</p>`;
   };
 
   const rasterizeCharacterTemplate = (character) => {
@@ -246,7 +293,16 @@ export function mountPixelStudio(container, options = {}) {
       return;
     }
 
-    const guess = characterDatabase
+    const guessCandidates = limitBestGuessToStrokeCount && liveStrokeCount > 0
+      ? characterDatabase.filter((entry) => entry.strokeCount === liveStrokeCount)
+      : characterDatabase;
+
+    if (!guessCandidates.length) {
+      bestGuess.innerHTML = `<p class="pixel-studio__match-empty">${copy.bestGuessNoFilteredMatch}</p>`;
+      return;
+    }
+
+    const guess = guessCandidates
       .map((entry) => ({
         ...entry,
         score: scoreTemplateMatch(normalizedGrid, getTemplateForCharacter(entry.character)),
@@ -256,18 +312,23 @@ export function mountPixelStudio(container, options = {}) {
     const confidence = Math.round(guess.score * 100);
 
     bestGuess.innerHTML = `
-      <div class="pixel-studio__guess-character" aria-hidden="true">${guess.character}</div>
-      <div class="pixel-studio__guess-copy">
-        <p class="pixel-studio__guess-title">${guess.name}</p>
-        <p class="pixel-studio__guess-meta">${guess.type} · ${guess.strokeCount} strokes</p>
-        <p class="pixel-studio__guess-confidence">Template match confidence: ${confidence}%</p>
-      </div>
+      <button class="pixel-studio__guess-button" type="button" data-character="${guess.character}" aria-label="Add best guess ${guess.character} ${guess.name} to matched character text">
+        <span class="pixel-studio__guess-character" aria-hidden="true">${guess.character}</span>
+        <span class="pixel-studio__guess-copy">
+          <span class="pixel-studio__guess-title">${guess.name}</span>
+          <span class="pixel-studio__guess-meta">${guess.type} · ${guess.strokeCount} strokes</span>
+          <span class="pixel-studio__guess-confidence">Template match confidence: ${confidence}% · Tap to add</span>
+        </span>
+      </button>
     `;
   };
 
   resolutionSelect.value = String(resolution);
   brushInput.value = String(brushSize);
   smoothDrawingInput.checked = smoothDrawingEnabled;
+  if (bestGuessFilterInput) {
+    bestGuessFilterInput.checked = limitBestGuessToStrokeCount;
+  }
 
   const render = () => {
     drawGrid(context, grid, showGrid);
@@ -291,18 +352,7 @@ export function mountPixelStudio(container, options = {}) {
       return;
     }
 
-    characterMatches.innerHTML = matches
-      .map(
-        ({ character, name, type, strokeCount, readings }) => `
-          <button class="pixel-studio__match-card" type="button" role="listitem" aria-label="${character} ${name}" data-character="${character}">
-            <span class="pixel-studio__match-character">${character}</span>
-            <span class="pixel-studio__match-name">${name}</span>
-            ${formatReadings(readings) ? `<span class="pixel-studio__match-readings">${formatReadings(readings)}</span>` : ""}
-            <span class="pixel-studio__match-meta">${type} · ${strokeCount} strokes</span>
-          </button>
-        `
-      )
-      .join("");
+    characterMatches.innerHTML = matches.map(renderCharacterCard).join("");
     renderBestGuess();
   };
 
@@ -612,6 +662,25 @@ export function mountPixelStudio(container, options = {}) {
     updateLookupDetails();
   };
 
+  const handleBestGuessFilterChange = (event) => {
+    limitBestGuessToStrokeCount = event.target.checked;
+    renderBestGuess();
+  };
+
+  const handleBestGuessClick = (event) => {
+    const guessButton = event.target.closest("[data-character]");
+
+    if (!guessButton) {
+      return;
+    }
+
+    appendMatchedCharacter(guessButton.dataset.character);
+  };
+
+  const handleLoadDatabase = () => {
+    renderDatabaseGrid();
+  };
+
   brushInput.addEventListener("input", handleBrushChange);
   smoothDrawingInput.addEventListener("change", handleSmoothDrawingChange);
   resolutionSelect.addEventListener("change", handleResolutionChange);
@@ -623,6 +692,10 @@ export function mountPixelStudio(container, options = {}) {
   stepButton.addEventListener("click", handleStep);
   textForm.addEventListener("submit", handleSubmit);
   characterMatches.addEventListener("click", handleMatchClick);
+  bestGuessFilterInput?.addEventListener("change", handleBestGuessFilterChange);
+  bestGuess?.addEventListener("click", handleBestGuessClick);
+  loadDatabaseButton?.addEventListener("click", handleLoadDatabase);
+  databaseGrid?.addEventListener("click", handleMatchClick);
   matchTextInput?.addEventListener("input", handleMatchInput);
   canvas.addEventListener("pointerdown", handlePointerDown);
   canvas.addEventListener("pointermove", handlePointerMove);
@@ -652,6 +725,10 @@ export function mountPixelStudio(container, options = {}) {
     stepButton.removeEventListener("click", handleStep);
     textForm.removeEventListener("submit", handleSubmit);
     characterMatches.removeEventListener("click", handleMatchClick);
+    bestGuessFilterInput?.removeEventListener("change", handleBestGuessFilterChange);
+    bestGuess?.removeEventListener("click", handleBestGuessClick);
+    loadDatabaseButton?.removeEventListener("click", handleLoadDatabase);
+    databaseGrid?.removeEventListener("click", handleMatchClick);
     matchTextInput?.removeEventListener("input", handleMatchInput);
     canvas.removeEventListener("pointerdown", handlePointerDown);
     canvas.removeEventListener("pointermove", handlePointerMove);

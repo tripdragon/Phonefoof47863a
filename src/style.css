@@ -2107,12 +2107,20 @@ code {
 }
 
 .pixel-studio__session-header,
-.pixel-studio__session-stats,
+.pixel-studio__session-toolbar,
 .pixel-studio__session-actions {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
+}
+
+.pixel-studio__session-toolbar {
+  flex-wrap: wrap;
+}
+
+.pixel-studio__session--results {
+  align-self: start;
 }
 
 .pixel-studio__session-count {
@@ -2244,7 +2252,7 @@ code {
   }
 
   .pixel-studio__session-header,
-  .pixel-studio__session-stats {
+  .pixel-studio__session-toolbar {
     flex-direction: column;
     align-items: stretch;
   }

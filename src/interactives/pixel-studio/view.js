@@ -16,8 +16,7 @@ const DEFAULT_COPY = {
   playbackGroupLabel: "Playback controls",
   sessionLabel: "Drawing session",
   sessionHint: "Track each stroke you draw and compare it against common Japanese characters.",
-  sessionButtonLabel: "Start drawing session",
-  sessionIdle: "Session idle. Press start to count live strokes.",
+  sessionIdle: "New session ready. Stroke count updates while you draw.",
   sessionActive: "Session active. Stroke count updates live while you draw.",
   sessionCountLabel: "Lines drawn",
   matchesLabel: "Stroke count matches",
@@ -63,7 +62,6 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
     playbackGroupLabel,
     sessionLabel,
     sessionHint,
-    sessionButtonLabel,
     sessionIdle,
     sessionCountLabel,
     matchesLabel,
@@ -166,39 +164,31 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
             <button class="pixel-studio__button pixel-studio__button--secondary" type="submit">Send to canvas</button>
           </form>
 
+          <section class="pixel-studio__session" aria-label="${sessionLabel}">
+            <div class="pixel-studio__session-header">
+              <div>
+                <p class="pixel-studio__section-label">${sessionLabel}</p>
+                <p class="pixel-studio__tools-hint">${sessionHint}</p>
+              </div>
+              <output id="pixel-session-status" class="pixel-studio__recording-status" aria-live="polite">${sessionIdle}</output>
+            </div>
+            <div class="pixel-studio__session-toolbar">
+              <div class="pixel-studio__session-count">
+                <span>${sessionCountLabel}</span>
+                <output id="pixel-stroke-count" aria-live="polite">0</output>
+              </div>
+              <div class="pixel-studio__session-actions">
+                <button id="pixel-clear" class="pixel-studio__button pixel-studio__button--ghost" type="button">${clearButtonLabel}</button>
+              </div>
+            </div>
+          </section>
+
           <div class="pixel-studio__canvas-wrap">
             <canvas id="pixel-canvas" class="pixel-studio__canvas" width="${DISPLAY_SIZE}" height="${DISPLAY_SIZE}" aria-label="Pixel drawing canvas"></canvas>
           </div>
         </div>
 
-        <section class="pixel-studio__session" aria-label="${sessionLabel}">
-          <div class="pixel-studio__session-header">
-            <div>
-              <p class="pixel-studio__section-label">${sessionLabel}</p>
-              <p class="pixel-studio__tools-hint">${sessionHint}</p>
-            </div>
-            <div class="pixel-studio__session-actions">
-              <button id="pixel-session-toggle" class="pixel-studio__button pixel-studio__button--secondary" type="button" aria-pressed="false">${sessionButtonLabel}</button>
-              <button id="pixel-clear" class="pixel-studio__button pixel-studio__button--ghost" type="button">${clearButtonLabel}</button>
-            </div>
-          </div>
-          <div class="pixel-studio__session-stats">
-            <div class="pixel-studio__session-count">
-              <span>${sessionCountLabel}</span>
-              <output id="pixel-stroke-count" aria-live="polite">0</output>
-            </div>
-            <output id="pixel-session-status" class="pixel-studio__recording-status" aria-live="polite">${sessionIdle}</output>
-          </div>
-          <div class="pixel-studio__matches">
-            <div class="pixel-studio__tools-header">
-              <p class="pixel-studio__section-label">${matchesLabel}</p>
-              <p class="pixel-studio__tools-hint">${matchesHint}</p>
-            </div>
-            <div id="pixel-character-matches" class="pixel-studio__match-grid" role="list">
-              <p class="pixel-studio__match-empty">${matchesEmpty}</p>
-            </div>
-          </div>
-
+        <section class="pixel-studio__session pixel-studio__session--results" aria-label="${sessionLabel} results">
           <div class="pixel-studio__matches pixel-studio__matches--best-guess">
             <div class="pixel-studio__tools-header">
               <p class="pixel-studio__section-label">${bestGuessLabel}</p>
@@ -206,6 +196,16 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
             </div>
             <div id="pixel-best-guess" class="pixel-studio__guess-card" aria-live="polite">
               <p class="pixel-studio__match-empty">${bestGuessEmpty}</p>
+            </div>
+          </div>
+
+          <div class="pixel-studio__matches">
+            <div class="pixel-studio__tools-header">
+              <p class="pixel-studio__section-label">${matchesLabel}</p>
+              <p class="pixel-studio__tools-hint">${matchesHint}</p>
+            </div>
+            <div id="pixel-character-matches" class="pixel-studio__match-grid" role="list">
+              <p class="pixel-studio__match-empty">${matchesEmpty}</p>
             </div>
           </div>
         </section>

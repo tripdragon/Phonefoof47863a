@@ -35,7 +35,6 @@ export function mountPixelStudio(container, options = {}) {
   const recordingStatus = container.querySelector("#pixel-recording-status");
   const textForm = container.querySelector("#pixel-text-form");
   const textInput = container.querySelector("#pixel-text-input");
-  const sessionToggleButton = container.querySelector("#pixel-session-toggle");
   const sessionStatus = container.querySelector("#pixel-session-status");
   const strokeCountOutput = container.querySelector("#pixel-stroke-count");
   const characterMatches = container.querySelector("#pixel-character-matches");
@@ -53,13 +52,11 @@ export function mountPixelStudio(container, options = {}) {
   let currentPaintAction = null;
   let playbackIndex = 0;
   let playbackTimerId = null;
-  let sessionActive = false;
+  let sessionActive = true;
   let liveStrokeCount = 0;
   const characterDatabase = options.characterDatabase ?? JAPANESE_CHARACTER_STROKES;
   const copy = {
-    sessionButtonLabel: "Start drawing session",
-    sessionStopLabel: "Stop drawing session",
-    sessionIdle: "Session idle. Press start to count live strokes.",
+    sessionIdle: "New session ready. Stroke count updates while you draw.",
     sessionActive: "Session active. Stroke count updates live while you draw.",
     matchesEmpty: "Draw a few lines to see matching kana and kanji.",
     bestGuessEmpty: "Draw on the canvas to generate a best-guess character.",
@@ -252,13 +249,11 @@ export function mountPixelStudio(container, options = {}) {
   };
 
   const updateSessionStatus = () => {
-    if (!sessionStatus || !strokeCountOutput || !sessionToggleButton) {
+    if (!sessionStatus || !strokeCountOutput) {
       return;
     }
 
     strokeCountOutput.textContent = String(liveStrokeCount);
-    sessionToggleButton.textContent = sessionActive ? copy.sessionStopLabel : copy.sessionButtonLabel;
-    sessionToggleButton.setAttribute("aria-pressed", String(sessionActive));
     sessionStatus.textContent = sessionActive
       ? `${copy.sessionActive} ${liveStrokeCount} line${liveStrokeCount === 1 ? "" : "s"} tracked.`
       : copy.sessionIdle;
@@ -421,7 +416,7 @@ export function mountPixelStudio(container, options = {}) {
     drawingSession = new DrawingSession();
     currentPaintAction = null;
     playbackIndex = 0;
-    sessionActive = false;
+    sessionActive = true;
     liveStrokeCount = 0;
     updateRecordingStatus();
     updateSessionStatus();
@@ -456,18 +451,10 @@ export function mountPixelStudio(container, options = {}) {
     stopPlayback();
     grid = createGrid(resolution);
     playbackIndex = 0;
-    sessionActive = false;
+    sessionActive = true;
     liveStrokeCount = 0;
     render();
     updateRecordingStatus();
-    updateSessionStatus();
-  };
-
-  const handleSessionToggle = () => {
-    sessionActive = !sessionActive;
-    if (sessionActive) {
-      liveStrokeCount = 0;
-    }
     updateSessionStatus();
   };
 
@@ -562,7 +549,6 @@ export function mountPixelStudio(container, options = {}) {
   recordToggleButton.addEventListener("click", handleRecordToggle);
   playbackButton.addEventListener("click", handlePlayback);
   stepButton.addEventListener("click", handleStep);
-  sessionToggleButton?.addEventListener("click", handleSessionToggle);
   textForm.addEventListener("submit", handleSubmit);
   canvas.addEventListener("pointerdown", handlePointerDown);
   canvas.addEventListener("pointermove", handlePointerMove);
@@ -589,7 +575,6 @@ export function mountPixelStudio(container, options = {}) {
     recordToggleButton.removeEventListener("click", handleRecordToggle);
     playbackButton.removeEventListener("click", handlePlayback);
     stepButton.removeEventListener("click", handleStep);
-    sessionToggleButton?.removeEventListener("click", handleSessionToggle);
     textForm.removeEventListener("submit", handleSubmit);
     canvas.removeEventListener("pointerdown", handlePointerDown);
     canvas.removeEventListener("pointermove", handlePointerMove);

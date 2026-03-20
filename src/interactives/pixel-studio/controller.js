@@ -39,6 +39,7 @@ export function mountPixelStudio(container, options = {}) {
   const sessionStatus = container.querySelector("#pixel-session-status");
   const strokeCountOutput = container.querySelector("#pixel-stroke-count");
   const characterMatches = container.querySelector("#pixel-character-matches");
+  const bestGuess = container.querySelector("#pixel-best-guess");
 
   let resolution = options.initialResolution ?? DEFAULT_RESOLUTION;
   let brushSize = options.initialBrushSize ?? DEFAULT_BRUSH_SIZE;
@@ -61,7 +62,153 @@ export function mountPixelStudio(container, options = {}) {
     sessionIdle: "Session idle. Press start to count live strokes.",
     sessionActive: "Session active. Stroke count updates live while you draw.",
     matchesEmpty: "Draw a few lines to see matching kana and kanji.",
+    bestGuessEmpty: "Draw on the canvas to generate a best-guess character.",
     ...options.copy,
+  };
+  const templateResolution = 24;
+  const templateCache = new Map();
+
+  const createEmptyGrid = (size) => Array.from({ length: size }, () => Array(size).fill(0));
+
+  const rasterizeCharacterTemplate = (character) => {
+    const offscreenCanvas = document.createElement("canvas");
+    offscreenCanvas.width = templateResolution;
+    offscreenCanvas.height = templateResolution;
+    const offscreenContext = offscreenCanvas.getContext("2d", { willReadFrequently: true });
+
+    offscreenContext.clearRect(0, 0, templateResolution, templateResolution);
+    offscreenContext.fillStyle = "#ffffff";
+    offscreenContext.fillRect(0, 0, templateResolution, templateResolution);
+    offscreenContext.fillStyle = "#000000";
+    offscreenContext.textAlign = "center";
+    offscreenContext.textBaseline = "middle";
+    offscreenContext.font = `700 ${Math.floor(templateResolution * 0.72)}px system-ui`;
+    offscreenContext.fillText(character, templateResolution / 2, templateResolution / 2, templateResolution * 0.9);
+
+    const { data } = offscreenContext.getImageData(0, 0, templateResolution, templateResolution);
+    const template = createEmptyGrid(templateResolution);
+
+    for (let y = 0; y < templateResolution; y += 1) {
+      for (let x = 0; x < templateResolution; x += 1) {
+        const pixelIndex = (y * templateResolution + x) * 4;
+        template[y][x] = data[pixelIndex] < 200 ? 1 : 0;
+      }
+    }
+
+    return template;
+  };
+
+  const getTemplateForCharacter = (character) => {
+    if (!templateCache.has(character)) {
+      templateCache.set(character, rasterizeCharacterTemplate(character));
+    }
+
+    return templateCache.get(character);
+  };
+
+  const normalizeGrid = (sourceGrid, size) => {
+    const points = [];
+
+    for (let y = 0; y < sourceGrid.length; y += 1) {
+      for (let x = 0; x < sourceGrid[y].length; x += 1) {
+        if (sourceGrid[y][x]) {
+          points.push({ x, y });
+        }
+      }
+    }
+
+    if (!points.length) {
+      return createEmptyGrid(size);
+    }
+
+    const bounds = points.reduce((accumulator, point) => ({
+      minX: Math.min(accumulator.minX, point.x),
+      minY: Math.min(accumulator.minY, point.y),
+      maxX: Math.max(accumulator.maxX, point.x),
+      maxY: Math.max(accumulator.maxY, point.y),
+    }), {
+      minX: sourceGrid.length,
+      minY: sourceGrid.length,
+      maxX: 0,
+      maxY: 0,
+    });
+
+    const croppedWidth = Math.max(1, bounds.maxX - bounds.minX + 1);
+    const croppedHeight = Math.max(1, bounds.maxY - bounds.minY + 1);
+    const scale = Math.max(croppedWidth, croppedHeight) / Math.max(1, size - 4);
+    const offsetX = Math.floor((size - Math.round(croppedWidth / scale)) / 2);
+    const offsetY = Math.floor((size - Math.round(croppedHeight / scale)) / 2);
+    const normalizedGrid = createEmptyGrid(size);
+
+    points.forEach((point) => {
+      const normalizedX = clamp(
+        Math.round((point.x - bounds.minX) / scale) + offsetX,
+        0,
+        size - 1
+      );
+      const normalizedY = clamp(
+        Math.round((point.y - bounds.minY) / scale) + offsetY,
+        0,
+        size - 1
+      );
+      normalizedGrid[normalizedY][normalizedX] = 1;
+    });
+
+    return normalizedGrid;
+  };
+
+  const scoreTemplateMatch = (normalizedGrid, templateGrid) => {
+    let intersection = 0;
+    let union = 0;
+
+    for (let y = 0; y < normalizedGrid.length; y += 1) {
+      for (let x = 0; x < normalizedGrid[y].length; x += 1) {
+        const sampleValue = normalizedGrid[y][x];
+        const templateValue = templateGrid[y][x];
+
+        if (sampleValue && templateValue) {
+          intersection += 1;
+        }
+
+        if (sampleValue || templateValue) {
+          union += 1;
+        }
+      }
+    }
+
+    return union ? intersection / union : 0;
+  };
+
+  const renderBestGuess = () => {
+    if (!bestGuess) {
+      return;
+    }
+
+    const normalizedGrid = normalizeGrid(grid, templateResolution);
+    const filledCells = normalizedGrid.flat().reduce((sum, value) => sum + value, 0);
+
+    if (!filledCells) {
+      bestGuess.innerHTML = `<p class="pixel-studio__match-empty">${copy.bestGuessEmpty}</p>`;
+      return;
+    }
+
+    const guess = characterDatabase
+      .map((entry) => ({
+        ...entry,
+        score: scoreTemplateMatch(normalizedGrid, getTemplateForCharacter(entry.character)),
+      }))
+      .sort((left, right) => right.score - left.score)[0];
+
+    const confidence = Math.round(guess.score * 100);
+
+    bestGuess.innerHTML = `
+      <div class="pixel-studio__guess-character" aria-hidden="true">${guess.character}</div>
+      <div class="pixel-studio__guess-copy">
+        <p class="pixel-studio__guess-title">${guess.name}</p>
+        <p class="pixel-studio__guess-meta">${guess.type} · ${guess.strokeCount} strokes</p>
+        <p class="pixel-studio__guess-confidence">Template match confidence: ${confidence}%</p>
+      </div>
+    `;
   };
 
   resolutionSelect.value = String(resolution);
@@ -86,6 +233,7 @@ export function mountPixelStudio(container, options = {}) {
         ? `No saved kana or kanji found with ${liveStrokeCount} strokes.`
         : copy.matchesEmpty;
       characterMatches.innerHTML = `<p class="pixel-studio__match-empty">${emptyMessage}</p>`;
+      renderBestGuess();
       return;
     }
 
@@ -100,6 +248,7 @@ export function mountPixelStudio(container, options = {}) {
         `
       )
       .join("");
+    renderBestGuess();
   };
 
   const updateSessionStatus = () => {
@@ -142,6 +291,7 @@ export function mountPixelStudio(container, options = {}) {
   const resetPlaybackGrid = () => {
     grid = createGrid(resolution);
     render();
+    renderBestGuess();
   };
 
   const updateRecordingStatus = () => {
@@ -224,6 +374,7 @@ export function mountPixelStudio(container, options = {}) {
     }
 
     render();
+    renderBestGuess();
   };
 
   const handlePointerMove = (event) => {
@@ -242,6 +393,7 @@ export function mountPixelStudio(container, options = {}) {
 
     lastPaintedCell = cell;
     render();
+    renderBestGuess();
   };
 
   const stopDrawing = (event) => {
@@ -398,6 +550,7 @@ export function mountPixelStudio(container, options = {}) {
     stopPlayback();
     rasterizeText(grid, textInput.value);
     render();
+    renderBestGuess();
   };
 
   brushInput.addEventListener("input", handleBrushChange);
@@ -423,6 +576,7 @@ export function mountPixelStudio(container, options = {}) {
   updateRecordingStatus();
   updateSessionStatus();
   render();
+  renderBestGuess();
 
   return () => {
     stopPlayback();

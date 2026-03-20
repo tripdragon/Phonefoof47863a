@@ -73,7 +73,6 @@ export function mountPixelStudio(container, options = {}) {
     kanji: true,
     hiragana: true,
     katakana: true,
-    ...options.initialCharacterFilters,
   };
   const characterDatabase = options.characterDatabase ?? JAPANESE_CHARACTER_STROKES;
   const copy = {

@@ -1334,11 +1334,6 @@ function renderKanjiLookUpRoute() {
     },
     initialBrushSize: 2,
     initialResolution: 64,
-    initialCharacterFilters: {
-      kanji: true,
-      hiragana: false,
-      katakana: false,
-    },
     characterDatabase: JAPANESE_CHARACTER_STROKES,
   });
 }

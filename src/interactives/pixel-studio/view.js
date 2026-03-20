@@ -24,7 +24,13 @@ const DEFAULT_COPY = {
   matchesEmpty: "Draw a few lines to see matching kana and kanji.",
   bestGuessLabel: "Best guess",
   bestGuessHint: "Template matching compares your drawing with saved character silhouettes and surfaces the closest match.",
+  bestGuessFilterLabel: "Match current line count only",
+  bestGuessFilterHint: "When enabled, only characters with the same live line count are considered for best guess.",
   bestGuessEmpty: "Draw on the canvas to generate a best-guess character.",
+  databaseLabel: "Character database",
+  databaseHint: "Load the saved kana and kanji grouped by line count for quick browsing.",
+  databaseButtonLabel: "Load database",
+  databaseEmpty: "Load the database to browse every saved character by line count.",
   clearButtonLabel: "Clear canvas",
 };
 
@@ -69,7 +75,13 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
     matchesEmpty,
     bestGuessLabel,
     bestGuessHint,
+    bestGuessFilterLabel,
+    bestGuessFilterHint,
     bestGuessEmpty,
+    databaseLabel,
+    databaseHint,
+    databaseButtonLabel,
+    databaseEmpty,
     clearButtonLabel,
   } = { ...DEFAULT_COPY, ...copy };
 
@@ -194,6 +206,11 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
               <p class="pixel-studio__section-label">${bestGuessLabel}</p>
               <p class="pixel-studio__tools-hint">${bestGuessHint}</p>
             </div>
+            <label class="pixel-studio__toggle pixel-studio__toggle--compact" for="pixel-best-guess-filter">
+              <span>${bestGuessFilterLabel}</span>
+              <input id="pixel-best-guess-filter" type="checkbox" />
+              <small>${bestGuessFilterHint}</small>
+            </label>
             <div id="pixel-best-guess" class="pixel-studio__guess-card" aria-live="polite">
               <p class="pixel-studio__match-empty">${bestGuessEmpty}</p>
             </div>
@@ -222,6 +239,19 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
             </div>
             <div id="pixel-character-matches" class="pixel-studio__match-grid" role="list">
               <p class="pixel-studio__match-empty">${matchesEmpty}</p>
+            </div>
+          </div>
+
+          <div class="pixel-studio__matches pixel-studio__matches--database">
+            <div class="pixel-studio__tools-header">
+              <p class="pixel-studio__section-label">${databaseLabel}</p>
+              <p class="pixel-studio__tools-hint">${databaseHint}</p>
+            </div>
+            <div class="pixel-studio__database-toolbar">
+              <button id="pixel-load-database" class="pixel-studio__button pixel-studio__button--secondary" type="button">${databaseButtonLabel}</button>
+            </div>
+            <div id="pixel-database-grid" class="pixel-studio__database-grid" aria-live="polite">
+              <p class="pixel-studio__match-empty">${databaseEmpty}</p>
             </div>
           </div>
         </section>

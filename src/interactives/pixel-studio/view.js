@@ -204,6 +204,22 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
               <p class="pixel-studio__section-label">${matchesLabel}</p>
               <p class="pixel-studio__tools-hint">${matchesHint}</p>
             </div>
+            <div class="pixel-studio__lookup-panel">
+              <label class="pixel-studio__field pixel-studio__field--wide" for="pixel-match-text-input">
+                <span>Matched character text</span>
+                <input id="pixel-match-text-input" type="text" maxlength="24" placeholder="Tap a matched character to add it here" />
+              </label>
+              <div class="pixel-studio__lookup-meta" aria-live="polite">
+                <div class="pixel-studio__lookup-block">
+                  <p class="pixel-studio__lookup-label">Pronunciation</p>
+                  <p id="pixel-match-pronunciation" class="pixel-studio__lookup-value">Tap a matched character to build a reading.</p>
+                </div>
+                <div class="pixel-studio__lookup-block">
+                  <p class="pixel-studio__lookup-label">Rough translation</p>
+                  <p id="pixel-match-translation" class="pixel-studio__lookup-value">Meanings for the selected characters show here.</p>
+                </div>
+              </div>
+            </div>
             <div id="pixel-character-matches" class="pixel-studio__match-grid" role="list">
               <p class="pixel-studio__match-empty">${matchesEmpty}</p>
             </div>

@@ -24,8 +24,8 @@ const DEFAULT_COPY = {
   matchesEmpty: "Draw a few lines to see matching kana and kanji.",
   bestGuessLabel: "Best guess",
   bestGuessHint: "Template matching compares your drawing with saved character silhouettes and surfaces the closest match.",
-  bestGuessFilterLabel: "Match current line count only",
-  bestGuessFilterHint: "When enabled, only characters with the same live line count are considered for best guess.",
+  bestGuessFilterLabel: "Filters",
+  bestGuessFilterHint: "Use the filters to limit results by live line count and character set.",
   bestGuessEmpty: "Draw on the canvas to generate a best-guess character.",
   databaseLabel: "Character database",
   databaseHint: "Load the saved kana and kanji grouped by line count for quick browsing.",
@@ -206,11 +206,24 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
               <p class="pixel-studio__section-label">${bestGuessLabel}</p>
               <p class="pixel-studio__tools-hint">${bestGuessHint}</p>
             </div>
-            <label class="pixel-studio__toggle pixel-studio__toggle--compact" for="pixel-best-guess-filter">
-              <span>${bestGuessFilterLabel}</span>
-              <input id="pixel-best-guess-filter" type="checkbox" />
-              <small>${bestGuessFilterHint}</small>
-            </label>
+            <div class="pixel-studio__filter-grid" aria-label="${bestGuessFilterLabel}" role="group">
+              <label class="pixel-studio__toggle pixel-studio__toggle--compact" for="pixel-filter-lines">
+                <span>Lines</span>
+                <input id="pixel-filter-lines" type="checkbox" aria-label="Filter by live line count" />
+              </label>
+              <label class="pixel-studio__toggle pixel-studio__toggle--compact" for="pixel-filter-kanji">
+                <span>Kanji</span>
+                <input id="pixel-filter-kanji" type="checkbox" aria-label="Show kanji" checked />
+              </label>
+              <label class="pixel-studio__toggle pixel-studio__toggle--compact" for="pixel-filter-hiragana">
+                <span>Hiragana</span>
+                <input id="pixel-filter-hiragana" type="checkbox" aria-label="Show hiragana" checked />
+              </label>
+              <label class="pixel-studio__toggle pixel-studio__toggle--compact" for="pixel-filter-katakana">
+                <span>Katakana</span>
+                <input id="pixel-filter-katakana" type="checkbox" aria-label="Show katakana" checked />
+              </label>
+            </div>
             <div id="pixel-best-guess" class="pixel-studio__guess-card" aria-live="polite">
               <p class="pixel-studio__match-empty">${bestGuessEmpty}</p>
             </div>

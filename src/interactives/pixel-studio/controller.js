@@ -42,7 +42,10 @@ export function mountPixelStudio(container, options = {}) {
   const matchPronunciation = container.querySelector("#pixel-match-pronunciation");
   const matchTranslation = container.querySelector("#pixel-match-translation");
   const bestGuess = container.querySelector("#pixel-best-guess");
-  const bestGuessFilterInput = container.querySelector("#pixel-best-guess-filter");
+  const linesFilterInput = container.querySelector("#pixel-filter-lines");
+  const kanjiFilterInput = container.querySelector("#pixel-filter-kanji");
+  const hiraganaFilterInput = container.querySelector("#pixel-filter-hiragana");
+  const katakanaFilterInput = container.querySelector("#pixel-filter-katakana");
   const loadDatabaseButton = container.querySelector("#pixel-load-database");
   const databaseGrid = container.querySelector("#pixel-database-grid");
 
@@ -60,7 +63,12 @@ export function mountPixelStudio(container, options = {}) {
   let playbackTimerId = null;
   let sessionActive = true;
   let liveStrokeCount = 0;
-  let limitBestGuessToStrokeCount = false;
+  const activeCharacterFilters = {
+    lines: false,
+    kanji: true,
+    hiragana: true,
+    katakana: true,
+  };
   const characterDatabase = options.characterDatabase ?? JAPANESE_CHARACTER_STROKES;
   const copy = {
     sessionIdle: "New session ready. Stroke count updates while you draw.",
@@ -138,6 +146,18 @@ export function mountPixelStudio(container, options = {}) {
       <span class="pixel-studio__match-meta">${type} · ${strokeCount} strokes</span>
     </button>
   `;
+
+  const getFilteredCharacters = ({ requireLiveStrokeCount = false } = {}) => characterDatabase.filter((entry) => {
+    if (requireLiveStrokeCount && (!activeCharacterFilters.lines || liveStrokeCount <= 0 || entry.strokeCount !== liveStrokeCount)) {
+      return false;
+    }
+
+    if (activeCharacterFilters.lines && liveStrokeCount > 0 && entry.strokeCount !== liveStrokeCount) {
+      return false;
+    }
+
+    return Boolean(activeCharacterFilters[entry.type]);
+  });
 
   const renderDatabaseGrid = () => {
     if (!databaseGrid) {
@@ -293,9 +313,7 @@ export function mountPixelStudio(container, options = {}) {
       return;
     }
 
-    const guessCandidates = limitBestGuessToStrokeCount && liveStrokeCount > 0
-      ? characterDatabase.filter((entry) => entry.strokeCount === liveStrokeCount)
-      : characterDatabase;
+    const guessCandidates = getFilteredCharacters();
 
     if (!guessCandidates.length) {
       bestGuess.innerHTML = `<p class="pixel-studio__match-empty">${copy.bestGuessNoFilteredMatch}</p>`;
@@ -326,8 +344,17 @@ export function mountPixelStudio(container, options = {}) {
   resolutionSelect.value = String(resolution);
   brushInput.value = String(brushSize);
   smoothDrawingInput.checked = smoothDrawingEnabled;
-  if (bestGuessFilterInput) {
-    bestGuessFilterInput.checked = limitBestGuessToStrokeCount;
+  if (linesFilterInput) {
+    linesFilterInput.checked = activeCharacterFilters.lines;
+  }
+  if (kanjiFilterInput) {
+    kanjiFilterInput.checked = activeCharacterFilters.kanji;
+  }
+  if (hiraganaFilterInput) {
+    hiraganaFilterInput.checked = activeCharacterFilters.hiragana;
+  }
+  if (katakanaFilterInput) {
+    katakanaFilterInput.checked = activeCharacterFilters.katakana;
   }
 
   const render = () => {
@@ -339,9 +366,7 @@ export function mountPixelStudio(container, options = {}) {
       return;
     }
 
-    const matches = liveStrokeCount > 0
-      ? characterDatabase.filter((entry) => entry.strokeCount === liveStrokeCount)
-      : [];
+    const matches = getFilteredCharacters({ requireLiveStrokeCount: true });
 
     if (!matches.length) {
       const emptyMessage = liveStrokeCount > 0
@@ -662,9 +687,15 @@ export function mountPixelStudio(container, options = {}) {
     updateLookupDetails();
   };
 
-  const handleBestGuessFilterChange = (event) => {
-    limitBestGuessToStrokeCount = event.target.checked;
-    renderBestGuess();
+  const handleFilterChange = (event) => {
+    const { filter } = event.target.dataset;
+
+    if (!filter || !(filter in activeCharacterFilters)) {
+      return;
+    }
+
+    activeCharacterFilters[filter] = event.target.checked;
+    renderCharacterMatches();
   };
 
   const handleBestGuessClick = (event) => {
@@ -692,7 +723,14 @@ export function mountPixelStudio(container, options = {}) {
   stepButton.addEventListener("click", handleStep);
   textForm.addEventListener("submit", handleSubmit);
   characterMatches.addEventListener("click", handleMatchClick);
-  bestGuessFilterInput?.addEventListener("change", handleBestGuessFilterChange);
+  linesFilterInput && (linesFilterInput.dataset.filter = "lines");
+  kanjiFilterInput && (kanjiFilterInput.dataset.filter = "kanji");
+  hiraganaFilterInput && (hiraganaFilterInput.dataset.filter = "hiragana");
+  katakanaFilterInput && (katakanaFilterInput.dataset.filter = "katakana");
+  linesFilterInput?.addEventListener("change", handleFilterChange);
+  kanjiFilterInput?.addEventListener("change", handleFilterChange);
+  hiraganaFilterInput?.addEventListener("change", handleFilterChange);
+  katakanaFilterInput?.addEventListener("change", handleFilterChange);
   bestGuess?.addEventListener("click", handleBestGuessClick);
   loadDatabaseButton?.addEventListener("click", handleLoadDatabase);
   databaseGrid?.addEventListener("click", handleMatchClick);
@@ -725,7 +763,10 @@ export function mountPixelStudio(container, options = {}) {
     stepButton.removeEventListener("click", handleStep);
     textForm.removeEventListener("submit", handleSubmit);
     characterMatches.removeEventListener("click", handleMatchClick);
-    bestGuessFilterInput?.removeEventListener("change", handleBestGuessFilterChange);
+    linesFilterInput?.removeEventListener("change", handleFilterChange);
+    kanjiFilterInput?.removeEventListener("change", handleFilterChange);
+    hiraganaFilterInput?.removeEventListener("change", handleFilterChange);
+    katakanaFilterInput?.removeEventListener("change", handleFilterChange);
     bestGuess?.removeEventListener("click", handleBestGuessClick);
     loadDatabaseButton?.removeEventListener("click", handleLoadDatabase);
     databaseGrid?.removeEventListener("click", handleMatchClick);

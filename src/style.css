@@ -2148,6 +2148,12 @@ code {
   gap: 0.9rem;
 }
 
+.pixel-studio__filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
 .pixel-studio__match-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
@@ -2365,10 +2371,25 @@ code {
 .pixel-studio__toggle--compact {
   grid-template-columns: 1fr auto;
   align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.pixel-studio__toggle--compact small {
-  grid-column: 1 / -1;
+.pixel-studio__toggle--compact:has(input:checked) {
+  border-color: #4338ca;
+  background: linear-gradient(180deg, #eef2ff 0%, #e0e7ff 100%);
+}
+
+.pixel-studio__toggle--compact:has(input:not(:checked)) {
+  border-color: #cbd5e1;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #475569;
+}
+
+.pixel-studio__toggle--compact span {
+  font-size: 0.76rem;
 }
 
 .pixel-studio__guess-button {

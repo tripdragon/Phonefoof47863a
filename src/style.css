@@ -2163,10 +2163,48 @@ code {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
+.pixel-studio__lookup-panel {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.pixel-studio__lookup-meta {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pixel-studio__lookup-block {
+  padding: 0.85rem 1rem;
+  border: 1px solid #dbe3ff;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.pixel-studio__lookup-label,
+.pixel-studio__lookup-value {
+  margin: 0;
+}
+
+.pixel-studio__lookup-label {
+  margin-bottom: 0.35rem;
+  color: #312e81;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pixel-studio__lookup-value {
+  color: #475569;
+}
+
 .pixel-studio__match-card {
   display: grid;
   gap: 0.35rem;
   align-content: start;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
 }
 
 .pixel-studio__match-character {
@@ -2179,6 +2217,12 @@ code {
   color: #1e293b;
   font-weight: 700;
   text-transform: capitalize;
+}
+
+.pixel-studio__match-readings {
+  color: #4338ca;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .pixel-studio__match-meta,

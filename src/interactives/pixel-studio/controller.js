@@ -38,6 +38,9 @@ export function mountPixelStudio(container, options = {}) {
   const sessionStatus = container.querySelector("#pixel-session-status");
   const strokeCountOutput = container.querySelector("#pixel-stroke-count");
   const characterMatches = container.querySelector("#pixel-character-matches");
+  const matchTextInput = container.querySelector("#pixel-match-text-input");
+  const matchPronunciation = container.querySelector("#pixel-match-pronunciation");
+  const matchTranslation = container.querySelector("#pixel-match-translation");
   const bestGuess = container.querySelector("#pixel-best-guess");
 
   let resolution = options.initialResolution ?? DEFAULT_RESOLUTION;
@@ -64,8 +67,62 @@ export function mountPixelStudio(container, options = {}) {
   };
   const templateResolution = 24;
   const templateCache = new Map();
+  const characterLookup = new Map(characterDatabase.map((entry) => [entry.character, entry]));
 
   const createEmptyGrid = (size) => Array.from({ length: size }, () => Array(size).fill(0));
+
+  const formatReadings = (readings = {}) => {
+    const onReadings = readings.on?.length ? `On: ${readings.on.join(", ")}` : "";
+    const kunReadings = readings.kun?.length ? `Kun: ${readings.kun.join(", ")}` : "";
+
+    return [onReadings, kunReadings].filter(Boolean).join(" · ");
+  };
+
+  const getEntryPronunciation = (entry) => {
+    if (!entry) {
+      return "";
+    }
+
+    if (entry.pronunciation) {
+      return entry.pronunciation;
+    }
+
+    return entry.name || entry.character;
+  };
+
+  const getEntryTranslation = (entry) => {
+    if (!entry) {
+      return "";
+    }
+
+    return entry.translation || entry.name || entry.character;
+  };
+
+  const updateLookupDetails = () => {
+    if (!matchTextInput || !matchPronunciation || !matchTranslation) {
+      return;
+    }
+
+    const entries = Array.from(matchTextInput.value).map((character) => characterLookup.get(character)).filter(Boolean);
+
+    if (!entries.length) {
+      matchPronunciation.textContent = "Tap a matched character to build a reading.";
+      matchTranslation.textContent = "Meanings for the selected characters show here.";
+      return;
+    }
+
+    matchPronunciation.textContent = entries.map((entry) => getEntryPronunciation(entry)).join(" · ");
+    matchTranslation.textContent = entries.map((entry) => getEntryTranslation(entry)).join(" · ");
+  };
+
+  const appendMatchedCharacter = (character) => {
+    if (!matchTextInput) {
+      return;
+    }
+
+    matchTextInput.value = `${matchTextInput.value}${character}`;
+    updateLookupDetails();
+  };
 
   const rasterizeCharacterTemplate = (character) => {
     const offscreenCanvas = document.createElement("canvas");
@@ -236,12 +293,13 @@ export function mountPixelStudio(container, options = {}) {
 
     characterMatches.innerHTML = matches
       .map(
-        ({ character, name, type, strokeCount }) => `
-          <article class="pixel-studio__match-card" role="listitem" aria-label="${character} ${name}">
+        ({ character, name, type, strokeCount, readings }) => `
+          <button class="pixel-studio__match-card" type="button" role="listitem" aria-label="${character} ${name}" data-character="${character}">
             <span class="pixel-studio__match-character">${character}</span>
             <span class="pixel-studio__match-name">${name}</span>
+            ${formatReadings(readings) ? `<span class="pixel-studio__match-readings">${formatReadings(readings)}</span>` : ""}
             <span class="pixel-studio__match-meta">${type} · ${strokeCount} strokes</span>
-          </article>
+          </button>
         `
       )
       .join("");
@@ -540,6 +598,20 @@ export function mountPixelStudio(container, options = {}) {
     renderBestGuess();
   };
 
+  const handleMatchClick = (event) => {
+    const matchCard = event.target.closest("[data-character]");
+
+    if (!matchCard) {
+      return;
+    }
+
+    appendMatchedCharacter(matchCard.dataset.character);
+  };
+
+  const handleMatchInput = () => {
+    updateLookupDetails();
+  };
+
   brushInput.addEventListener("input", handleBrushChange);
   smoothDrawingInput.addEventListener("change", handleSmoothDrawingChange);
   resolutionSelect.addEventListener("change", handleResolutionChange);
@@ -550,6 +622,8 @@ export function mountPixelStudio(container, options = {}) {
   playbackButton.addEventListener("click", handlePlayback);
   stepButton.addEventListener("click", handleStep);
   textForm.addEventListener("submit", handleSubmit);
+  characterMatches.addEventListener("click", handleMatchClick);
+  matchTextInput?.addEventListener("input", handleMatchInput);
   canvas.addEventListener("pointerdown", handlePointerDown);
   canvas.addEventListener("pointermove", handlePointerMove);
   canvas.addEventListener("pointerup", stopDrawing);
@@ -561,6 +635,7 @@ export function mountPixelStudio(container, options = {}) {
   updateRecordButton();
   updateRecordingStatus();
   updateSessionStatus();
+  updateLookupDetails();
   render();
   renderBestGuess();
 
@@ -576,6 +651,8 @@ export function mountPixelStudio(container, options = {}) {
     playbackButton.removeEventListener("click", handlePlayback);
     stepButton.removeEventListener("click", handleStep);
     textForm.removeEventListener("submit", handleSubmit);
+    characterMatches.removeEventListener("click", handleMatchClick);
+    matchTextInput?.removeEventListener("input", handleMatchInput);
     canvas.removeEventListener("pointerdown", handlePointerDown);
     canvas.removeEventListener("pointermove", handlePointerMove);
     canvas.removeEventListener("pointerup", stopDrawing);

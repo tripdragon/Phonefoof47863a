@@ -23,6 +23,9 @@ const DEFAULT_COPY = {
   matchesLabel: "Stroke count matches",
   matchesHint: "Characters shown here share the same stroke count as your live session.",
   matchesEmpty: "Draw a few lines to see matching kana and kanji.",
+  bestGuessLabel: "Best guess",
+  bestGuessHint: "Template matching compares your drawing with saved character silhouettes and surfaces the closest match.",
+  bestGuessEmpty: "Draw on the canvas to generate a best-guess character.",
   clearButtonLabel: "Clear canvas",
 };
 
@@ -66,6 +69,9 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
     matchesLabel,
     matchesHint,
     matchesEmpty,
+    bestGuessLabel,
+    bestGuessHint,
+    bestGuessEmpty,
     clearButtonLabel,
   } = { ...DEFAULT_COPY, ...copy };
 
@@ -190,6 +196,16 @@ export function createPixelStudioMarkup(copy = DEFAULT_COPY) {
             </div>
             <div id="pixel-character-matches" class="pixel-studio__match-grid" role="list">
               <p class="pixel-studio__match-empty">${matchesEmpty}</p>
+            </div>
+          </div>
+
+          <div class="pixel-studio__matches pixel-studio__matches--best-guess">
+            <div class="pixel-studio__tools-header">
+              <p class="pixel-studio__section-label">${bestGuessLabel}</p>
+              <p class="pixel-studio__tools-hint">${bestGuessHint}</p>
+            </div>
+            <div id="pixel-best-guess" class="pixel-studio__guess-card" aria-live="polite">
+              <p class="pixel-studio__match-empty">${bestGuessEmpty}</p>
             </div>
           </div>
         </section>

@@ -2136,6 +2136,10 @@ code {
   gap: 0.75rem;
 }
 
+.pixel-studio__matches--best-guess {
+  gap: 0.9rem;
+}
+
 .pixel-studio__match-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
@@ -2175,6 +2179,49 @@ code {
   font-size: 0.9rem;
 }
 
+.pixel-studio__guess-card {
+  min-height: 136px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #dbe3ff;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
+}
+
+.pixel-studio__guess-character {
+  min-width: 88px;
+  min-height: 88px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: rgba(79, 70, 229, 0.08);
+  color: #312e81;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+}
+
+.pixel-studio__guess-copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.pixel-studio__guess-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.pixel-studio__guess-meta,
+.pixel-studio__guess-confidence {
+  margin: 0;
+  color: #475569;
+}
+
 @media (max-width: 840px) {
   .pixel-studio__controls {
     grid-template-columns: 1fr;
@@ -2200,6 +2247,10 @@ code {
   .pixel-studio__session-stats {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .pixel-studio__guess-card {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -206,7 +206,8 @@ export class FingersAPI {
     this.faceGridHelper.visible = true;
 
     // alternative using infinite math plane and its helper
-    this.planeMath.set(this.worldNormal,0)
+    
+    this.planeMath.set(this.worldNormal,hit.point.length())
   }
 
   selectPiece(){

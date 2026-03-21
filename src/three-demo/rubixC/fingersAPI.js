@@ -10,8 +10,10 @@ export class FingersAPI {
   debuggersObject3D;
   planeHitsMax;
   hits1 = [];
+  hitsPlane = [];// why array?
   raycaster = new THREE.Raycaster();
   planeHelper;
+  pointDown3D = new THREE Vector3D();
   // the math does not line up on 3d without 
   // even more math to get the proper constant 
   // planeMath;
@@ -23,6 +25,7 @@ export class FingersAPI {
   faceGridHelper;
   useFaceArrowDebugger = true;
   useFaceGridDebugger = true;
+  lockGridDown = false;
   arrowDirectionV = new THREE.Vector3();
   arrowOriginV = new THREE.Vector3();
 
@@ -78,6 +81,7 @@ export class FingersAPI {
     this.controls.enabled = true;
     this.IS_DOWN = false;
     this.selectedPiece = null;
+    this.lockGridDown = false;
   }
 
   buildPlanePool(){
@@ -142,29 +146,37 @@ export class FingersAPI {
     console.log(this.hits1);
     
     const ball = this.planePool.requestItem();
-    const ballGrid = this.planePoolGrid.requestItem();
     if(this.hits1.length > 0){
       this.IS_DOWN = true;
       this.controls.enabled = false;
       
       ball.visible = true;
       ball.position.copy(this.hits1[0].point);
-
-
+      
+      this.selectPiece();
       if(this.useFaceArrowDebugger){
         this.displayFaceArrow(this.hits1[0]);
       }
+      
+      // now do hit tests on the plane
+      const ballOnPlane = this.planePoolGrid.requestItem();
+      ballOnPlane.visible = true;
+      
       if(this.useFaceGridDebugger){
-        this.displayFaceGrid(this.hits1[0]);
+        if(this.lockGridDown === false){
+          this.lockGridDown = true;
+          this.pointDown3D.copy(this.hits1[0]);
+          this.displayFaceGrid(this.hits1[0]);
+        }
       }
       
-      ballGrid.visible = true;
-      // ballGrid.position.copy(this.hits1[0].point).add(new THREE.Vector3(0.1,0.1,0.1));
-      ballGrid.position.copy(this.hits1[0].point);
-      this.selectPiece();
+      this.hitsPlane = this.raycaster.intersectObject(this.faceGridHelper, false);
+      if(this.lockGridDown){
+        ballOnPlane.position.copy(this.hitsPlane[0].point);
+      }
     }
-    // now do hit tests on the plane
-
+      
+    
   }
 
   runBallOnCube(){

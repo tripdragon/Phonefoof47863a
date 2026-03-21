@@ -207,7 +207,7 @@ export class FingersAPI {
 
     // alternative using infinite math plane and its helper
     
-    this.planeMath.set(this.worldNormal,hit.point.length())
+    this.planeMath.set(this.worldNormal,-hit.point.length())
   }
 
   selectPiece(){

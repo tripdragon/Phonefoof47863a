@@ -11,6 +11,7 @@ export class FingersAPI {
   planeHitsMax;
   hits1 = [];
   raycaster = new THREE.Raycaster();
+  planeHelper;
 
   screenCoordsV = new THREE.Vector2();
   selectedPiece = null;
@@ -117,6 +118,11 @@ export class FingersAPI {
     this.faceGridHelper = new THREE.GridHelper(3, 12, 0x2d7fff, 0x2d7fff);
     this.faceGridHelper.visible = false;
     this.debuggersObject3D.add(this.faceGridHelper);
+
+    const plane = new THREE.Plane( new THREE.Vector3( 0, 1, 0 ), 0 );
+    this.planeHelper = new THREE.PlaneHelper( plane, 4, 0xffff00 );
+    this.debuggersObject3D.add( helper );
+    
   }
 
 

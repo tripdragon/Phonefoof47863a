@@ -98,7 +98,14 @@ const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
 const plane = new THREE.Mesh( geometry, material );
 scene.add( plane );
     this.planeHitZone3D = plane;
-    
+
+    {
+    const geometry = new THREE.PlaneGeometry( 5, 5 );
+const material = new THREE.MeshBasicMaterial( { color: 0xfbffc0 } );
+const plane = new THREE.Mesh( geometry, material );
+scene.add( plane );
+    }
+
     
     
     const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);

@@ -94,16 +94,24 @@ export class FingersAPI {
     this.planePoolGrid  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
 
     const geometry = new THREE.PlaneGeometry( 5, 5 );
-const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+const matrix = new THREE.Matrix4().makeRotationX(-Math.PI / 2);
+geometry.applyMatrix4(matrix);
+      
+    const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
 const plane = new THREE.Mesh( geometry, material );
 scene.add( plane );
     this.planeHitZone3D = plane;
 
     {
+
+
     const geometry = new THREE.PlaneGeometry( 5, 5 );
-const material = new THREE.MeshBasicMaterial( { color: 0xfbffc0 } );
+const matrix = new THREE.Matrix4().makeRotationX(-Math.PI / 2);
+geometry.applyMatrix4(matrix);
+      
+      const material = new THREE.MeshBasicMaterial( { color: 0xfbffc0 } );
 const plane = new THREE.Mesh( geometry, material );
-scene.add( plane );
+//scene.add( plane );
     }
 
     

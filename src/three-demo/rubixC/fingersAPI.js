@@ -119,8 +119,8 @@ export class FingersAPI {
     this.faceGridHelper.visible = false;
     this.debuggersObject3D.add(this.faceGridHelper);
 
-    const plane = new THREE.Plane( new THREE.Vector3( 0, 1, 0 ), 0 );
-    this.planeHelper = new THREE.PlaneHelper( plane, 4, 0xffff00 );
+    const plane = new THREE.Plane( new THREE.Vector3( 1, 1, 0 ), 4 );
+    this.planeHelper = new THREE.PlaneHelper( plane, 4, 0xafff00 );
     this.debuggersObject3D.add( this.planeHelper );
     
   }

@@ -7,6 +7,7 @@ export class FingersAPI {
   planePool; // CheapPoolIsh
   planePoolGrid; // stupid names
   planePoolHolder3D;
+  planeHitZone3D;
   debuggersObject3D;
   planeHitsMax;
   hits1 = [];
@@ -91,6 +92,14 @@ export class FingersAPI {
     this.scene.add(this.planePoolHolder3D);
     this.planePool  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
     this.planePoolGrid  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
+
+    const geometry = new THREE.PlaneGeometry( 5, 5 );
+const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+const plane = new THREE.Mesh( geometry, material );
+scene.add( plane );
+    this.planeHitZone3D = plane;
+    
+    
     
     const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);
     const markerMat = new THREE.MeshBasicMaterial({ color: 0xffff22 });
@@ -124,7 +133,7 @@ export class FingersAPI {
 
     this.faceGridHelper = new THREE.GridHelper(3, 12, 0x2d7fff, 0x2d7fff);
     this.faceGridHelper.visible = false;
-    this.debuggersObject3D.add(this.faceGridHelper);
+    this.planeHitZone3D.add(this.faceGridHelper);
 
     //this.planeMath = new THREE.Plane( new THREE.Vector3( 1, 1, 0 ), 4 );
     //this.planeHelper = new THREE.PlaneHelper( this.planeMath, 4, 0xafff00 );
@@ -170,7 +179,7 @@ export class FingersAPI {
         }
       }
       
-      this.hitsPlane = this.raycaster.intersectObject(this.faceGridHelper, false);
+      this.hitsPlane = this.raycaster.intersectObject(this.planeHitZone3D, false);
           if(this.hitsPlane.length > 0){
             ballOnPlane.position.copy(this.hitsPlane[0].point);
           }
@@ -210,14 +219,14 @@ export class FingersAPI {
   upV = new THREE.Vector3(0,1,0);
   displayFaceGrid(hit){
     // also update
-    this.faceGridHelper.position.copy(hit.point);
+    this.planeHitZone3D.position.copy(hit.point);
         // --- get world normal ---
     this.normalMatrix.getNormalMatrix(hit.object.matrixWorld);
     this.worldNormal.copy(hit.face.normal).applyMatrix3(this.normalMatrix).normalize();
 
     // this.faceGridHelper.quaternion.setFromUnitVectors(this.upV, hit.normal);
-    this.faceGridHelper.quaternion.setFromUnitVectors(this.upV, this.worldNormal);
-    this.faceGridHelper.visible = true;
+    this.planeHitZone3D.quaternion.setFromUnitVectors(this.upV, this.worldNormal);
+    this.planeHitZone3D.visible = true;
 
     // alternative using infinite math plane and its helper
     // in practice this is not a solution 

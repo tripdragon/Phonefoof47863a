@@ -12,6 +12,7 @@ export class FingersAPI {
   hits1 = [];
   raycaster = new THREE.Raycaster();
   planeHelper;
+  planeMath;
 
   screenCoordsV = new THREE.Vector2();
   selectedPiece = null;
@@ -119,8 +120,8 @@ export class FingersAPI {
     this.faceGridHelper.visible = false;
     this.debuggersObject3D.add(this.faceGridHelper);
 
-    const plane = new THREE.Plane( new THREE.Vector3( 1, 1, 0 ), 4 );
-    this.planeHelper = new THREE.PlaneHelper( plane, 4, 0xafff00 );
+    this.planeMath = new THREE.Plane( new THREE.Vector3( 1, 1, 0 ), 4 );
+    this.planeHelper = new THREE.PlaneHelper( this.planeMath, 4, 0xafff00 );
     this.debuggersObject3D.add( this.planeHelper );
     
   }
@@ -194,6 +195,7 @@ export class FingersAPI {
 
   upV = new THREE.Vector3(0,1,0);
   displayFaceGrid(hit){
+    // also update
     this.faceGridHelper.position.copy(hit.point);
         // --- get world normal ---
     this.normalMatrix.getNormalMatrix(hit.object.matrixWorld);
@@ -202,6 +204,9 @@ export class FingersAPI {
     // this.faceGridHelper.quaternion.setFromUnitVectors(this.upV, hit.normal);
     this.faceGridHelper.quaternion.setFromUnitVectors(this.upV, this.worldNormal);
     this.faceGridHelper.visible = true;
+
+    // alternative using infinite math plane and its helper
+    this.planeMath.set(this.worldNormal,0)
   }
 
   selectPiece(){

@@ -12,7 +12,9 @@ export class FingersAPI {
   hits1 = [];
   raycaster = new THREE.Raycaster();
   planeHelper;
-  planeMath;
+  // the math does not line up on 3d without 
+  // even more math to get the proper constant 
+  // planeMath;
 
   screenCoordsV = new THREE.Vector2();
   selectedPiece = null;
@@ -120,9 +122,9 @@ export class FingersAPI {
     this.faceGridHelper.visible = false;
     this.debuggersObject3D.add(this.faceGridHelper);
 
-    this.planeMath = new THREE.Plane( new THREE.Vector3( 1, 1, 0 ), 4 );
-    this.planeHelper = new THREE.PlaneHelper( this.planeMath, 4, 0xafff00 );
-    this.debuggersObject3D.add( this.planeHelper );
+    //this.planeMath = new THREE.Plane( new THREE.Vector3( 1, 1, 0 ), 4 );
+    //this.planeHelper = new THREE.PlaneHelper( this.planeMath, 4, 0xafff00 );
+    //this.debuggersObject3D.add( this.planeHelper );
     
   }
 
@@ -160,9 +162,8 @@ export class FingersAPI {
       // ballGrid.position.copy(this.hits1[0].point).add(new THREE.Vector3(0.1,0.1,0.1));
       ballGrid.position.copy(this.hits1[0].point);
       this.selectPiece();
-
-
     }
+    // now do hit tests on the plane
 
   }
 
@@ -206,8 +207,8 @@ export class FingersAPI {
     this.faceGridHelper.visible = true;
 
     // alternative using infinite math plane and its helper
-    
-    this.planeMath.set(this.worldNormal,-hit.point.length())
+    // in practice this is not a solution 
+    //this.planeMath.set(this.worldNormal,-hit.point.length())
   }
 
   selectPiece(){

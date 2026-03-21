@@ -13,7 +13,7 @@ export class FingersAPI {
   hitsPlane = [];// why array?
   raycaster = new THREE.Raycaster();
   planeHelper;
-  pointDown3D = new THREE Vector3D();
+  pointDown3D = new THREE.Vector3();
   // the math does not line up on 3d without 
   // even more math to get the proper constant 
   // planeMath;
@@ -171,9 +171,10 @@ export class FingersAPI {
       }
       
       this.hitsPlane = this.raycaster.intersectObject(this.faceGridHelper, false);
-      if(this.lockGridDown){
-        ballOnPlane.position.copy(this.hitsPlane[0].point);
-      }
+          if(this.hitsPlane.length > 0){
+            ballOnPlane.position.copy(this.hitsPlane[0].point);
+          }
+
     }
       
     

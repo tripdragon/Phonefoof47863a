@@ -194,6 +194,7 @@ scene.add( plane );
           this.displayFaceGrid(this.hits1[0]);
           this.arrowDirOriginV.copy(this.hits1[0].point);
           this.arrowDirV.set(0,1,1);
+          this.arrowDirHelper.visible = true;
         }
      // }
       

@@ -150,7 +150,7 @@ scene.add( plane );
     //this.debuggersObject3D.add( this.planeHelper );
 
     
-    this.arrowDirHelper = new THREE.ArrowHelper(this.arrowDirV, this.arrowDirOriginV, 1.1, 0xaa7fff, 0.18, 0.1);
+    this.arrowDirHelper = new THREE.ArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xaa7fff, 0.18, 0.1);
     this.arrowDirHelper.visible = false;
     this.debuggersObject3D.add(this.arrowDirHelper);
 

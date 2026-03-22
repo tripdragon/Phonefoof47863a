@@ -94,7 +94,7 @@ export class FingersAPI {
     this.planePoolGrid  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
 
     // need the plane facing up for other calculations later
-    const geometry = new THREE.PlaneGeometry( 5, 5 );
+    const geometry = new THREE.PlaneGeometry( 10, 10 );
 const matrix = new THREE.Matrix4().makeRotationX(-Math.PI / 2);
 geometry.applyMatrix4(matrix);
       

@@ -98,7 +98,7 @@ export class FingersAPI {
 const matrix = new THREE.Matrix4().makeRotationX(-Math.PI / 2);
 geometry.applyMatrix4(matrix);
       
-    const material = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity:1 } );
+    const material = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity:0, transparent : true} );
 const plane = new THREE.Mesh( geometry, material );
 scene.add( plane );
     this.planeHitZone3D = plane;

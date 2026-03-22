@@ -190,8 +190,10 @@ scene.add( plane );
       //if(this.useFaceGridDebugger){
         if(this.lockGridDown === false){
           this.lockGridDown = true;
-          this.pointDown3D.copy(this.hits1[0]);
+          this.pointDown3D.copy(this.hits1[0].point);
           this.displayFaceGrid(this.hits1[0]);
+          this.arrowDirOriginV.copy(this.hits1[0].point);
+          this.arrowDirV.set(0,1,1);
         }
      // }
       

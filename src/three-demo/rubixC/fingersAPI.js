@@ -18,6 +18,9 @@ export class FingersAPI {
   // the math does not line up on 3d without 
   // even more math to get the proper constant 
   // planeMath;
+  arrowDirHelper;
+  arrowDirV = new THREE.Vector3();
+  arrowDirOriginV = new THREE.Vector3();
 
   screenCoordsV = new THREE.Vector2();
   selectedPiece = null;
@@ -29,6 +32,7 @@ export class FingersAPI {
   lockGridDown = false;
   arrowDirectionV = new THREE.Vector3();
   arrowOriginV = new THREE.Vector3();
+  
 
   IS_DOWN = false;
 
@@ -144,7 +148,12 @@ scene.add( plane );
     //this.planeMath = new THREE.Plane( new THREE.Vector3( 1, 1, 0 ), 4 );
     //this.planeHelper = new THREE.PlaneHelper( this.planeMath, 4, 0xafff00 );
     //this.debuggersObject3D.add( this.planeHelper );
+
     
+    this.arrowDirHelper = new THREE.ArrowHelper(this.arrowDirV, this.arrowDirOriginV, 1.1, 0xaa7fff, 0.18, 0.1);
+    this.arrowDirHelper.visible = false;
+    this.debuggersObject3D.add(this.arrowDirHelper);
+
   }
 
 

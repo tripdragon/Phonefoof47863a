@@ -172,24 +172,25 @@ scene.add( plane );
       if(this.useFaceArrowDebugger){
         this.displayFaceArrow(this.hits1[0]);
       }
-      
+    }
+    if(this.IS_DOWN ){
       // now do hit tests on the plane
       const ballOnPlane = this.planePoolGrid.requestItem();
       ballOnPlane.visible = true;
       
-      if(this.useFaceGridDebugger){
+      //if(this.useFaceGridDebugger){
         if(this.lockGridDown === false){
           this.lockGridDown = true;
           this.pointDown3D.copy(this.hits1[0]);
           this.displayFaceGrid(this.hits1[0]);
         }
-      }
+     // }
       
       this.hitsPlane = this.raycaster.intersectObject(this.planeHitZone3D, false);
           if(this.hitsPlane.length > 0){
             ballOnPlane.position.copy(this.hitsPlane[0].point);
           }
-
+      
     }
       
     

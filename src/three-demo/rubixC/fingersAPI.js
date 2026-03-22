@@ -4,6 +4,8 @@ import { SlightlyPriceyPool } from './slightlyPriceyPool.js';
 
 export class FingersAPI {
 
+  activePointers = new Map();
+  
   planePool; // CheapPoolIsh
   planePoolGrid; // stupid names
   planePoolHolder3D;
@@ -74,6 +76,7 @@ export class FingersAPI {
   onPointerDown(ev){
     // this.IS_DOWN = true;
     // this.controls.enabled = false;
+    this.activePointers.set(e.pointerId, ev);
     this.trySelectingPiece(ev);
   }
   onPointerMove(ev){
@@ -83,6 +86,7 @@ export class FingersAPI {
   onPointerUp(ev){
     // if (this.hits1.length > 0) {
     // }
+    this.activePointers.delete(ev.pointerId);
     this.controls.enabled = true;
     this.IS_DOWN = false;
     this.selectedPiece = null;
@@ -159,6 +163,8 @@ scene.add( plane );
 
   
   trySelectingPiece(ev){
+if(this.activePointers.size > 1) return;
+    
     // if (!this.IS_DOWN) return;
     if (!this.camera || !this.cube || !this.domElement) return null;
     const v1 = this.getScreenCoords(ev);

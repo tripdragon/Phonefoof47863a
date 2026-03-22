@@ -76,7 +76,7 @@ export class FingersAPI {
   onPointerDown(ev){
     // this.IS_DOWN = true;
     // this.controls.enabled = false;
-    this.activePointers.set(e.pointerId, ev);
+    this.activePointers.set(ev.pointerId, ev);
     this.trySelectingPiece(ev);
   }
   onPointerMove(ev){

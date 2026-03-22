@@ -155,7 +155,7 @@ scene.add( plane );
 
     
     this.arrowDirHelper = new THREE.ArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xaa7fff, 0.18, 0.1);
-    this.arrowDirHelper.visible = false;
+    //this.arrowDirHelper.visible = false;
     this.debuggersObject3D.add(this.arrowDirHelper);
 
   }
@@ -163,7 +163,7 @@ scene.add( plane );
 
   
   trySelectingPiece(ev){
-if(this.activePointers.size > 1) return;
+//if(this.activePointers.size > 1) return;
     
     // if (!this.IS_DOWN) return;
     if (!this.camera || !this.cube || !this.domElement) return null;

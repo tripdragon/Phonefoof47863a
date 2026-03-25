@@ -12,9 +12,10 @@ export class FingersAPI {
   planeHitZone3D;
   debuggersObject3D;
   planeHitsMax;
-  hits1 = [];
-  hitsPlane = [];// why array?
+  hits1 = [];// for raycaster
+  hitsPlane = [];// for racaster
   raycaster = new THREE.Raycaster();
+  pointsPlane = []; // as finger moves
   planeHelper;
   pointDown3D = new THREE.Vector3();
   // the math does not line up on 3d without 
@@ -77,6 +78,7 @@ export class FingersAPI {
     // this.IS_DOWN = true;
     // this.controls.enabled = false;
     this.activePointers.set(ev.pointerId, ev);
+    this.pointsPlane.length = 0;
     this.trySelectingPiece(ev);
   }
   onPointerMove(ev){
@@ -163,6 +165,21 @@ scene.add( plane );
 
   
   trySelectingPiece(ev){
+    // on pointer down first test if on the cube
+    // + test if on a piece
+    // + get the face of the piece and its normal
+    // + draw a giant 3d plane on the face
+    // + continue hit tests now onto this plane
+    // + over time test the form of points gesture
+    //   ++ are they going in a direction n w s e
+    //   ++ or in a radial circular
+    // + convert the points to local space onto the face
+    // + once gesture is picked get the delta distance
+    // + locate which side of cube is effected
+    // + begin its rotating using the delta
+    // + delegate further work to different api to follow finger
+  
+    
 //if(this.activePointers.size > 1) return;
     
     // if (!this.IS_DOWN) return;

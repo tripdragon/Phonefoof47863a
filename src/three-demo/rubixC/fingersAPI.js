@@ -209,22 +209,33 @@ scene.add( plane );
       // now do hit tests on the plane
       const ballOnPlane = this.planePoolGrid.requestItem();
       ballOnPlane.visible = true;
-      
-      //if(this.useFaceGridDebugger){
-        if(this.lockGridDown === false){
+
+      // assuming .point is world
+      // otherwise remove else 
+      // so we dont have two same starter points
+      if(this.lockGridDown === false){
           this.lockGridDown = true;
-          this.pointDown3D.copy(this.hits1[0].point);
-          this.displayFaceGrid(this.hits1[0]);
-          this.arrowDirOriginV.copy(this.hits1[0].point);
+          this.pointsPlane.length = 0;
+          this.pointsPlane.push(this.hits1[0]);
+          this.pointDown3D.copy(this.pointsPlane[0].point);
+          this.displayFaceGrid(this.pointsPlane[0]);
+          this.arrowDirOriginV.copy(this.pointsPlane[0].point);
           this.arrowDirV.set(0,1,1);
           this.arrowDirHelper.visible = true;
         }
-     // }
-      
-      this.hitsPlane = this.raycaster.intersectObject(this.planeHitZone3D, false);
-          if(this.hitsPlane.length > 0){
-            ballOnPlane.position.copy(this.hitsPlane[0].point);
+      else {
+        this.hitsPlane = this.raycaster.intersectObject(this.planeHitZone3D, false);
+        if(this.hitsPlane.length > 0){
+          this.pointsPlane.push(this.hitsPlane[0]);
+          if(this.pointsPlane.length>0){
+            ballOnPlane.position.copy(this.pointsPlane[0].point);
           }
+        }
+        
+      }
+    
+      
+      
       
     }
       

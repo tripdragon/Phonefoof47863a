@@ -35,7 +35,8 @@ export class FingersAPI {
   lockGridDown = false;
   arrowDirectionV = new THREE.Vector3();
   arrowOriginV = new THREE.Vector3();
-  
+
+  movingAvV = new THREE.Vector3();
 
   IS_DOWN = false;
 
@@ -308,6 +309,20 @@ scene.add( plane );
     const x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
     return this.screenCoordsV.set(x, y);
+  }
+
+  
+  _av1 = new THREE.Vector3();
+  getMovingAvDirFromHits(hits, vector){
+    // hits here being from raycaster
+    // so its n.point for the vector
+    this._av.set(0,0,0);
+    if(hits.length===0) return this._av;
+    hits.forEach(x=>{
+      this._av.add(x.point);
+    });
+    _av.divide(hits.length);
+    return this._av;
   }
 
 }

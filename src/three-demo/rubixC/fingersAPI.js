@@ -112,7 +112,7 @@ geometry.applyMatrix4(matrix);
 const plane = new THREE.Mesh( geometry, material );
 scene.add( plane );
     this.planeHitZone3D = plane;
-    plane.visible = false;
+    //plane.visible = false;
     
 
     

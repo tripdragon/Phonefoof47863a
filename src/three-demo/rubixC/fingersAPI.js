@@ -205,7 +205,7 @@ scene.add( plane );
         this.displayFaceArrow(this.hits1[0]);
       }
     }
-    if(this.IS_DOWN ){
+    //if(this.IS_DOWN ){
       // now do hit tests on the plane
       const ballOnPlane = this.planePoolGrid.requestItem();
       ballOnPlane.visible = true;
@@ -237,7 +237,7 @@ scene.add( plane );
       
       
       
-    }
+    //}
       
     
   }

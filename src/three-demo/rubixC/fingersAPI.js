@@ -36,7 +36,7 @@ export class FingersAPI {
   arrowDirectionV = new THREE.Vector3();
   arrowOriginV = new THREE.Vector3();
 
-  movingAvV = new THREE.Vector3();
+  //movingAvV = new THREE.Vector3();
 
   IS_DOWN = false;
 

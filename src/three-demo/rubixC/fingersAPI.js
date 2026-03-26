@@ -83,7 +83,7 @@ export class FingersAPI {
     this.trySelectingPiece(ev);
   }
   onPointerMove(ev){
-    //if (!this.IS_DOWN) return;
+    if (!this.IS_DOWN) return;
     this.trySelectingPiece(ev);
   }
   onPointerUp(ev){

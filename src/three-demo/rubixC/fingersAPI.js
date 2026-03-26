@@ -75,14 +75,14 @@ export class FingersAPI {
   }
 
   onPointerDown(ev){
-    // this.IS_DOWN = true;
+    this.IS_DOWN = true;
     // this.controls.enabled = false;
     this.activePointers.set(ev.pointerId, ev);
     this.pointsPlane.length = 0;
     this.trySelectingPiece(ev);
   }
   onPointerMove(ev){
-    if (!this.IS_DOWN) return;
+    //if (!this.IS_DOWN) return;
     this.trySelectingPiece(ev);
   }
   onPointerUp(ev){
@@ -119,7 +119,7 @@ scene.add( plane );
     
     const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);
     const markerMat = new THREE.MeshBasicMaterial({ color: 0xffff22 });
-    const markerMat2 = new THREE.MeshBasicMaterial({ color: 0x00ffaa });
+    const markerMat2 = new THREE.MeshBasicMaterial({ color: 0x0000ff });
     
     for (let i = 0; i < this.planeHitsMax; i++) {
       const marker = new THREE.Mesh(markerGeo, markerMat);

@@ -228,7 +228,7 @@ scene.add( plane );
         if(this.hitsPlane.length > 0){
           this.pointsPlane.push(this.hitsPlane[0]);
           if(this.pointsPlane.length>0){
-            ballOnPlane.position.copy(this.pointsPlane[0].point);
+            ballOnPlane.position.copy(this.hitsPlane[0].point);
           }
         }
         

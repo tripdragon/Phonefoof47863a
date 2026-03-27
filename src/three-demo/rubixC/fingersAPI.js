@@ -221,7 +221,9 @@ scene.add( plane );
           this.pointDown3D.copy(this.pointsPlane[0].point);
           this.displayFaceGrid(this.pointsPlane[0]);
           this.arrowDirOriginV.copy(this.pointsPlane[0].point);
-          this.arrowDirV.set(0,1,1);
+          this.arrowDirV.set(0, 0, 1);
+          this.arrowDirHelper.position.copy(this.arrowDirOriginV);
+          this.arrowDirHelper.setDirection(this.arrowDirV);
           this.arrowDirHelper.visible = true;
         }
       else {
@@ -230,6 +232,13 @@ scene.add( plane );
           this.pointsPlane.push(this.hitsPlane[0]);
           if(this.pointsPlane.length>0){
             ballOnPlane.position.copy(this.hitsPlane[0].point);
+            this.arrowDirV.copy(this.hitsPlane[0].point).sub(this.arrowDirOriginV);
+            const dirLen = this.arrowDirV.length();
+            if (dirLen > 0.000001) {
+              this.arrowDirV.multiplyScalar(1 / dirLen);
+              this.arrowDirHelper.position.copy(this.arrowDirOriginV);
+              this.arrowDirHelper.setDirection(this.arrowDirV);
+            }
           }
         }
         
@@ -326,4 +335,3 @@ scene.add( plane );
   }
 
 }
-

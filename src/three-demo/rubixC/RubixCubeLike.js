@@ -411,4 +411,10 @@ export class RubixCubeLike extends THREE.Group {
       this.attach(x);
     })
   }
+
+  updateMatrixPieces(){
+    this.pieces.forEach(x=>{
+      x.updateMatrix();
+    });
+  }
                           }

@@ -35,6 +35,7 @@ export class FingersAPI {
   lockGridDown = false;
   arrowDirectionV = new THREE.Vector3();
   arrowOriginV = new THREE.Vector3();
+  movingAveragePointV = new THREE.Vector3();
 
   //movingAvV = new THREE.Vector3();
 
@@ -157,7 +158,7 @@ scene.add( plane );
     //this.debuggersObject3D.add( this.planeHelper );
 
     
-    this.arrowDirHelper = new THREE.ArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xaa7fff, 0.18, 0.1);
+    this.arrowDirHelper = new THREE.ArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xffffff, 0.18, 0.1);
     //this.arrowDirHelper.visible = false;
     this.debuggersObject3D.add(this.arrowDirHelper);
 
@@ -232,7 +233,8 @@ scene.add( plane );
           this.pointsPlane.push(this.hitsPlane[0]);
           if(this.pointsPlane.length>0){
             ballOnPlane.position.copy(this.hitsPlane[0].point);
-            this.arrowDirV.copy(this.hitsPlane[0].point).sub(this.arrowDirOriginV);
+            this.getAveragePointFromHits(this.pointsPlane, this.movingAveragePointV);
+            this.arrowDirV.copy(this.movingAveragePointV).sub(this.arrowDirOriginV);
             const dirLen = this.arrowDirV.length();
             if (dirLen > 0.000001) {
               this.arrowDirV.multiplyScalar(1 / dirLen);
@@ -321,17 +323,14 @@ scene.add( plane );
   }
 
   
-  _av1 = new THREE.Vector3();
-  getMovingAvDirFromHits(hits, vector){
-    // hits here being from raycaster
-    // so its n.point for the vector
-    this._av.set(0,0,0);
-    if(hits.length===0) return this._av;
-    hits.forEach(x=>{
-      this._av.add(x.point);
+  getAveragePointFromHits(hits, output){
+    output.set(0, 0, 0);
+    if(hits.length === 0) return output;
+    hits.forEach(x => {
+      output.add(x.point);
     });
-    _av.divide(hits.length);
-    return this._av;
+    output.divideScalar(hits.length);
+    return output;
   }
 
 }

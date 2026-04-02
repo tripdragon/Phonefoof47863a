@@ -36,6 +36,11 @@ export class FingersAPI {
   arrowDirectionV = new THREE.Vector3();
   arrowOriginV = new THREE.Vector3();
   movingAveragePointV = new THREE.Vector3();
+  currentDragDistance = 0;
+  lastTriggeredDistance = 0;
+  triggerDistance = 0.35;
+  distanceHudEl = null;
+  thresholdBubbleTimeout = null;
 
   //movingAvV = new THREE.Vector3();
 
@@ -48,7 +53,7 @@ export class FingersAPI {
   centerV = new THREE.Vector3();
   sizeV = new THREE.Vector3();
 
-  constructor({ camera, domElement, scene, controls, cube, planeHitsMax = 42 } = {}) {
+  constructor({ camera, domElement, scene, controls, cube, planeHitsMax = 42, triggerDistance = 0.35 } = {}) {
 
     this.scene = scene;
     this.camera = camera;
@@ -56,6 +61,7 @@ export class FingersAPI {
     this.controls = controls;
     this.cube = cube;
     this.planeHitsMax = planeHitsMax;
+    this.triggerDistance = triggerDistance;
     // this.planeHitsMax = 4;
 
     this.onPointerDown = this.onPointerDown.bind(this);
@@ -64,6 +70,7 @@ export class FingersAPI {
     
     this.buildPlanePool();
     this.buildVisualHelpers();
+    this.buildDistanceHud();
 
   }
   beginPointerEvents() {
@@ -81,6 +88,9 @@ export class FingersAPI {
     // this.controls.enabled = false;
     this.activePointers.set(ev.pointerId, ev);
     this.pointsPlane.length = 0;
+    this.currentDragDistance = 0;
+    this.lastTriggeredDistance = 0;
+    this.updateDistanceHud(0);
     this.trySelectingPiece(ev);
   }
   onPointerMove(ev){
@@ -95,6 +105,8 @@ export class FingersAPI {
     this.IS_DOWN = false;
     this.selectedPiece = null;
     this.lockGridDown = false;
+    this.lastTriggeredDistance = 0;
+    this.updateDistanceHud(0);
   }
 
   buildPlanePool(){
@@ -162,6 +174,42 @@ scene.add( plane );
     //this.arrowDirHelper.visible = false;
     this.debuggersObject3D.add(this.arrowDirHelper);
 
+  }
+
+  buildDistanceHud() {
+    if (typeof document === "undefined") return;
+    const hud = document.createElement("output");
+    hud.className = "superneat-top-log";
+    hud.setAttribute("aria-live", "polite");
+    hud.textContent = "Drag distance: 0.000";
+    document.body.appendChild(hud);
+    this.distanceHudEl = hud;
+  }
+
+  updateDistanceHud(distance) {
+    if (!this.distanceHudEl) return;
+    this.distanceHudEl.textContent = `Drag distance: ${distance.toFixed(3)}`;
+  }
+
+  popThresholdBubble(distance) {
+    if (typeof document === "undefined") return;
+    const bubble = document.createElement("output");
+    bubble.className = "superneat-top-log";
+    bubble.style.top = "2.8rem";
+    bubble.style.background = "rgba(22, 101, 52, 0.94)";
+    bubble.style.borderColor = "#14532d";
+    bubble.textContent = `Distance reached ${distance.toFixed(3)} (threshold ${this.triggerDistance.toFixed(3)})`;
+    document.body.appendChild(bubble);
+
+    if (this.thresholdBubbleTimeout) {
+      window.clearTimeout(this.thresholdBubbleTimeout);
+    }
+    this.thresholdBubbleTimeout = window.setTimeout(() => {
+      bubble.remove();
+      if (this.thresholdBubbleTimeout) {
+        this.thresholdBubbleTimeout = null;
+      }
+    }, 1600);
   }
 
 
@@ -234,6 +282,12 @@ scene.add( plane );
           if(this.pointsPlane.length>0){
             ballOnPlane.position.copy(this.hitsPlane[0].point);
             this.getAveragePointFromHits(this.pointsPlane, this.movingAveragePointV);
+            this.currentDragDistance = this.pointDown3D.distanceTo(this.hitsPlane[0].point);
+            this.updateDistanceHud(this.currentDragDistance);
+            if (this.currentDragDistance >= this.triggerDistance && this.lastTriggeredDistance < this.triggerDistance) {
+              this.lastTriggeredDistance = this.currentDragDistance;
+              this.popThresholdBubble(this.currentDragDistance);
+            }
             this.arrowDirV.copy(this.movingAveragePointV).sub(this.arrowDirOriginV);
             const dirLen = this.arrowDirV.length();
             if (dirLen > 0.000001) {
@@ -331,6 +385,22 @@ scene.add( plane );
     });
     output.divideScalar(hits.length);
     return output;
+  }
+
+  dispose() {
+    this.domElement?.removeEventListener("pointerdown", this.onPointerDown);
+    this.domElement?.removeEventListener("pointermove", this.onPointerMove);
+    this.domElement?.removeEventListener("pointerup", this.onPointerUp);
+    this.domElement?.removeEventListener("pointercancel", this.onPointerUp);
+    this.domElement?.removeEventListener("pointerleave", this.onPointerUp);
+    if (this.distanceHudEl) {
+      this.distanceHudEl.remove();
+      this.distanceHudEl = null;
+    }
+    if (this.thresholdBubbleTimeout) {
+      window.clearTimeout(this.thresholdBubbleTimeout);
+      this.thresholdBubbleTimeout = null;
+    }
   }
 
 }

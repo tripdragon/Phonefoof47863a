@@ -2759,3 +2759,55 @@ code {
     margin-bottom: 0.1rem;
   }
 }
+
+.cross-product-controls {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.cross-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.cross-fieldset {
+  margin: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.6rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.cross-fieldset legend {
+  padding: 0 0.3rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.cross-fieldset label {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.45rem;
+  align-items: center;
+  color: #334155;
+  font-weight: 600;
+}
+
+.cross-fieldset input {
+  width: 100%;
+  padding: 0.3rem 0.42rem;
+  border-radius: 8px;
+  border: 1px solid #94a3b8;
+  font: inherit;
+}
+
+.cross-product-readout {
+  margin: 0.7rem 0 0;
+  font-weight: 700;
+  color: #0f172a;
+}

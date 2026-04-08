@@ -2811,3 +2811,50 @@ code {
   font-weight: 700;
   color: #0f172a;
 }
+
+.torque-controls {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.torque-controls-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.torque-control {
+  display: grid;
+  gap: 0.45rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.torque-input-row {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: minmax(0, 110px) minmax(0, 1fr);
+  align-items: center;
+}
+
+.torque-input-row input[type="number"] {
+  width: 100%;
+  padding: 0.3rem 0.42rem;
+  border-radius: 8px;
+  border: 1px solid #94a3b8;
+  font: inherit;
+}
+
+.torque-input-row input[type="range"] {
+  width: 100%;
+  accent-color: #2563eb;
+}
+
+.torque-readout {
+  margin: 0.8rem 0 0;
+  color: #0f172a;
+  font-weight: 700;
+}

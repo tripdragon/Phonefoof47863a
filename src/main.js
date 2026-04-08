@@ -10,6 +10,7 @@ import { renderBotanyInteractive, renderBotanyLatex } from "./interactives/botan
 import { renderCameraInteractive } from "./interactives/camera";
 import { renderPixelStudio } from "./interactives/pixel-studio";
 import { renderCrossProductVisualizerRoute } from "./interactives/cross-product-visualizer";
+import { renderTorqueVisualizerRoute } from "./interactives/torque-visualizer";
 import { renderGroceryTranslationsRoute } from "./grocery-translations";
 import { renderFrenchTalkingRoute } from "./french-talking";
 import { renderSpanishTalkingRoute } from "./spanish-talking";
@@ -39,6 +40,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/three-demo" href="#/three-demo">Three.js Demo</a></li>
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
           <li><a class="menu-link" data-route="/cross-product" href="#/cross-product">Cross Product</a></li>
+          <li><a class="menu-link" data-route="/torque-visualizer" href="#/torque-visualizer">Torque Visualizer</a></li>
           <li><a class="menu-link" data-route="/languages" href="#/languages">languages</a></li>
           <li><a class="menu-link" data-route="/grocery-translations" href="#/grocery-translations">Grocery Words</a></li>
           <li><a class="menu-link" data-route="/french-talking" href="#/french-talking">French talking</a></li>
@@ -1598,6 +1600,10 @@ function renderCrossProductRoute() {
   return renderCrossProductVisualizerRoute(routeContent);
 }
 
+function renderTorqueRoute() {
+  return renderTorqueVisualizerRoute(routeContent);
+}
+
 function renderLanguagesRoute() {
   const spokenLanguagesByPopularity = [
     {
@@ -1971,6 +1977,7 @@ const routes = {
   "/three-demo": renderThreeRoute,
   "/three-superneat": renderThreeSuperneatRoute,
   "/cross-product": renderCrossProductRoute,
+  "/torque-visualizer": renderTorqueRoute,
   "/languages": renderLanguagesRoute,
   "/grocery-translations": renderGroceryRoute,
   "/french-talking": renderFrenchTalkingPageRoute,

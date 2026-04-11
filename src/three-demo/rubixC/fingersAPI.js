@@ -118,9 +118,13 @@ export class FingersAPI {
   }
 
   onPointerDown(ev){
-    this.IS_DOWN = true;
-    // this.controls.enabled = false;
     this.activePointers.set(ev.pointerId, ev);
+    if (this.activePointers.size > 1) {
+      this.resetInteractionState();
+      return;
+    }
+
+    this.IS_DOWN = true;
     this.pointsPlane.length = 0;
     this.currentDragDistance = 0;
     this.lastTriggeredDistance = 0;
@@ -129,6 +133,11 @@ export class FingersAPI {
     this.tryPointerDown(ev);
   }
   onPointerMove(ev){
+    this.activePointers.set(ev.pointerId, ev);
+    if (this.activePointers.size > 1) {
+      this.resetInteractionState();
+      return;
+    }
     // if (!this.IS_DOWN) return;
     if (!this.isOnCube) return;
     // if (this.state === states.idle) return;
@@ -138,12 +147,14 @@ export class FingersAPI {
   }
   
   onPointerUp(ev){
-    this.state = states.idle; // ??
-    this.isOnCube = false;
-
-    // if (this.hits1.length > 0) {
-    // }
     this.activePointers.delete(ev.pointerId);
+    if (this.activePointers.size > 0) return;
+    this.resetInteractionState();
+  }
+
+  resetInteractionState() {
+    this.state = states.idle;
+    this.isOnCube = false;
     this.controls.enabled = true;
     this.IS_DOWN = false;
     this.selectedPiece = null;

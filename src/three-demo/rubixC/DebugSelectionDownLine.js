@@ -9,6 +9,7 @@ export class DebugSelectionDownLine extends THREE.Object3D {
     this.worldDown = new THREE.Vector3(0, -1, 0);
     this.origin = new THREE.Vector3();
     this.quaternionTarget = new THREE.Quaternion();
+    this.downAxis = new THREE.Vector3(0, -1, 0);
 
     const geometry = new THREE.CylinderGeometry(radius, radius, length, 14, 1, false);
     const material = new THREE.MeshBasicMaterial({ color });
@@ -21,8 +22,8 @@ export class DebugSelectionDownLine extends THREE.Object3D {
     this.visible = false;
   }
 
-  syncFromSelection(piece, cube) {
-    if (!piece || !cube) {
+  syncFromSelection(piece) {
+    if (!piece) {
       this.visible = false;
       return;
     }
@@ -32,10 +33,10 @@ export class DebugSelectionDownLine extends THREE.Object3D {
 
     this.worldDown
       .copy(this.localDown)
-      .transformDirection(cube.matrixWorld)
+      .transformDirection(piece.matrixWorld)
       .normalize();
 
-    this.quaternionTarget.setFromUnitVectors(new THREE.Vector3(0, -1, 0), this.worldDown);
+    this.quaternionTarget.setFromUnitVectors(this.downAxis, this.worldDown);
     this.quaternion.copy(this.quaternionTarget);
 
     this.visible = true;

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { SlightlyPriceyPool } from './slightlyPriceyPool.js';
 import { _setMinAndMaxByKey } from "chart.js/helpers";
+import { DebugSelectionDownLine } from "./DebugSelectionDownLine.js";
 // A lot of this might should be from superneatlike pointer events
 
     // on pointer down first test if on the cube
@@ -73,6 +74,7 @@ export class FingersAPI {
 
   showDirectionArrow = true;
   showPlaneBallDebugger = true;
+  selectionDownLine;
 
   //movingAvV = new THREE.Vector3();
 
@@ -148,6 +150,9 @@ export class FingersAPI {
     this.lockGridDown = false;
     this.lastTriggeredDistance = 0;
     this.updateDistanceHud(0);
+    if (this.selectionDownLine) {
+      this.selectionDownLine.visible = false;
+    }
   }
 
   buildPlanePool(){
@@ -217,6 +222,9 @@ export class FingersAPI {
     this.arrowDirHelper = new THREE.ArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xffffff, 0.18, 0.1);
     //this.arrowDirHelper.visible = false;
     this.debuggersObject3D.add(this.arrowDirHelper);
+
+    this.selectionDownLine = new DebugSelectionDownLine({ length: 1.5, radius: 0.03, color: 0x000000 });
+    this.debuggersObject3D.add(this.selectionDownLine);
 
   }
 
@@ -313,6 +321,7 @@ export class FingersAPI {
   selectPiece(hit){
     if(hit.object.parent?.isPiece){
       this.selectedPiece = hit.object.parent;
+      this.selectionDownLine?.syncFromSelection(this.selectedPiece, this.cube?.core ?? this.cube);
     }
     // console.log(this.selectedPiece);
   }

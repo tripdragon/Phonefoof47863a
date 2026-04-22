@@ -105,6 +105,7 @@ export class FingersAPI {
     this.buildPlanePool();
     this.buildVisualHelpers();
     this.buildDistanceHud();
+    this.debugSetAllPieceInnerFacesToWhite();
 
   }
   beginPointerEvents() {
@@ -726,6 +727,22 @@ export class FingersAPI {
     });
     output.divideScalar(hits.length);
     return output;
+  }
+
+  debugSetAllPieceInnerFacesToWhite() {
+    if (!this.cube?.pieces?.length) return;
+    this.cube.pieces.forEach((piece) => {
+      if (!piece?.planes?.length) return;
+      piece.planes.forEach((entry) => {
+        const mat = entry?.plane?.material;
+        if (entry?.color) {
+          entry.color.set(0xffffff);
+        }
+        if (mat?.uniforms?.uMainColor?.value) {
+          mat.uniforms.uMainColor.value.set(0xffffff);
+        }
+      });
+    });
   }
 
   dispose() {

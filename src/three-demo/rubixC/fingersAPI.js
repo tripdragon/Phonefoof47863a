@@ -316,9 +316,8 @@ export class FingersAPI {
       
       this.selectPiece(this.hitDown);
 
-      this.highlightSelected();
-
-      this.highlightGroupsInSelected();
+      this.colorAllPiecesWhite();
+      this.colorSelectedGroupsCyan();
 
       this.refreshPieceFaceNormal(this.hitDown);
 
@@ -338,31 +337,38 @@ export class FingersAPI {
     // console.log(this.selectedPiece);
   }
 
-  highlightSelected(){
-    this.cube.pieces.forEach(x=>{
-      x.revertColor();
-    })
-    if (this.selectedPiece) this.selectedPiece.highlight();
+  setPieceMainColor(piece, colorHex = 0xffffff) {
+    if (!piece?.planes?.length) return;
+    piece.planes.forEach((entry) => {
+      if (entry?.color) {
+        entry.color.set(colorHex);
+      }
+      const mat = entry?.plane?.material;
+      if (mat?.uniforms?.uMainColor?.value) {
+        mat.uniforms.uMainColor.value.set(colorHex);
+      }
+    });
   }
 
-  highlightGroupsInSelected(){
-    if (!this.selectedPiece) return;
-    // for(const obj in this.cube.tGS){
-    //   const pp = this.cube.tGS[obj];
-    //   if (pp.includes(this.selectedPiece)) {
-    //     pp.forEach(x=>{
-    //       if (x) {
-    //         x.highlight({amp:0.9});
-    //       }
-    //     })  
-    //   }
-    // }
-    Object.values(this.cube.tGS)
-      .filter(group => group.includes(this.selectedPiece))
-      .forEach(group =>
-        group.forEach(x => x?.highlight({ amp: 0.1 }))
-      );
-    
+  colorAllPiecesWhite() {
+    if (!this.cube?.pieces?.length) return;
+    this.cube.pieces.forEach((piece) => {
+      this.setPieceMainColor(piece, 0xffffff);
+    });
+  }
+
+  getAllGroupsSelectedIsIn() {
+    if (!this.selectedPiece || !this.cube?.tGS) return [];
+    return Object.values(this.cube.tGS).filter((group) => group?.includes?.(this.selectedPiece));
+  }
+
+  colorSelectedGroupsCyan() {
+    const groups = this.getAllGroupsSelectedIsIn();
+    groups.forEach((group) => {
+      group.forEach((piece) => {
+        this.setPieceMainColor(piece, 0x00ffff);
+      });
+    });
   }
 
 

@@ -1021,6 +1021,21 @@ code {
   letter-spacing: 0.06em;
 }
 
+
+.hex-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+  color: #bbf7d0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.hex-mode-toggle input {
+  accent-color: #22c55e;
+}
+
 .hex-label {
   display: block;
   margin: 0.7rem 0 0.35rem;

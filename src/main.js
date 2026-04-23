@@ -174,14 +174,18 @@ function renderHomeRoute() {
     </section>
     <section class="hex-widget" aria-label="Hex converter">
       <p class="hex-title">Matrix Hex Translator</p>
-      <label class="hex-label" for="hex-input">Type text</label>
+      <label class="hex-mode-toggle" for="hex-mode-toggle">
+        <input id="hex-mode-toggle" type="checkbox" />
+        <span>Hex → String mode</span>
+      </label>
+      <label class="hex-label" id="hex-input-label" for="hex-input">Type text</label>
       <textarea
         id="hex-input"
         class="hex-input"
         rows="4"
         placeholder="Type anything and watch the hex stream…"
       ></textarea>
-      <p class="hex-label">Hex output</p>
+      <p class="hex-label" id="hex-output-label">Hex output</p>
       <output id="hex-output" class="hex-output" aria-live="polite">--</output>
     </section>
     <section class="sentence-widget" aria-label="Sentence structure analyzer">
@@ -273,6 +277,9 @@ function renderHomeRoute() {
   const scribbleDownload = document.getElementById("scribble-download");
   const hexInput = document.getElementById("hex-input");
   const hexOutput = document.getElementById("hex-output");
+  const hexModeToggle = document.getElementById("hex-mode-toggle");
+  const hexInputLabel = document.getElementById("hex-input-label");
+  const hexOutputLabel = document.getElementById("hex-output-label");
   const sentenceForm = document.getElementById("sentence-form");
   const sentenceInput = document.getElementById("sentence-input");
   const sentenceOutput = document.getElementById("sentence-output");
@@ -644,12 +651,53 @@ function renderHomeRoute() {
     });
   }
 
+  function parseHexToken(token) {
+    const cleaned = token.replace(/^0x/i, "").toLowerCase();
+
+    if (!cleaned) {
+      return [];
+    }
+
+    if (/^[0-9a-f]+$/.test(cleaned) && cleaned.length % 2 === 0) {
+      return cleaned.match(/.{2}/g) ?? [];
+    }
+
+    return /^[0-9a-f]{2}$/i.test(token) ? [token.toLowerCase()] : [];
+  }
+
+  function toStringWordGroups(hexText) {
+    return Array.from(hexText.matchAll(/[^|\n]+/g), (match) => {
+      const [rawGroup] = match;
+      const pairs = rawGroup
+        .trim()
+        .split(/\s+/)
+        .flatMap((token) => parseHexToken(token));
+      const bytes = Uint8Array.from(pairs, (pair) => Number.parseInt(pair, 16));
+      const group = bytes.length ? new TextDecoder().decode(bytes) : "";
+
+      return {
+        group,
+        start: match.index,
+        end: (match.index ?? 0) + rawGroup.length,
+      };
+    }).filter(({ group }) => group.length > 0);
+  }
+
   function findActiveHexGroupIndex(groups, cursorPosition) {
     return groups.findIndex(({ start, end }) => cursorPosition >= start && cursorPosition <= end);
   }
 
+  function syncHexModeLabels() {
+    const decodingMode = hexModeToggle.checked;
+    hexInputLabel.textContent = decodingMode ? "Type hex" : "Type text";
+    hexOutputLabel.textContent = decodingMode ? "String output" : "Hex output";
+    hexInput.placeholder = decodingMode
+      ? "Try: 48 65 6c 6c 6f | 57 6f 72 6c 64"
+      : "Type anything and watch the hex stream…";
+  }
+
   function syncHexOutput() {
-    const groups = toHexWordGroups(hexInput.value);
+    const groups = hexModeToggle.checked ? toStringWordGroups(hexInput.value) : toHexWordGroups(hexInput.value);
     const cursorPosition = hexInput.selectionStart ?? 0;
     const activeGroupIndex = findActiveHexGroupIndex(groups, cursorPosition);
     hexOutput.replaceChildren();
@@ -675,10 +723,17 @@ function renderHomeRoute() {
     });
   }
 
+  function handleHexModeToggle() {
+    syncHexModeLabels();
+    syncHexOutput();
+  }
+
   hexInput.addEventListener("input", syncHexOutput);
   hexInput.addEventListener("click", syncHexOutput);
   hexInput.addEventListener("keyup", syncHexOutput);
   hexInput.addEventListener("select", syncHexOutput);
+  hexModeToggle.addEventListener("change", handleHexModeToggle);
+  syncHexModeLabels();
   syncHexOutput();
 
   function handleSentenceSubmit(event) {
@@ -805,6 +860,7 @@ function renderHomeRoute() {
     hexInput.removeEventListener("click", syncHexOutput);
     hexInput.removeEventListener("keyup", syncHexOutput);
     hexInput.removeEventListener("select", syncHexOutput);
+    hexModeToggle.removeEventListener("change", handleHexModeToggle);
     sentenceForm.removeEventListener("submit", handleSentenceSubmit);
     logicInputA.removeEventListener("change", syncLogicResult);
     logicInputB.removeEventListener("change", syncLogicResult);

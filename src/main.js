@@ -435,51 +435,137 @@ function renderHomeRoute() {
     ctx.stroke();
   }
 
+  // ai fail v1
+  // async function loadDowJones() {
+  //   // Yahoo Finance unofficial quote endpoint (no API key needed, works from browser)
+  //   const symbol = "%5EDJI"; // ^DJI URL-encoded
+  //   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=5m&range=1d&includePrePost=false`;
+
+  //   try {
+  //     const response = await fetch(url);
+  //     if (!response.ok) throw new Error("fetch failed");
+  //     const json = await response.json();
+
+  //     const result = json?.chart?.result?.[0];
+  //     if (!result) throw new Error("no result");
+
+  //     const meta = result.meta;
+  //     const closes = result.indicators?.quote?.[0]?.close ?? [];
+  //     const validCloses = closes.filter((v) => v != null);
+
+  //     const currentPrice = meta.regularMarketPrice ?? validCloses[validCloses.length - 1];
+  //     const prevClose = meta.chartPreviousClose ?? meta.previousClose;
+  //     const change = currentPrice - prevClose;
+  //     const changePct = (change / prevClose) * 100;
+  //     const isUp = change >= 0;
+
+  //     const fmt = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  //     const sign = isUp ? "+" : "";
+
+  //     stocksPrice.textContent = fmt.format(currentPrice);
+  //     stocksChange.textContent = `${sign}${fmt.format(change)} (${sign}${changePct.toFixed(2)}%)`;
+  //     stocksChange.className = `stocks-change ${isUp ? "is-up" : "is-down"}`;
+
+  //     const marketState = meta.marketState ?? "CLOSED";
+  //     const isRegular = marketState === "REGULAR";
+  //     stocksBadge.textContent = isRegular ? "LIVE" : marketState;
+  //     stocksBadge.className = `stocks-badge ${isRegular ? "is-live" : "is-closed"}`;
+
+  //     const now = new Date();
+  //     stocksMeta.textContent = `Updated ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · Prev close ${fmt.format(prevClose)}`;
+
+  //     drawSparkline(validCloses, isUp);
+  //   } catch {
+  //     stocksChange.textContent = "Data unavailable";
+  //     stocksMeta.textContent = "Could not fetch market data";
+  //     stocksBadge.textContent = "—";
+  //   }
+  // }
+
+  // ai fail v2
   async function loadDowJones() {
-    // Yahoo Finance unofficial quote endpoint (no API key needed, works from browser)
-    const symbol = "%5EDJI"; // ^DJI URL-encoded
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=5m&range=1d&includePrePost=false`;
+    const symbol = "^DJI";
+    const baseUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d&includePrePost=false`;
+
+    // Optional CORS fallback
+    const url = baseUrl;
+    // const url = "https://corsproxy.io/?" + encodeURIComponent(baseUrl);
 
     try {
       const response = await fetch(url);
-      if (!response.ok) throw new Error("fetch failed");
+      if (!response.ok) throw new Error("Fetch failed");
+
       const json = await response.json();
-
       const result = json?.chart?.result?.[0];
-      if (!result) throw new Error("no result");
 
-      const meta = result.meta;
-      const closes = result.indicators?.quote?.[0]?.close ?? [];
-      const validCloses = closes.filter((v) => v != null);
+      if (!result) throw new Error("No result");
 
-      const currentPrice = meta.regularMarketPrice ?? validCloses[validCloses.length - 1];
-      const prevClose = meta.chartPreviousClose ?? meta.previousClose;
+      const meta = result.meta || {};
+      const closesRaw = result.indicators?.quote?.[0]?.close || [];
+
+      // Remove nulls safely
+      const closes = closesRaw.filter(v => typeof v === "number");
+
+      if (!closes.length) throw new Error("No valid price data");
+
+      const currentPrice =
+        meta.regularMarketPrice ??
+        closes[closes.length - 1];
+
+      const prevClose =
+        meta.chartPreviousClose ??
+        meta.previousClose;
+
+      if (typeof currentPrice !== "number" || typeof prevClose !== "number") {
+        throw new Error("Invalid pricing data");
+      }
+
       const change = currentPrice - prevClose;
-      const changePct = (change / prevClose) * 100;
+      const changePct = prevClose ? (change / prevClose) * 100 : 0;
       const isUp = change >= 0;
 
-      const fmt = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const fmt = new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
       const sign = isUp ? "+" : "";
 
+      // ---- UI updates ----
       stocksPrice.textContent = fmt.format(currentPrice);
-      stocksChange.textContent = `${sign}${fmt.format(change)} (${sign}${changePct.toFixed(2)}%)`;
-      stocksChange.className = `stocks-change ${isUp ? "is-up" : "is-down"}`;
 
-      const marketState = meta.marketState ?? "CLOSED";
+      stocksChange.textContent =
+        `${sign}${fmt.format(change)} (${sign}${changePct.toFixed(2)}%)`;
+
+      stocksChange.className =
+        `stocks-change ${isUp ? "is-up" : "is-down"}`;
+
+      const marketState = meta.marketState || "CLOSED";
       const isRegular = marketState === "REGULAR";
+
       stocksBadge.textContent = isRegular ? "LIVE" : marketState;
-      stocksBadge.className = `stocks-badge ${isRegular ? "is-live" : "is-closed"}`;
+      stocksBadge.className =
+        `stocks-badge ${isRegular ? "is-live" : "is-closed"}`;
 
       const now = new Date();
-      stocksMeta.textContent = `Updated ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · Prev close ${fmt.format(prevClose)}`;
 
-      drawSparkline(validCloses, isUp);
-    } catch {
+      stocksMeta.textContent =
+        `Updated ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` +
+        (prevClose ? ` · Prev close ${fmt.format(prevClose)}` : "");
+
+      drawSparkline(closes, isUp);
+
+    } catch (err) {
+      console.error("Dow Jones load error:", err);
+
+      stocksPrice.textContent = "—";
       stocksChange.textContent = "Data unavailable";
       stocksMeta.textContent = "Could not fetch market data";
       stocksBadge.textContent = "—";
+      stocksBadge.className = "stocks-badge is-closed";
     }
   }
+
 
   loadDowJones();
   // Refresh every 60 seconds
@@ -559,20 +645,35 @@ function renderHomeRoute() {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          await loadFromCoordinates(latitude, longitude, "Your location");
-        } catch {
-          await loadFromCoordinates(fallback.latitude, fallback.longitude, fallback.label);
-        }
-      },
-      async () => {
+    // return;
+    // removing geo ask
+    // navigator.geolocation.getCurrentPosition(
+    //   async (position) => {
+    //     try {
+    //       const { latitude, longitude } = position.coords;
+    //       await loadFromCoordinates(latitude, longitude, "Your location");
+    //     } catch {
+    //       await loadFromCoordinates(fallback.latitude, fallback.longitude, fallback.label);
+    //     }
+    //   },
+    //   async () => {
+    //     await loadFromCoordinates(fallback.latitude, fallback.longitude, fallback.label);
+    //   },
+    //   { timeout: 3000 },
+    // );
+    (async () => {
+      const maine = {
+        latitude: 45.2538,
+        longitude: -69.4455,
+        label: "Maine",
+      };
+
+      try {
+        await loadFromCoordinates(maine.latitude, maine.longitude, maine.label);
+      } catch {
         await loadFromCoordinates(fallback.latitude, fallback.longitude, fallback.label);
-      },
-      { timeout: 3000 },
-    );
+      }
+    })();
   }
 
   loadWeather().catch(() => {

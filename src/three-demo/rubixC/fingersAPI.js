@@ -235,6 +235,7 @@ export class FingersAPI {
     //this.arrowDirHelper.visible = false;
     this.debuggersObject3D.add(this.arrowDirHelper);
 
+    // ??? ai?? 
     this.selectionDownLine = new DebugSelectionDownLine({ length: 1.5, radius: 0.03, color: 0x000000 });
     this.debuggersObject3D.add(this.selectionDownLine);
 
@@ -316,6 +317,8 @@ export class FingersAPI {
       
       this.selectPiece(this.hitDown);
 
+      // debuggers ; some logic ; need to sort
+// console.log("??¿¿")
       this.colorAllPiecesWhite();
       this.colorSelectedGroupsCyan();
 
@@ -332,29 +335,28 @@ export class FingersAPI {
   selectPiece(hit){
     if(hit.object.parent?.isPiece){
       this.selectedPiece = hit.object.parent;
+      // ai???
       this.selectionDownLine?.syncFromSelection(this.selectedPiece, this.cube?.core ?? this.cube);
     }
     // console.log(this.selectedPiece);
   }
 
-  setPieceMainColor(piece, colorHex = 0xffffff) {
-    if (!piece?.planes?.length) return;
-    piece.planes.forEach((entry) => {
-      if (entry?.color) {
-        entry.color.set(colorHex);
-      }
-      const mat = entry?.plane?.material;
-      if (mat?.uniforms?.uMainColor?.value) {
-        mat.uniforms.uMainColor.value.set(colorHex);
-      }
-    });
-  }
+  // setPieceMainColor(piece, colorHex = 0xffffff) {
+  //   if (!piece?.planes?.length) return;
+  //   piece.planes.forEach((entry) => {
+  //     if (entry?.color) {
+  //       entry.color.set(colorHex);
+  //     }
+  //     const mat = entry?.plane?.material;
+  //     if (mat?.uniforms?.uMainColor?.value) {
+  //       mat.uniforms.uMainColor.value.set(colorHex);
+  //     }
+  //   });
+  // }
+
 
   colorAllPiecesWhite() {
-    if (!this.cube?.pieces?.length) return;
-    this.cube.pieces.forEach((piece) => {
-      this.setPieceMainColor(piece, 0xffffff);
-    });
+    this.cube.colorAllPieces(0xffffff);
   }
 
   getAllGroupsSelectedIsIn() {
@@ -366,7 +368,7 @@ export class FingersAPI {
     const groups = this.getAllGroupsSelectedIsIn();
     groups.forEach((group) => {
       group.forEach((piece) => {
-        this.setPieceMainColor(piece, 0x00ffff);
+        piece.setColorOverAll(0x00ffff);
       });
     });
   }
@@ -419,6 +421,8 @@ export class FingersAPI {
   // previous
   trySelectingPiece(ev){
     return;
+
+
     if (false) {
       return;
     }

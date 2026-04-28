@@ -417,4 +417,12 @@ export class RubixCubeLike extends THREE.Group {
       x.updateMatrix();
     });
   }
-                          }
+
+  colorAllPieces(colorHex = 0xfffaaa){
+    if (!this.pieces?.length) return;
+    this.pieces.forEach((x) => {
+      x.setColorOverAll(colorHex);
+    });
+  }
+
+}

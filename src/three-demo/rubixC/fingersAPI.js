@@ -4,6 +4,11 @@ import { _setMinAndMaxByKey } from "chart.js/helpers";
 import { DebugSelectionDownLine } from "./DebugSelectionDownLine.js";
 // A lot of this might should be from superneatlike pointer events
 
+// pick and turn
+// thats the base of it
+// pick and figure out which way in 3d space you intent to turn the group
+
+
     // on pointer down first test if on the cube
     // + test if on a piece
     // + get the face of the piece and its normal
@@ -35,8 +40,12 @@ export class FingersAPI {
 
   activePointers = new Map();
   
+  // CONFUSING, planePool is the pool on thge cube, planePoolGrid is the 
+  // plane itself, WRONG names
   planePool; // CheapPoolIsh
-  planePoolGrid; // stupid names
+  // cubePool; // CheapPoolIsh
+  planePoolGrid; // stupid names 
+
   planePoolHolder3D;
   planeHitZone3D;
   debuggersObject3D;
@@ -131,7 +140,12 @@ export class FingersAPI {
     this.lastTriggeredDistance = 0;
     this.updateDistanceHud(0);
     // this.trySelectingPiece(ev);
+    
+    // original
     this.tryPointerDown(ev);
+    // just debugging with this one
+    // ehhh too much counter work
+
   }
   onPointerMove(ev){
     this.activePointers.set(ev.pointerId, ev);
@@ -288,7 +302,7 @@ export class FingersAPI {
     const zones = this.cube.pieces.flatMap(piece => piece.hitZone);
 
     this.hits1 = this.raycaster.intersectObjects(zones, false);
-    console.log("hits", this.hits1);
+    // console.log("hits", this.hits1);
     // return this.hits1;
   }
 
@@ -300,6 +314,8 @@ export class FingersAPI {
     const ball = this.planePool.requestItem();
 
     if(this.hits1.length > 0){
+      
+      // this.colapseCubeBalls();
 
       // figuring out the nessesary flag states
       //this.IS_DOWN = true;
@@ -418,99 +434,12 @@ export class FingersAPI {
   }
 
 
-  // previous
-  trySelectingPiece(ev){
-    return;
-
-
-    if (false) {
-      return;
-    }
-    
-//if(this.activePointers.size > 1) return;
-    
-    // if (!this.IS_DOWN) return;
-    // if (!this.camera || !this.cube || !this.domElement) return null;
-    
-    const v1 = this.getScreenCoords(ev);
-    this.raycaster.setFromCamera(v1, this.camera);
-
-    const zones = this.cube.pieces.flatMap(piece => piece.hitZone);
-
-    this.hits1 = this.raycaster.intersectObjects(zones, false);
-    console.log(this.hits1);
-    
-    const ball = this.planePool.requestItem();
-    if(this.hits1.length > 0){
-      this.IS_DOWN = true;
-      this.controls.enabled = false;
-      
-      ball.visible = true;
-      ball.position.copy(this.hits1[0].point);
-      
-      this.selectPiece();
-      if(this.useFaceArrowDebugger){
-        this.displayFaceArrow(this.hits1[0]);
-      }
-    }
-    if(this.IS_DOWN ){
-      // now do hit tests on the plane
-      const ballOnPlane = this.planePoolGrid.requestItem();
-      ballOnPlane.visible = true;
-
-      // assuming .point is world
-      // otherwise remove else 
-      // so we dont have two same starter points
-      if(this.lockGridDown === false){
-          this.lockGridDown = true;
-          this.pointsPlane.length = 0;
-          this.pointsPlane.push(this.hits1[0]);
-          this.pointDown3D.copy(this.pointsPlane[0].point);
-          this.displayFacePlane(this.pointsPlane[0]);
-          this.arrowDirOriginV.copy(this.pointsPlane[0].point);
-          this.arrowDirV.set(0, 0, 1);
-          this.arrowDirHelper.position.copy(this.arrowDirOriginV);
-          this.arrowDirHelper.setDirection(this.arrowDirV);
-          this.arrowDirHelper.visible = true;
-        }
-      else {
-        this.hitsPlane = this.raycaster.intersectObject(this.planeHitZone3D, false);
-        if(this.hitsPlane.length > 0){
-          this.pointsPlane.push(this.hitsPlane[0]);
-          if(this.pointsPlane.length>0){
-            ballOnPlane.position.copy(this.hitsPlane[0].point);
-            this.getAveragePointFromHits(this.pointsPlane, this.movingAveragePointV);
-            this.currentDragDistance = this.pointDown3D.distanceTo(this.hitsPlane[0].point);
-            this.updateDistanceHud(this.currentDragDistance);
-            if (this.currentDragDistance >= this.triggerDistance && this.lastTriggeredDistance < this.triggerDistance) {
-              this.lastTriggeredDistance = this.currentDragDistance;
-              this.popThresholdBubble(this.currentDragDistance);
-            }
-            this.arrowDirV.copy(this.movingAveragePointV).sub(this.arrowDirOriginV);
-            const dirLen = this.arrowDirV.length();
-            if (dirLen > 0.000001) {
-              this.arrowDirV.multiplyScalar(1 / dirLen);
-              this.arrowDirHelper.position.copy(this.arrowDirOriginV);
-              this.arrowDirHelper.setDirection(this.arrowDirV);
-            }
-          }
-        }
-        
-      }
-    
-      
-      
-      
-  }
-      
-    
-  }
-
 
 
   seeking(ev){
     if (this.state === states.onCube) {
       this.state = states.seeking;
+      this.colapsePlaneBalls();
     }
     if (this.state !== states.seeking) return;
     this.getHits(ev);
@@ -537,8 +466,8 @@ export class FingersAPI {
       this.pointsPlane.push(this.hitsPlane[0]);
       
       if(this.pointsPlane.length>0){
-        console.log("????");
-        
+        // console.log("????");
+
         if(this.showPlaneBallDebugger){
           const ballOnPlane = this.planePoolGrid.requestItem();
           ballOnPlane.visible = true;
@@ -564,6 +493,8 @@ export class FingersAPI {
   boxaA1 = null;
   Vsdhjkf111 = new THREE.Vector3();
   updateDirectionCheck(ev){
+
+    // temp maybe adding some debuggers one time run
     if(!this.has_dihffg){
       this.has_dihffg = true;
       const ballGeoA = new THREE.SphereGeometry(0.1, 8, 8);
@@ -581,7 +512,7 @@ export class FingersAPI {
       this.scene.add(this.boxaA1);
 
     }
-    // this was AI, its job isa to get the average
+    // this was AI, its job is a to get the average
     // of the points to get the direction on the plane
     // then over a threshold, activate the next states
 
@@ -594,12 +525,39 @@ export class FingersAPI {
     }
     this.arrowDirV.copy(this.movingAveragePointV).sub(this.arrowDirOriginV);
     const dirLen = this.arrowDirV.length();
-    if (dirLen > 0.000001) {
+    if (dirLen > 0.5) {
       this.arrowDirV.multiplyScalar(1 / dirLen);
       this.arrowDirHelper.position.copy(this.arrowDirOriginV);
       this.arrowDirHelper.setDirection(this.arrowDirV);
+
+      // debugger
+      console.log("pop")
+
+      // this.cube.pieces.forEach(x=>{
+      //   x.rotation.y = 0.4;
+      //   x.rotation.z = 0.4;
+      //   x.rotation.x = 0.4;
+      // });
+      // this.cube.rotation.z = Math.random() * Math.PI;
+      // this.cube.rotation.y = Math.random() * Math.PI;
+      // this.cube.rotation.x = Math.random() * Math.PI;
+      const tGS = this.cube.tGS;
+      for (const key in tGS) {
+          tGS[key].forEach(x=>{
+            if(x.whichType === "center"){
+                console.log("key", key);
+              if (x.y === 0 && x.x > 0 && x.z === 0) {
+              x.rotation.z = Math.random()*Math.PI*2;
+              }
+            }
+          })
+      }
     }
 
+    // NO not good, what IS Y up???!! the screen? The plane? The plane
+    // only has a first time orientation, you dont build code around
+    // that as a work around. So its a NO, this is a job for linear physics
+    // previous idea:
     // // ok from here we need to atan2 in local space
     // // then test north east etc...
     this.pv0.copy(this.arrowDirOriginV);
@@ -630,7 +588,7 @@ export class FingersAPI {
 //     // transform direction into local space
     // this.pv2.copy(this.arrowDirV).applyMatrix3(this.matrixA).normalize();
     // this.pv2.applyMatrix3(this.matrixA).normalize();
-    console.log(this.pv2);
+    // console.log(this.pv2);
     
 
 // // compute angle in plane-local space
@@ -659,7 +617,7 @@ export class FingersAPI {
 
   // }
 
-  //previous
+  //previous??÷÷¿¿
   // moves the faceArrow into the face of the selected hitzone
   displayFaceArrow(hit){
     this.faceArrow.visible = true;
@@ -771,4 +729,118 @@ export class FingersAPI {
     }
   }
 
+
+  colapseCubeBalls(){
+    this.planePool.forEach(x=>{
+      x.position.set(0,0,0);
+    })
+    console.log("colapseCubeBalls");
+  }
+  colapsePlaneBalls(){
+    this.planePoolGrid.forEach(x=>{
+      x.position.set(0,0,0);
+    })
+    console.log("colapsePlaneBalls");
+  }
+
 }
+
+
+
+
+
+
+// +++++++++++++++++
+
+// previous
+
+
+
+  // previous
+  // trySelectingPiece(ev){
+  function trySelectingPiece(ev){
+    return;
+
+
+    if (false) {
+      return;
+    }
+    
+    //if(this.activePointers.size > 1) return;
+    
+    // if (!this.IS_DOWN) return;
+    // if (!this.camera || !this.cube || !this.domElement) return null;
+    
+    const v1 = this.getScreenCoords(ev);
+    this.raycaster.setFromCamera(v1, this.camera);
+
+    const zones = this.cube.pieces.flatMap(piece => piece.hitZone);
+
+    this.hits1 = this.raycaster.intersectObjects(zones, false);
+    console.log(this.hits1);
+    
+    const ball = this.planePool.requestItem();
+    if(this.hits1.length > 0){
+      this.IS_DOWN = true;
+      this.controls.enabled = false;
+      
+      ball.visible = true;
+      ball.position.copy(this.hits1[0].point);
+      
+      this.selectPiece();
+      if(this.useFaceArrowDebugger){
+        this.displayFaceArrow(this.hits1[0]);
+      }
+    }
+    if(this.IS_DOWN ){
+      // now do hit tests on the plane
+      const ballOnPlane = this.planePoolGrid.requestItem();
+      ballOnPlane.visible = true;
+
+      // assuming .point is world
+      // otherwise remove else 
+      // so we dont have two same starter points
+      if(this.lockGridDown === false){
+          this.lockGridDown = true;
+          this.pointsPlane.length = 0;
+          this.pointsPlane.push(this.hits1[0]);
+          this.pointDown3D.copy(this.pointsPlane[0].point);
+          this.displayFacePlane(this.pointsPlane[0]);
+          this.arrowDirOriginV.copy(this.pointsPlane[0].point);
+          this.arrowDirV.set(0, 0, 1);
+          this.arrowDirHelper.position.copy(this.arrowDirOriginV);
+          this.arrowDirHelper.setDirection(this.arrowDirV);
+          this.arrowDirHelper.visible = true;
+        }
+      else {
+        this.hitsPlane = this.raycaster.intersectObject(this.planeHitZone3D, false);
+        if(this.hitsPlane.length > 0){
+          this.pointsPlane.push(this.hitsPlane[0]);
+          if(this.pointsPlane.length>0){
+            ballOnPlane.position.copy(this.hitsPlane[0].point);
+            this.getAveragePointFromHits(this.pointsPlane, this.movingAveragePointV);
+            this.currentDragDistance = this.pointDown3D.distanceTo(this.hitsPlane[0].point);
+            this.updateDistanceHud(this.currentDragDistance);
+            if (this.currentDragDistance >= this.triggerDistance && this.lastTriggeredDistance < this.triggerDistance) {
+              this.lastTriggeredDistance = this.currentDragDistance;
+              this.popThresholdBubble(this.currentDragDistance);
+            }
+            this.arrowDirV.copy(this.movingAveragePointV).sub(this.arrowDirOriginV);
+            const dirLen = this.arrowDirV.length();
+            if (dirLen > 0.000001) {
+              this.arrowDirV.multiplyScalar(1 / dirLen);
+              this.arrowDirHelper.position.copy(this.arrowDirOriginV);
+              this.arrowDirHelper.setDirection(this.arrowDirV);
+            }
+          }
+        }
+        
+      }
+    
+      
+      
+      
+  }
+      
+    
+  }

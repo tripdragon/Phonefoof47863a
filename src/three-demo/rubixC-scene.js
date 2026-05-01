@@ -127,7 +127,7 @@ magicCube.rotation.y = Math.PI;
 //   iim++;
 // }
 
-magicCube.showNormals();
+magicCube.showCenterNormals();
 
   window.magicCube = magicCube;
   

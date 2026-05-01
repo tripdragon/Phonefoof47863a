@@ -15,6 +15,17 @@ export class RubixCubeLike extends THREE.Group {
 
   // transitionalGroups
   // sides and rings of cube
+  // the pieces all keep swapping out
+  // so dont cache this in a reference
+  // the concept of visual world space applies to the positions of groups
+  // like what is top for example
+  /*
+    for (const key in tGS) {
+    console.log(key, tGS[key]);
+    }
+  */
+  // in seeking we only need the first 6, not the ring systems
+  // to find their up y vector and crossproduct
   tGS = {
     // faces / cornersets
     top: new PiecesGroup("top"),        // +y
@@ -393,8 +404,8 @@ export class RubixCubeLike extends THREE.Group {
     this.add(this.core);
   }
 
-
-  showNormals(){
+  // 
+  showCenterNormals(){
     this.pieces.forEach(x=>{
         //const axesHelper = new THREE.AxesHelper( 2 );
         // x.add( axesHelper );

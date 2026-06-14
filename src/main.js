@@ -136,6 +136,28 @@ function renderHomeRoute() {
       </div>
     </section>
 
+    <section class="wet-bulb-widget" aria-label="Wet bulb temperature calculator">
+      <div class="wet-bulb-header">
+        <p class="wet-bulb-label">Heat Stress Helper</p>
+        <h2 class="wet-bulb-title">Wet Bulb Temperature</h2>
+        <p class="wet-bulb-copy">Move the sliders to estimate wet bulb temperature from dry bulb temperature and relative humidity.</p>
+      </div>
+      <div class="wet-bulb-controls">
+        <label class="wet-bulb-control" for="dry-bulb-slider">
+          <span>Dry bulb temp</span>
+          <strong id="dry-bulb-value">80°F</strong>
+          <input id="dry-bulb-slider" type="range" min="60" max="102" value="80" />
+        </label>
+        <label class="wet-bulb-control" for="humidity-slider">
+          <span>Relative humidity</span>
+          <strong id="humidity-value">50%</strong>
+          <input id="humidity-slider" type="range" min="0" max="100" value="50" />
+        </label>
+      </div>
+      <output id="wet-bulb-result" class="wet-bulb-result" aria-live="polite">Wet bulb: --</output>
+      <p class="wet-bulb-note">Approximation is most reliable for typical outdoor conditions.</p>
+    </section>
+
     <section class="stocks-widget" aria-live="polite" aria-label="Dow Jones Industrial Average">
       <div class="stocks-header">
         <div class="stocks-title-row">
@@ -273,6 +295,11 @@ function renderHomeRoute() {
   const weatherStatus = document.getElementById("weather-status");
   const weatherLocation = document.getElementById("weather-location");
   const weatherMetrics = document.getElementById("weather-metrics");
+  const dryBulbSlider = document.getElementById("dry-bulb-slider");
+  const dryBulbValue = document.getElementById("dry-bulb-value");
+  const humiditySlider = document.getElementById("humidity-slider");
+  const humidityValue = document.getElementById("humidity-value");
+  const wetBulbResult = document.getElementById("wet-bulb-result");
   const scribbleCanvas = document.getElementById("scribble-canvas");
   const scribbleDownload = document.getElementById("scribble-download");
   const hexInput = document.getElementById("hex-input");
@@ -304,6 +331,41 @@ function renderHomeRoute() {
   const shaderCanvas = document.getElementById("shader-canvas");
   const shaderMeta = document.getElementById("shader-meta");
   const shaderRefresh = document.getElementById("shader-refresh");
+
+  function fahrenheitToCelsius(value) {
+    return (value - 32) * (5 / 9);
+  }
+
+  function celsiusToFahrenheit(value) {
+    return value * (9 / 5) + 32;
+  }
+
+  function calculateWetBulbFahrenheit(dryBulbFahrenheit, relativeHumidity) {
+    const temperatureCelsius = fahrenheitToCelsius(dryBulbFahrenheit);
+    const humidity = Math.min(100, Math.max(0, relativeHumidity));
+    const wetBulbCelsius =
+      temperatureCelsius * Math.atan(0.151977 * Math.sqrt(humidity + 8.313659)) +
+      Math.atan(temperatureCelsius + humidity) -
+      Math.atan(humidity - 1.676331) +
+      0.00391838 * humidity ** 1.5 * Math.atan(0.023101 * humidity) -
+      4.686035;
+
+    return celsiusToFahrenheit(wetBulbCelsius);
+  }
+
+  function syncWetBulbCalculator() {
+    const dryBulb = Number(dryBulbSlider.value);
+    const humidity = Number(humiditySlider.value);
+    const wetBulb = calculateWetBulbFahrenheit(dryBulb, humidity);
+
+    dryBulbValue.textContent = `${dryBulb}°F`;
+    humidityValue.textContent = `${humidity}%`;
+    wetBulbResult.textContent = `Wet bulb: ${wetBulb.toFixed(1)}°F`;
+  }
+
+  dryBulbSlider.addEventListener("input", syncWetBulbCalculator);
+  humiditySlider.addEventListener("input", syncWetBulbCalculator);
+  syncWetBulbCalculator();
 
   let shaderFrame = 0;
   let shaderSeed = Math.random() * 9999;
@@ -852,6 +914,8 @@ function renderHomeRoute() {
   return () => {
     window.clearInterval(intervalId);
     window.clearInterval(stocksIntervalId);
+    dryBulbSlider.removeEventListener("input", syncWetBulbCalculator);
+    humiditySlider.removeEventListener("input", syncWetBulbCalculator);
     scribbleCanvas.removeEventListener("pointerdown", startDrawing);
     scribbleCanvas.removeEventListener("pointermove", draw);
     scribbleCanvas.removeEventListener("pointerup", stopDrawing);

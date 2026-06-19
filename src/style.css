@@ -28,7 +28,7 @@ main {
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
   padding: clamp(1.5rem, 4vw, 3rem);
 
-  
+
 }
 
 .menu {
@@ -3083,6 +3083,25 @@ code {
   50% { transform: translate(10px, -6px); }
 }
 
+.potentiostat-explainer {
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(20, 184, 166, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #134e4a;
+}
+
+.potentiostat-explainer h2 {
+  margin: 0 0 0.35rem;
+  color: #0f766e;
+  font-size: 1rem;
+}
+
+.potentiostat-explainer p {
+  margin: 0;
+  line-height: 1.6;
+}
+
 .potentiostat-canvas {
   display: block;
   width: 100%;
@@ -3091,6 +3110,29 @@ code {
   border: 1px solid #67e8f9;
   border-radius: 14px;
   background: #f8fafc;
+}
+
+.potentiostat-samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.potentiostat-samples label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(8, 145, 178, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #155e75;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.potentiostat-samples input {
+  accent-color: #0f766e;
 }
 
 .potentiostat-controls {
@@ -3131,7 +3173,8 @@ code {
 }
 
 @media (max-width: 640px) {
-  .potentiostat-controls {
+
+.potentiostat-controls {
     grid-template-columns: 1fr;
   }
 }

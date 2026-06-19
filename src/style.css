@@ -3162,6 +3162,29 @@ code {
   transform: translateX(-50%);
 }
 
+.potentiostat-scan-card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(124, 58, 237, 0.22);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(245, 243, 255, 0.92), rgba(224, 242, 254, 0.72));
+  color: #312e81;
+}
+
+.potentiostat-scan-card__label {
+  color: #6d28d9;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.potentiostat-scan-card strong {
+  color: #4c1d95;
+  font-size: 1.05rem;
+}
+
 .potentiostat-canvas {
   display: block;
   width: 100%;

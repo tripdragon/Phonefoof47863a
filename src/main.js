@@ -1744,18 +1744,17 @@ function renderPotentiostatRoute() {
     </p>
     <section class="potentiostat-panel" aria-label="Enzyme reaction simulator">
       <div class="potentiostat-meter">
-        <span class="potentiostat-meter__label">Product formation rate</span>
-        <strong id="potentiostat-reading">0.00 µM/s</strong>
-        <span id="potentiostat-time">0.00 s / 5.00 s</span>
+        <span class="potentiostat-meter__label">Net electrode current</span>
+        <strong id="potentiostat-reading">0.00 µA</strong>
+        <span id="potentiostat-time">0.00 s / 5.00 s · +0.00 V</span>
       </div>
       <div class="potentiostat-explainer">
-        <h2>Why the trace rises and falls</h2>
+        <h2>Why studies show the voltage going “backwards”</h2>
         <p>
-          A three-electrode potentiostat does not read the enzyme layer directly. The working electrode is
-          held against a reference electrode while the counter electrode supplies balancing current through a
-          tiny sample volume on the stick. This simulator adds an intentional monitor falloff: after the first
-          wetting surge, the virtual meter tapers the signal to mimic diffusion limits, reference drift, and
-          compensation behavior in the electrode geometry.
+          Many potentiostat papers use cyclic voltammetry: the instrument sweeps the working electrode to a
+          positive switching potential, then reverses the scan back through the starting voltage. That backwards
+          leg is not time running in reverse; it is an inverse applied potential that can drive the opposite
+          redox reaction, so the measured current may shrink, cross zero, or become cathodic (negative).
         </p>
       </div>
       <div class="enzyme-reaction-chamber" aria-hidden="true">
@@ -1772,12 +1771,17 @@ function renderPotentiostatRoute() {
         <span class="sample-stick__pad sample-stick__pad--counter">Counter</span>
         <span class="sample-stick__drop">sample</span>
       </div>
+      <div class="potentiostat-scan-card" aria-live="polite">
+        <span class="potentiostat-scan-card__label">Scan runner</span>
+        <strong id="potentiostat-scan-state">Forward oxidation sweep</strong>
+        <span>Forward: -0.20 V → +0.65 V · Reverse: +0.65 V → -0.35 V</span>
+      </div>
       <canvas
         id="potentiostat-canvas"
         class="potentiostat-canvas"
         width="820"
         height="360"
-        aria-label="Five second enzyme reaction rate trace with meter rise and falloff"
+        aria-label="Five second cyclic voltammetry trace with forward and reverse voltage sweep"
         role="img"
       ></canvas>
       <div class="potentiostat-samples" role="radiogroup" aria-label="Auto-fill sample presets">
@@ -1804,6 +1808,7 @@ function renderPotentiostatRoute() {
   const timeReadout = document.getElementById("potentiostat-time");
   const currentSlider = document.getElementById("potentiostat-current");
   const currentValue = document.getElementById("potentiostat-current-value");
+  const scanState = document.getElementById("potentiostat-scan-state");
   const restartButton = document.getElementById("potentiostat-restart");
   const sampleInputs = [...document.querySelectorAll('input[name="potentiostat-sample"]')];
   const ctx = canvas.getContext("2d");
@@ -1814,8 +1819,25 @@ function renderPotentiostatRoute() {
   let activeSample = radioSamples[2];
 
   function mapCurrentToY(rate, height, padding) {
-    const clamped = Math.max(0, Math.min(100, rate));
-    return padding.top + ((100 - clamped) / 100) * (height - padding.top - padding.bottom);
+    const minCurrent = -45;
+    const maxCurrent = 100;
+    const clamped = Math.max(minCurrent, Math.min(maxCurrent, rate));
+    return padding.top + ((maxCurrent - clamped) / (maxCurrent - minCurrent)) * (height - padding.top - padding.bottom);
+  }
+
+  function getScanState(elapsedMs) {
+    const halfSweepMs = durationMs / 2;
+    const forward = elapsedMs <= halfSweepMs;
+    const progress = forward ? elapsedMs / halfSweepMs : (elapsedMs - halfSweepMs) / halfSweepMs;
+    const potential = forward
+      ? -0.2 + progress * 0.85
+      : 0.65 - progress * 1.0;
+
+    return {
+      forward,
+      potential,
+      label: forward ? "Forward oxidation sweep" : "Reverse reduction sweep",
+    };
   }
 
   function simulateCurrent(elapsedMs) {
@@ -1828,9 +1850,15 @@ function renderPotentiostatRoute() {
     const wettingSurge = 1 + 0.2 * Math.exp(-Math.max(0, seconds - 0.18) / 0.22);
     const monitorCompensation = 1 - activeSample.diffusionLimit * (1 - Math.exp(-Math.max(0, seconds - 0.55) / activeSample.fall));
     const referenceDrift = 1 - 0.06 * (1 - Math.exp(-seconds / 3.2));
+    const scan = getScanState(elapsedMs);
     const electrodeBaseline = 2.6 * Math.exp(-seconds / 0.42);
     const molecularJitter = Math.sin(seconds * Math.PI * 5.2) * 1.1 + Math.sin(seconds * Math.PI * 12.5) * 0.35;
-    return Math.max(0, michaelisMentenRate * rise * wettingSurge * monitorCompensation * referenceDrift + electrodeBaseline + molecularJitter);
+    const forwardCurrent = michaelisMentenRate * rise * wettingSurge * monitorCompensation * referenceDrift;
+    const reverseProgress = Math.max(0, (elapsedMs - durationMs / 2) / (durationMs / 2));
+    const reductionPull = reverseProgress ** 1.35 * (10 + substrate * 0.28 + activeSample.diffusionLimit * 22);
+    const capacitiveFlip = scan.forward ? 0 : -8 * Math.exp(-reverseProgress / 0.18);
+
+    return forwardCurrent + electrodeBaseline + molecularJitter - reductionPull + capacitiveFlip;
   }
 
   function drawGrid(width, height, padding) {
@@ -1853,14 +1881,14 @@ function renderPotentiostatRoute() {
       ctx.stroke();
       ctx.fillText(`${i}s`, x - 8, height - 14);
     }
-    for (let i = 0; i <= 100; i += 25) {
-      const y = mapCurrentToY(i, height, padding);
+    [-40, 0, 25, 50, 75, 100].forEach((current) => {
+      const y = mapCurrentToY(current, height, padding);
       ctx.beginPath();
       ctx.moveTo(padding.left, y);
       ctx.lineTo(width - padding.right, y);
       ctx.stroke();
-      ctx.fillText(`${i}µM/s`, 8, y + 4);
-    }
+      ctx.fillText(`${current}µA`, 8, y + 4);
+    });
   }
 
   function mapTimeToX(timeMs, width, padding) {
@@ -1887,6 +1915,17 @@ function renderPotentiostatRoute() {
     });
     ctx.stroke();
 
+    const switchX = mapTimeToX(durationMs / 2, width, padding);
+    ctx.strokeStyle = "#7c3aed";
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(switchX, padding.top);
+    ctx.lineTo(switchX, height - padding.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#6d28d9";
+    ctx.fillText("reverse sweep", switchX + 8, padding.top + 16);
+
     const cursorX = mapTimeToX(elapsedMs, width, padding);
     ctx.strokeStyle = "#f97316";
     ctx.lineWidth = 2;
@@ -1899,9 +1938,11 @@ function renderPotentiostatRoute() {
   function tick(now) {
     const elapsedMs = Math.min(now - startTime, durationMs);
     const current = simulateCurrent(elapsedMs);
+    const scan = getScanState(elapsedMs);
     samples.push({ time: elapsedMs, current });
-    reading.textContent = `${current.toFixed(2)} µM/s`;
-    timeReadout.textContent = `${(elapsedMs / 1000).toFixed(2)} s / 5.00 s`;
+    reading.textContent = `${current.toFixed(2)} µA`;
+    scanState.textContent = scan.label;
+    timeReadout.textContent = `${(elapsedMs / 1000).toFixed(2)} s / 5.00 s · ${scan.potential >= 0 ? "+" : ""}${scan.potential.toFixed(2)} V`;
     drawTrace(elapsedMs);
 
     if (elapsedMs < durationMs) {

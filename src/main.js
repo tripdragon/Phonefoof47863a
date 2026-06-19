@@ -1729,18 +1729,18 @@ function renderTorqueRoute() {
 
 function renderPotentiostatRoute() {
   const radioSamples = [
-    { label: "Blank / rinse", substrate: 4, rise: 0.95, fall: 1.35 },
-    { label: "Low glucose", substrate: 18, rise: 0.7, fall: 1.1 },
-    { label: "Normal sample", substrate: 48, rise: 0.48, fall: 0.85 },
-    { label: "High sample", substrate: 92, rise: 0.32, fall: 0.62 },
+    { label: "Blank / rinse", substrate: 4, rise: 0.95, fall: 1.35, diffusionLimit: 0.18 },
+    { label: "Low glucose", substrate: 18, rise: 0.7, fall: 1.1, diffusionLimit: 0.24 },
+    { label: "Normal sample", substrate: 48, rise: 0.48, fall: 0.85, diffusionLimit: 0.32 },
+    { label: "High sample", substrate: 92, rise: 0.32, fall: 0.62, diffusionLimit: 0.42 },
   ];
 
   routeContent.innerHTML = `
     <p class="hero-label">Enzyme kinetics</p>
     <h1 class="hero-title">Enzyme reaction simulation</h1>
     <p class="hero-subtitle">
-      Run a five-second enzyme-catalyzed reaction. Adjust substrate concentration,
-      restart the assay, and watch the product formation rate draw across the canvas.
+      Run a five-second enzyme-catalyzed reaction through a three-electrode sample stick. Adjust substrate
+      concentration, restart the assay, and watch the meter-shaped current trace draw across the canvas.
     </p>
     <section class="potentiostat-panel" aria-label="Enzyme reaction simulator">
       <div class="potentiostat-meter">
@@ -1751,10 +1751,11 @@ function renderPotentiostatRoute() {
       <div class="potentiostat-explainer">
         <h2>Why the trace rises and falls</h2>
         <p>
-          A handheld potentiostat/meter does not jump instantly to its final reading. After a sample is applied,
-          the working electrode charges and the enzyme layer starts producing measurable current, so the signal
-          rises toward a peak. As nearby substrate is consumed and products build up, diffusion and feedback make
-          the signal relax downward toward a steadier tail.
+          A three-electrode potentiostat does not read the enzyme layer directly. The working electrode is
+          held against a reference electrode while the counter electrode supplies balancing current through a
+          tiny sample volume on the stick. This simulator adds an intentional monitor falloff: after the first
+          wetting surge, the virtual meter tapers the signal to mimic diffusion limits, reference drift, and
+          compensation behavior in the electrode geometry.
         </p>
       </div>
       <div class="enzyme-reaction-chamber" aria-hidden="true">
@@ -1764,6 +1765,12 @@ function renderPotentiostatRoute() {
         <span class="reaction-arrow">→</span>
         <span class="product product--one">P</span>
         <span class="product product--two">P</span>
+      </div>
+      <div class="sample-stick" aria-label="Three electrode sample stick model">
+        <span class="sample-stick__pad sample-stick__pad--working">Working</span>
+        <span class="sample-stick__pad sample-stick__pad--reference">Reference</span>
+        <span class="sample-stick__pad sample-stick__pad--counter">Counter</span>
+        <span class="sample-stick__drop">sample</span>
       </div>
       <canvas
         id="potentiostat-canvas"
@@ -1818,10 +1825,12 @@ function renderPotentiostatRoute() {
     const km = 32;
     const michaelisMentenRate = (vmax * substrate) / (km + substrate);
     const rise = 1 - Math.exp(-seconds / activeSample.rise);
-    const falloff = 0.72 + 0.28 * Math.exp(-Math.max(0, seconds - 0.55) / activeSample.fall);
+    const wettingSurge = 1 + 0.2 * Math.exp(-Math.max(0, seconds - 0.18) / 0.22);
+    const monitorCompensation = 1 - activeSample.diffusionLimit * (1 - Math.exp(-Math.max(0, seconds - 0.55) / activeSample.fall));
+    const referenceDrift = 1 - 0.06 * (1 - Math.exp(-seconds / 3.2));
     const electrodeBaseline = 2.6 * Math.exp(-seconds / 0.42);
     const molecularJitter = Math.sin(seconds * Math.PI * 5.2) * 1.1 + Math.sin(seconds * Math.PI * 12.5) * 0.35;
-    return Math.max(0, michaelisMentenRate * rise * falloff + electrodeBaseline + molecularJitter);
+    return Math.max(0, michaelisMentenRate * rise * wettingSurge * monitorCompensation * referenceDrift + electrodeBaseline + molecularJitter);
   }
 
   function drawGrid(width, height, padding) {

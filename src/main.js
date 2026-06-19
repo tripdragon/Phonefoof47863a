@@ -1729,33 +1729,41 @@ function renderTorqueRoute() {
 
 function renderPotentiostatRoute() {
   routeContent.innerHTML = `
-    <p class="hero-label">Electrochemistry</p>
-    <h1 class="hero-title">Potentiostat current simulation</h1>
+    <p class="hero-label">Enzyme kinetics</p>
+    <h1 class="hero-title">Enzyme reaction simulation</h1>
     <p class="hero-subtitle">
-      Run a five-second simulated current response. Adjust the microamp setpoint,
-      restart the scan, and watch the reading draw across the canvas in real time.
+      Run a five-second enzyme-catalyzed reaction. Adjust substrate concentration,
+      restart the assay, and watch the product formation rate draw across the canvas.
     </p>
-    <section class="potentiostat-panel" aria-label="Potentiostat simulator">
+    <section class="potentiostat-panel" aria-label="Enzyme reaction simulator">
       <div class="potentiostat-meter">
-        <span class="potentiostat-meter__label">Live reading</span>
-        <strong id="potentiostat-reading">0.00 µA</strong>
+        <span class="potentiostat-meter__label">Product formation rate</span>
+        <strong id="potentiostat-reading">0.00 µM/s</strong>
         <span id="potentiostat-time">0.00 s / 5.00 s</span>
+      </div>
+      <div class="enzyme-reaction-chamber" aria-hidden="true">
+        <span class="enzyme enzyme--left">E</span>
+        <span class="substrate substrate--one">S</span>
+        <span class="substrate substrate--two">S</span>
+        <span class="reaction-arrow">→</span>
+        <span class="product product--one">P</span>
+        <span class="product product--two">P</span>
       </div>
       <canvas
         id="potentiostat-canvas"
         class="potentiostat-canvas"
         width="820"
         height="360"
-        aria-label="Five second potentiostat current trace"
+        aria-label="Five second enzyme reaction rate trace"
         role="img"
       ></canvas>
       <div class="potentiostat-controls">
         <label class="potentiostat-control" for="potentiostat-current">
-          <span>Current target</span>
-          <strong id="potentiostat-current-value">25 µA</strong>
-          <input id="potentiostat-current" type="range" min="-100" max="100" value="25" step="1" />
+          <span>Substrate concentration</span>
+          <strong id="potentiostat-current-value">25 µM</strong>
+          <input id="potentiostat-current" type="range" min="1" max="120" value="25" step="1" />
         </label>
-        <button class="potentiostat-restart" id="potentiostat-restart" type="button">Restart 5s reading</button>
+        <button class="potentiostat-restart" id="potentiostat-restart" type="button">Restart assay</button>
       </div>
     </section>
   `;
@@ -1772,18 +1780,21 @@ function renderPotentiostatRoute() {
   let animationId = 0;
   let startTime = performance.now();
 
-  function mapCurrentToY(current, height, padding) {
-    const clamped = Math.max(-120, Math.min(120, current));
-    return padding.top + ((120 - clamped) / 240) * (height - padding.top - padding.bottom);
+  function mapCurrentToY(rate, height, padding) {
+    const clamped = Math.max(0, Math.min(100, rate));
+    return padding.top + ((100 - clamped) / 100) * (height - padding.top - padding.bottom);
   }
 
   function simulateCurrent(elapsedMs) {
-    const target = Number(currentSlider.value);
+    const substrate = Number(currentSlider.value);
     const seconds = elapsedMs / 1000;
-    const chargingSpike = 18 * Math.exp(-seconds * 1.85) * Math.sign(target || 1);
-    const ripple = Math.sin(seconds * Math.PI * 4.6) * 2.2 + Math.sin(seconds * Math.PI * 13) * 0.7;
-    const settling = target * (1 - Math.exp(-seconds * 2.4));
-    return settling + chargingSpike + ripple;
+    const vmax = 92;
+    const km = 32;
+    const michaelisMentenRate = (vmax * substrate) / (km + substrate);
+    const enzymeWarmup = 1 - Math.exp(-seconds * 2.2);
+    const productFeedback = 1 - 0.18 * (seconds / 5);
+    const molecularJitter = Math.sin(seconds * Math.PI * 5.2) * 1.4 + Math.sin(seconds * Math.PI * 12.5) * 0.45;
+    return Math.max(0, michaelisMentenRate * enzymeWarmup * productFeedback + molecularJitter);
   }
 
   function drawGrid(width, height, padding) {
@@ -1806,13 +1817,13 @@ function renderPotentiostatRoute() {
       ctx.stroke();
       ctx.fillText(`${i}s`, x - 8, height - 14);
     }
-    for (let i = -100; i <= 100; i += 50) {
+    for (let i = 0; i <= 100; i += 25) {
       const y = mapCurrentToY(i, height, padding);
       ctx.beginPath();
       ctx.moveTo(padding.left, y);
       ctx.lineTo(width - padding.right, y);
       ctx.stroke();
-      ctx.fillText(`${i}µA`, 8, y + 4);
+      ctx.fillText(`${i}µM/s`, 8, y + 4);
     }
   }
 
@@ -1853,7 +1864,7 @@ function renderPotentiostatRoute() {
     const elapsedMs = Math.min(now - startTime, durationMs);
     const current = simulateCurrent(elapsedMs);
     samples.push({ time: elapsedMs, current });
-    reading.textContent = `${current.toFixed(2)} µA`;
+    reading.textContent = `${current.toFixed(2)} µM/s`;
     timeReadout.textContent = `${(elapsedMs / 1000).toFixed(2)} s / 5.00 s`;
     drawTrace(elapsedMs);
 
@@ -1870,7 +1881,7 @@ function renderPotentiostatRoute() {
   }
 
   function handleSliderInput() {
-    currentValue.textContent = `${currentSlider.value} µA`;
+    currentValue.textContent = `${currentSlider.value} µM`;
   }
 
   currentSlider.addEventListener("input", handleSliderInput);

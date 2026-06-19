@@ -14,6 +14,7 @@ import { renderTorqueVisualizerRoute } from "./interactives/torque-visualizer";
 import { renderGroceryTranslationsRoute } from "./grocery-translations";
 import { renderFrenchTalkingRoute } from "./french-talking";
 import { renderSpanishTalkingRoute } from "./spanish-talking";
+import { renderAni1Route } from "./interactives/ani1";
 import { JAPANESE_CHARACTER_STROKES } from "./interactives/pixel-studio/character-strokes";
 
 const appVersion = `v${__APP_VERSION__}`;
@@ -46,6 +47,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/french-talking" href="#/french-talking">French talking</a></li>
           <li><a class="menu-link" data-route="/spanish-talking" href="#/spanish-talking">Spanish talking</a></li>
           <li><a class="menu-link" data-route="/rubix-cube" href="#/rubix-cube">Rubix Cube</a></li>
+          <li><a class="menu-link" data-route="/ani1" href="#/ani1">ani1</a></li>
 <li><a class="menu-link" data-route="/bunnyblast-full" href="bunnyblast-full.html">claude1</a></li>
 <li><a class="menu-link" data-route="/learn-univers_1" href="learn-univers_1.html">learn uni 1</a></li>
 <li><a class="menu-link" data-route="/claude-game-1" href="claude-game-1.html">claude game 1</a></li>
@@ -2084,6 +2086,10 @@ function renderSpanishTalkingPageRoute() {
   return renderSpanishTalkingRoute(routeContent);
 }
 
+function renderAni1PageRoute() {
+  return renderAni1Route(routeContent);
+}
+
 const routes = {
   "/": renderHomeRoute,
   "/shows": renderShowsRoute,
@@ -2103,6 +2109,7 @@ const routes = {
   "/french-talking": renderFrenchTalkingPageRoute,
   "/spanish-talking": renderSpanishTalkingPageRoute,
   "/rubix-cube": renderRubixCubeRoute,
+  "/ani1": renderAni1PageRoute,
   "/rubixC": renderRubixCPageRoute,
 };
 

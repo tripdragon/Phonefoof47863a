@@ -2951,3 +2951,35 @@ code {
   color: #0f172a;
   font-weight: 700;
 }
+
+.ani1-stage-card {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #eef2ff 100%);
+  box-shadow: 0 16px 32px rgba(79, 70, 229, 0.14);
+}
+
+.ani1-canvas {
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #dbe3f4;
+  background: #eef2ff;
+}
+
+.ani1-canvas canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ani1-readout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  color: #312e81;
+  font-weight: 700;
+}

@@ -1728,6 +1728,13 @@ function renderTorqueRoute() {
 }
 
 function renderPotentiostatRoute() {
+  const radioSamples = [
+    { label: "Blank / rinse", substrate: 4, rise: 0.95, stripFall: 1.75, depletion: 0.18 },
+    { label: "Low glucose", substrate: 18, rise: 0.72, stripFall: 1.35, depletion: 0.25 },
+    { label: "Normal sample", substrate: 48, rise: 0.5, stripFall: 1.02, depletion: 0.34 },
+    { label: "High sample", substrate: 92, rise: 0.34, stripFall: 0.78, depletion: 0.43 },
+  ];
+
   routeContent.innerHTML = `
     <p class="hero-label">Enzyme kinetics</p>
     <h1 class="hero-title">Enzyme reaction simulation</h1>
@@ -1740,6 +1747,16 @@ function renderPotentiostatRoute() {
         <span class="potentiostat-meter__label">Product formation rate</span>
         <strong id="potentiostat-reading">0.00 µM/s</strong>
         <span id="potentiostat-time">0.00 s / 5.00 s</span>
+      </div>
+      <div class="potentiostat-explainer">
+        <h2>Why the trace rises and falls</h2>
+        <p>
+          A handheld three-electrode strip meter does not jump instantly to its final reading. When the sample wets
+          the working, reference, and counter electrodes, the meter first settles the electrode baseline and the
+          enzyme layer begins generating current. The downward slope is intentionally artificial: it mimics the
+          firmware-visible falloff from a tiny sample stick as local reagent/substrate near the working electrode is
+          depleted and the counter/reference pair stabilizes the cell toward a lower tail.
+        </p>
       </div>
       <div class="enzyme-reaction-chamber" aria-hidden="true">
         <span class="enzyme enzyme--left">E</span>
@@ -1754,14 +1771,22 @@ function renderPotentiostatRoute() {
         class="potentiostat-canvas"
         width="820"
         height="360"
-        aria-label="Five second enzyme reaction rate trace"
+        aria-label="Five second enzyme reaction rate trace with meter rise and falloff"
         role="img"
       ></canvas>
+      <div class="potentiostat-samples" role="radiogroup" aria-label="Auto-fill sample presets">
+        ${radioSamples.map((sample, index) => `
+          <label>
+            <input type="radio" name="potentiostat-sample" value="${index}" ${index === 2 ? "checked" : ""} />
+            <span>${sample.label}</span>
+          </label>
+        `).join("")}
+      </div>
       <div class="potentiostat-controls">
         <label class="potentiostat-control" for="potentiostat-current">
           <span>Substrate concentration</span>
-          <strong id="potentiostat-current-value">25 µM</strong>
-          <input id="potentiostat-current" type="range" min="1" max="120" value="25" step="1" />
+          <strong id="potentiostat-current-value">48 µM</strong>
+          <input id="potentiostat-current" type="range" min="1" max="120" value="48" step="1" />
         </label>
         <button class="potentiostat-restart" id="potentiostat-restart" type="button">Restart assay</button>
       </div>
@@ -1774,11 +1799,13 @@ function renderPotentiostatRoute() {
   const currentSlider = document.getElementById("potentiostat-current");
   const currentValue = document.getElementById("potentiostat-current-value");
   const restartButton = document.getElementById("potentiostat-restart");
+  const sampleInputs = [...document.querySelectorAll('input[name="potentiostat-sample"]')];
   const ctx = canvas.getContext("2d");
   const durationMs = 5000;
   const samples = [];
   let animationId = 0;
   let startTime = performance.now();
+  let activeSample = radioSamples[2];
 
   function mapCurrentToY(rate, height, padding) {
     const clamped = Math.max(0, Math.min(100, rate));
@@ -1791,10 +1818,17 @@ function renderPotentiostatRoute() {
     const vmax = 92;
     const km = 32;
     const michaelisMentenRate = (vmax * substrate) / (km + substrate);
-    const enzymeWarmup = 1 - Math.exp(-seconds * 2.2);
-    const productFeedback = 1 - 0.18 * (seconds / 5);
-    const molecularJitter = Math.sin(seconds * Math.PI * 5.2) * 1.4 + Math.sin(seconds * Math.PI * 12.5) * 0.45;
-    return Math.max(0, michaelisMentenRate * enzymeWarmup * productFeedback + molecularJitter);
+    const wettingRise = 1 - Math.exp(-seconds / activeSample.rise);
+    const baselineSettle = 3.8 * (1 - Math.exp(-seconds / 0.1)) * Math.exp(-seconds / 0.36);
+    const stripFallStart = Math.max(0, seconds - 0.72);
+    const depletionCurve = 1 - Math.exp(-stripFallStart / activeSample.stripFall);
+    const artificialStripFalloff = 1 - activeSample.depletion * depletionCurve;
+    const referenceRecoveryTail = 1.7 * (1 - Math.exp(-stripFallStart / 0.2)) * Math.exp(-stripFallStart / 1.9);
+    const molecularJitter = Math.sin(seconds * Math.PI * 5.2) * 0.9 + Math.sin(seconds * Math.PI * 12.5) * 0.28;
+    return Math.max(
+      0,
+      michaelisMentenRate * wettingRise * artificialStripFalloff + baselineSettle + referenceRecoveryTail + molecularJitter,
+    );
   }
 
   function drawGrid(width, height, padding) {
@@ -1884,8 +1918,23 @@ function renderPotentiostatRoute() {
     currentValue.textContent = `${currentSlider.value} µM`;
   }
 
+  function applySample(sample) {
+    activeSample = sample;
+    currentSlider.value = String(sample.substrate);
+    handleSliderInput();
+    restart();
+  }
+
+  function handleSampleInput(event) {
+    const sample = radioSamples[Number(event.currentTarget.value)];
+    if (sample) {
+      applySample(sample);
+    }
+  }
+
   currentSlider.addEventListener("input", handleSliderInput);
   restartButton.addEventListener("click", restart);
+  sampleInputs.forEach((input) => input.addEventListener("change", handleSampleInput));
   handleSliderInput();
   restart();
 
@@ -1893,6 +1942,7 @@ function renderPotentiostatRoute() {
     window.cancelAnimationFrame(animationId);
     currentSlider.removeEventListener("input", handleSliderInput);
     restartButton.removeEventListener("click", restart);
+    sampleInputs.forEach((input) => input.removeEventListener("change", handleSampleInput));
   };
 }
 

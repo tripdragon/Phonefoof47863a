@@ -1,102 +1,85 @@
 import { Application, Container, Graphics, Text } from "pixi.js";
 
-function drawArm(arm, length) {
-  arm.clear();
+const FLIGHT_DURATION_SECONDS = 4;
+const GLITCH_DURATION_SECONDS = 0.25;
 
-  const pixel = 8;
-  const sleeveLength = 82;
-  const skinStart = sleeveLength - pixel;
-  const handStart = length - 34;
+function drawChicken(chicken) {
+  chicken.clear();
 
-  // Shirt sleeve, built from square blocks to keep a chunky pixel-art edge.
-  arm.rect(0, -24, sleeveLength, 48);
-  arm.fill({ color: 0x2563eb });
-  arm.rect(0, -24, sleeveLength, pixel);
-  arm.rect(0, 16, sleeveLength, pixel);
-  arm.rect(0, -24, pixel, 48);
-  arm.fill({ color: 0x1e3a8a });
-  arm.rect(pixel, -16, sleeveLength - 24, pixel);
-  arm.fill({ color: 0x60a5fa });
-  arm.rect(sleeveLength - 16, -24, 16, 48);
-  arm.fill({ color: 0xfacc15 });
+  // Wing shadow and body use chunky shapes for a playful pixel-art chicken.
+  chicken.ellipse(0, 8, 66, 42);
+  chicken.fill({ color: 0xf8fafc });
+  chicken.stroke({ width: 6, color: 0x94a3b8 });
 
-  // Cartoon forearm with stepped highlights and a darker pixel outline.
-  arm.rect(skinStart, -20, handStart - skinStart, 40);
-  arm.fill({ color: 0xf2b880 });
-  arm.rect(skinStart, -20, handStart - skinStart, pixel);
-  arm.rect(skinStart, 12, handStart - skinStart, pixel);
-  arm.rect(skinStart, -20, pixel, 40);
-  arm.fill({ color: 0x9a5b32 });
-  arm.rect(skinStart + pixel, -12, handStart - skinStart - 24, pixel);
-  arm.fill({ color: 0xffd3a3 });
+  chicken.circle(46, -18, 30);
+  chicken.fill({ color: 0xffffff });
+  chicken.stroke({ width: 6, color: 0x94a3b8 });
 
-  // Blocky cartoon hand and four visible fingers.
-  arm.rect(handStart, -22, 30, 44);
-  arm.fill({ color: 0xf2b880 });
-  arm.rect(handStart, -22, 30, pixel);
-  arm.rect(handStart, 14, 30, pixel);
-  arm.rect(handStart + 22, -14, pixel, 28);
-  arm.fill({ color: 0x9a5b32 });
+  chicken.ellipse(-16, 16, 34, 24);
+  chicken.fill({ color: 0xe2e8f0 });
+  chicken.stroke({ width: 4, color: 0x94a3b8 });
 
-  const fingerBase = length - 6;
-  [-22, -10, 2, 14].forEach((y, index) => {
-    const fingerLength = index === 0 || index === 3 ? 18 : 24;
-    arm.rect(fingerBase, y, fingerLength, 8);
-    arm.fill({ color: 0xf2b880 });
-    arm.rect(fingerBase + fingerLength - 4, y, 4, 8);
-    arm.fill({ color: 0x9a5b32 });
-    arm.rect(fingerBase + 4, y, 8, 3);
-    arm.fill({ color: 0xffd3a3 });
+  chicken.circle(55, -25, 4);
+  chicken.fill({ color: 0x111827 });
+
+  chicken.poly([72, -18, 110, -8, 72, 4]);
+  chicken.fill({ color: 0xf59e0b });
+  chicken.stroke({ width: 4, color: 0xb45309 });
+
+  chicken.circle(32, -47, 10);
+  chicken.circle(46, -52, 12);
+  chicken.circle(60, -45, 10);
+  chicken.fill({ color: 0xef4444 });
+  chicken.stroke({ width: 3, color: 0x991b1b });
+
+  chicken.rect(-52, 36, 8, 26);
+  chicken.rect(16, 36, 8, 26);
+  chicken.fill({ color: 0xf59e0b });
+  chicken.rect(-64, 58, 24, 7);
+  chicken.rect(6, 58, 24, 7);
+  chicken.fill({ color: 0xb45309 });
+}
+
+function drawTrail(trail) {
+  trail.clear();
+  [0, 1, 2].forEach((index) => {
+    trail.roundRect(-170 - index * 54, -17 + index * 13, 78 - index * 10, 12, 8);
+    trail.fill({ color: 0xc7d2fe, alpha: 0.58 - index * 0.13 });
   });
 }
 
-function drawJoint(joint) {
-  joint.clear();
-  joint.circle(0, 0, 30);
-  joint.fill({ color: 0xf97316 });
-  joint.stroke({ width: 5, color: 0x9a3412 });
-  joint.circle(0, 0, 12);
-  joint.fill({ color: 0xffedd5 });
-}
+function drawGlitch(glitch, width, height, intensity) {
+  glitch.clear();
 
-function drawTorso(torso) {
-  torso.clear();
-  torso.rect(-48, 16, 96, 144);
-  torso.fill({ color: 0x1e3a8a });
-  torso.rect(-48, 16, 96, 8);
-  torso.rect(-48, 152, 96, 8);
-  torso.rect(-48, 16, 8, 144);
-  torso.rect(40, 16, 8, 144);
-  torso.fill({ color: 0x172554 });
-  torso.rect(-24, 24, 48, 16);
-  torso.fill({ color: 0x60a5fa });
-  torso.rect(-16, 40, 32, 24);
-  torso.fill({ color: 0xfacc15 });
-  torso.rect(-48, 16, 96, 16);
-  torso.fill({ color: 0x2563eb });
-  torso.rect(-40, 40, 16, 88);
-  torso.fill({ color: 0x3b82f6 });
-  torso.rect(-24, -48, 96, 96);
-  torso.fill({ color: 0xf2b880 });
-  torso.rect(-24, -48, 96, 8);
-  torso.rect(-24, 40, 96, 8);
-  torso.rect(-24, -48, 8, 96);
-  torso.rect(64, -48, 8, 96);
-  torso.fill({ color: 0x9a5b32 });
-  torso.rect(-8, -32, 64, 16);
-  torso.fill({ color: 0xffd3a3 });
+  if (intensity <= 0) {
+    return;
+  }
+
+  const bands = 10;
+  for (let index = 0; index < bands; index += 1) {
+    const bandHeight = 5 + ((index * 7) % 18);
+    const y = (index * 43 + Math.sin(intensity * 20 + index) * 22) % height;
+    const offset = Math.sin(intensity * 31 + index * 2.3) * 42;
+    const color = index % 3 === 0 ? 0xff00d4 : index % 3 === 1 ? 0x00f5ff : 0xfacc15;
+
+    glitch.rect(offset, y, width, bandHeight);
+    glitch.fill({ color, alpha: 0.18 + intensity * 0.22 });
+  }
+
+  glitch.rect(0, 0, width, height);
+  glitch.stroke({ width: 6, color: 0xff00d4, alpha: intensity * 0.55 });
 }
 
 export function renderAni1Route(routeContent) {
   routeContent.innerHTML = `
     <p class="hero-label">PixiJS animation</p>
-    <h1 class="hero-title">ani1: rotating hinged arm</h1>
-    <p class="hero-subtitle">A small PixiJS scene with an arm rotating around a shoulder hinge joint.</p>
-    <section class="ani1-stage-card" aria-label="PixiJS rotating arm animation">
+    <h1 class="hero-title">ani1: looping glitch chicken</h1>
+    <p class="hero-subtitle">A chicken flies across the canvas every four seconds. When it crosses the center, the whole canvas glitches and jitters for a quarter second.</p>
+    <section class="ani1-stage-card" aria-label="PixiJS flying chicken animation">
       <div id="ani1-canvas" class="ani1-canvas"></div>
       <div class="ani1-readout" aria-live="polite">
-        <span>Shoulder hinge: fixed pivot</span>
-        <span id="ani1-angle">Angle: 0°</span>
+        <span>Loop: ${FLIGHT_DURATION_SECONDS}s fly-by</span>
+        <span id="ani1-angle">Glitch: armed</span>
       </div>
     </section>
     <div class="hero-controls">
@@ -105,7 +88,7 @@ export function renderAni1Route(routeContent) {
   `;
 
   const host = routeContent.querySelector("#ani1-canvas");
-  const angleReadout = routeContent.querySelector("#ani1-angle");
+  const glitchReadout = routeContent.querySelector("#ani1-angle");
   const app = new Application();
   let destroyed = false;
 
@@ -127,43 +110,72 @@ export function renderAni1Route(routeContent) {
       host.append(app.canvas);
 
       const scene = new Container();
-      scene.position.set(app.screen.width / 2, app.screen.height / 2 - 10);
       app.stage.addChild(scene);
 
-      const torso = new Graphics();
-      drawTorso(torso);
-      scene.addChild(torso);
+      const sky = new Graphics();
+      sky.rect(0, 0, app.screen.width, app.screen.height);
+      sky.fill({ color: 0xeef2ff });
+      sky.circle(120, 78, 34);
+      sky.circle(155, 74, 46);
+      sky.circle(196, 82, 32);
+      sky.fill({ color: 0xffffff, alpha: 0.78 });
+      sky.circle(520, 132, 28);
+      sky.circle(552, 126, 38);
+      sky.circle(590, 136, 30);
+      sky.fill({ color: 0xffffff, alpha: 0.62 });
+      scene.addChild(sky);
 
-      const shoulder = new Container();
-      shoulder.position.set(32, -6);
-      scene.addChild(shoulder);
+      const trail = new Graphics();
+      drawTrail(trail);
+      scene.addChild(trail);
 
-      const arm = new Graphics();
-      drawArm(arm, 210);
-      shoulder.addChild(arm);
+      const chicken = new Graphics();
+      drawChicken(chicken);
+      scene.addChild(chicken);
 
-      const joint = new Graphics();
-      drawJoint(joint);
-      shoulder.addChild(joint);
-
-      const label = new Text({
-        text: "pivot",
+      const caption = new Text({
+        text: "CLUCK.EXE",
         style: {
           fill: 0x312e81,
           fontFamily: "system-ui, sans-serif",
-          fontSize: 16,
-          fontWeight: "700",
+          fontSize: 18,
+          fontWeight: "800",
+          letterSpacing: 2,
         },
       });
-      label.anchor.set(0.5);
-      label.position.set(0, -52);
-      shoulder.addChild(label);
+      caption.anchor.set(0.5);
+      caption.position.set(app.screen.width / 2, app.screen.height - 42);
+      scene.addChild(caption);
+
+      const glitch = new Graphics();
+      app.stage.addChild(glitch);
 
       app.ticker.add((ticker) => {
         const elapsed = ticker.lastTime / 1000;
-        shoulder.rotation = Math.sin(elapsed * 1.6) * 0.95;
-        const degrees = Math.round((shoulder.rotation * 180) / Math.PI);
-        angleReadout.textContent = `Angle: ${degrees}°`;
+        const cycleTime = elapsed % FLIGHT_DURATION_SECONDS;
+        const progress = cycleTime / FLIGHT_DURATION_SECONDS;
+        const centerTime = FLIGHT_DURATION_SECONDS / 2;
+        const glitchAge = Math.abs(cycleTime - centerTime);
+        const glitchActive = glitchAge <= GLITCH_DURATION_SECONDS / 2;
+        const glitchIntensity = glitchActive ? 1 - glitchAge / (GLITCH_DURATION_SECONDS / 2) : 0;
+        const wingFlap = Math.sin(elapsed * 18);
+
+        chicken.position.set(-135 + progress * (app.screen.width + 270), app.screen.height / 2 + Math.sin(elapsed * 5) * 22);
+        chicken.scale.set(1, 1 + wingFlap * 0.025);
+        chicken.rotation = Math.sin(elapsed * 4) * 0.08;
+        trail.position.copyFrom(chicken.position);
+
+        if (glitchActive) {
+          const shakeX = Math.sin(elapsed * 115) * 10 * glitchIntensity;
+          const shakeY = Math.cos(elapsed * 93) * 7 * glitchIntensity;
+          scene.position.set(shakeX, shakeY);
+          drawGlitch(glitch, app.screen.width, app.screen.height, glitchIntensity);
+          glitchReadout.textContent = "Glitch: jittering";
+        } else {
+          scene.position.set(0, 0);
+          drawGlitch(glitch, app.screen.width, app.screen.height, 0);
+          glitchReadout.textContent = "Glitch: armed";
+        }
       });
     });
 

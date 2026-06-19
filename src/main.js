@@ -1729,10 +1729,10 @@ function renderTorqueRoute() {
 
 function renderPotentiostatRoute() {
   const radioSamples = [
-    { label: "Blank / rinse", substrate: 4, rise: 0.95, stripFall: 1.75, depletion: 0.18 },
-    { label: "Low glucose", substrate: 18, rise: 0.72, stripFall: 1.35, depletion: 0.25 },
-    { label: "Normal sample", substrate: 48, rise: 0.5, stripFall: 1.02, depletion: 0.34 },
-    { label: "High sample", substrate: 92, rise: 0.34, stripFall: 0.78, depletion: 0.43 },
+    { label: "Blank / rinse", substrate: 4, rise: 0.95, fall: 1.35 },
+    { label: "Low glucose", substrate: 18, rise: 0.7, fall: 1.1 },
+    { label: "Normal sample", substrate: 48, rise: 0.48, fall: 0.85 },
+    { label: "High sample", substrate: 92, rise: 0.32, fall: 0.62 },
   ];
 
   routeContent.innerHTML = `
@@ -1751,11 +1751,10 @@ function renderPotentiostatRoute() {
       <div class="potentiostat-explainer">
         <h2>Why the trace rises and falls</h2>
         <p>
-          A handheld three-electrode strip meter does not jump instantly to its final reading. When the sample wets
-          the working, reference, and counter electrodes, the meter first settles the electrode baseline and the
-          enzyme layer begins generating current. The downward slope is intentionally artificial: it mimics the
-          firmware-visible falloff from a tiny sample stick as local reagent/substrate near the working electrode is
-          depleted and the counter/reference pair stabilizes the cell toward a lower tail.
+          A handheld potentiostat/meter does not jump instantly to its final reading. After a sample is applied,
+          the working electrode charges and the enzyme layer starts producing measurable current, so the signal
+          rises toward a peak. As nearby substrate is consumed and products build up, diffusion and feedback make
+          the signal relax downward toward a steadier tail.
         </p>
       </div>
       <div class="enzyme-reaction-chamber" aria-hidden="true">
@@ -1818,17 +1817,11 @@ function renderPotentiostatRoute() {
     const vmax = 92;
     const km = 32;
     const michaelisMentenRate = (vmax * substrate) / (km + substrate);
-    const wettingRise = 1 - Math.exp(-seconds / activeSample.rise);
-    const baselineSettle = 3.8 * (1 - Math.exp(-seconds / 0.1)) * Math.exp(-seconds / 0.36);
-    const stripFallStart = Math.max(0, seconds - 0.72);
-    const depletionCurve = 1 - Math.exp(-stripFallStart / activeSample.stripFall);
-    const artificialStripFalloff = 1 - activeSample.depletion * depletionCurve;
-    const referenceRecoveryTail = 1.7 * (1 - Math.exp(-stripFallStart / 0.2)) * Math.exp(-stripFallStart / 1.9);
-    const molecularJitter = Math.sin(seconds * Math.PI * 5.2) * 0.9 + Math.sin(seconds * Math.PI * 12.5) * 0.28;
-    return Math.max(
-      0,
-      michaelisMentenRate * wettingRise * artificialStripFalloff + baselineSettle + referenceRecoveryTail + molecularJitter,
-    );
+    const rise = 1 - Math.exp(-seconds / activeSample.rise);
+    const falloff = 0.72 + 0.28 * Math.exp(-Math.max(0, seconds - 0.55) / activeSample.fall);
+    const electrodeBaseline = 2.6 * Math.exp(-seconds / 0.42);
+    const molecularJitter = Math.sin(seconds * Math.PI * 5.2) * 1.1 + Math.sin(seconds * Math.PI * 12.5) * 0.35;
+    return Math.max(0, michaelisMentenRate * rise * falloff + electrodeBaseline + molecularJitter);
   }
 
   function drawGrid(width, height, padding) {

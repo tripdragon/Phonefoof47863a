@@ -2952,6 +2952,91 @@ code {
   font-weight: 700;
 }
 
+.potentiostat-panel {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #a5f3fc;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 52%, #f8fafc 100%);
+  box-shadow: 0 18px 36px rgba(8, 145, 178, 0.14);
+}
+
+.potentiostat-meter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.65rem 1rem;
+  color: #164e63;
+}
+
+.potentiostat-meter__label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.potentiostat-meter strong {
+  font-size: clamp(1.7rem, 6vw, 3rem);
+  line-height: 1;
+  color: #0f766e;
+}
+
+.potentiostat-canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #67e8f9;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.potentiostat-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.potentiostat-control {
+  display: grid;
+  gap: 0.35rem;
+  color: #134e4a;
+  font-weight: 700;
+}
+
+.potentiostat-control input {
+  width: 100%;
+  accent-color: #0891b2;
+}
+
+.potentiostat-restart {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  background: #0f766e;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  box-shadow: 0 10px 20px rgba(15, 118, 110, 0.2);
+}
+
+.potentiostat-restart:hover,
+.potentiostat-restart:focus-visible {
+  background: #115e59;
+  outline: 3px solid rgba(20, 184, 166, 0.35);
+}
+
+@media (max-width: 640px) {
+  .potentiostat-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ani1-stage-card {
   margin-top: 1.5rem;
   padding: 1rem;

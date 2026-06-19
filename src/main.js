@@ -42,6 +42,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/three-superneat" href="#/three-superneat">Three.js SuperNeat</a></li>
           <li><a class="menu-link" data-route="/cross-product" href="#/cross-product">Cross Product</a></li>
           <li><a class="menu-link" data-route="/torque-visualizer" href="#/torque-visualizer">Torque Visualizer</a></li>
+          <li><a class="menu-link" data-route="/potentiostat" href="#/potentiostat">Potentiostat</a></li>
           <li><a class="menu-link" data-route="/languages" href="#/languages">languages</a></li>
           <li><a class="menu-link" data-route="/grocery-translations" href="#/grocery-translations">Grocery Words</a></li>
           <li><a class="menu-link" data-route="/french-talking" href="#/french-talking">French talking</a></li>
@@ -1726,6 +1727,164 @@ function renderTorqueRoute() {
   return renderTorqueVisualizerRoute(routeContent);
 }
 
+function renderPotentiostatRoute() {
+  routeContent.innerHTML = `
+    <p class="hero-label">Electrochemistry</p>
+    <h1 class="hero-title">Potentiostat current simulation</h1>
+    <p class="hero-subtitle">
+      Run a five-second simulated current response. Adjust the microamp setpoint,
+      restart the scan, and watch the reading draw across the canvas in real time.
+    </p>
+    <section class="potentiostat-panel" aria-label="Potentiostat simulator">
+      <div class="potentiostat-meter">
+        <span class="potentiostat-meter__label">Live reading</span>
+        <strong id="potentiostat-reading">0.00 µA</strong>
+        <span id="potentiostat-time">0.00 s / 5.00 s</span>
+      </div>
+      <canvas
+        id="potentiostat-canvas"
+        class="potentiostat-canvas"
+        width="820"
+        height="360"
+        aria-label="Five second potentiostat current trace"
+        role="img"
+      ></canvas>
+      <div class="potentiostat-controls">
+        <label class="potentiostat-control" for="potentiostat-current">
+          <span>Current target</span>
+          <strong id="potentiostat-current-value">25 µA</strong>
+          <input id="potentiostat-current" type="range" min="-100" max="100" value="25" step="1" />
+        </label>
+        <button class="potentiostat-restart" id="potentiostat-restart" type="button">Restart 5s reading</button>
+      </div>
+    </section>
+  `;
+
+  const canvas = document.getElementById("potentiostat-canvas");
+  const reading = document.getElementById("potentiostat-reading");
+  const timeReadout = document.getElementById("potentiostat-time");
+  const currentSlider = document.getElementById("potentiostat-current");
+  const currentValue = document.getElementById("potentiostat-current-value");
+  const restartButton = document.getElementById("potentiostat-restart");
+  const ctx = canvas.getContext("2d");
+  const durationMs = 5000;
+  const samples = [];
+  let animationId = 0;
+  let startTime = performance.now();
+
+  function mapCurrentToY(current, height, padding) {
+    const clamped = Math.max(-120, Math.min(120, current));
+    return padding.top + ((120 - clamped) / 240) * (height - padding.top - padding.bottom);
+  }
+
+  function simulateCurrent(elapsedMs) {
+    const target = Number(currentSlider.value);
+    const seconds = elapsedMs / 1000;
+    const chargingSpike = 18 * Math.exp(-seconds * 1.85) * Math.sign(target || 1);
+    const ripple = Math.sin(seconds * Math.PI * 4.6) * 2.2 + Math.sin(seconds * Math.PI * 13) * 0.7;
+    const settling = target * (1 - Math.exp(-seconds * 2.4));
+    return settling + chargingSpike + ripple;
+  }
+
+  function drawGrid(width, height, padding) {
+    ctx.clearRect(0, 0, width, height);
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, "#ecfeff");
+    gradient.addColorStop(1, "#f8fafc");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 1;
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.fillStyle = "#475569";
+    for (let i = 0; i <= 5; i += 1) {
+      const x = padding.left + ((width - padding.left - padding.right) * i) / 5;
+      ctx.beginPath();
+      ctx.moveTo(x, padding.top);
+      ctx.lineTo(x, height - padding.bottom);
+      ctx.stroke();
+      ctx.fillText(`${i}s`, x - 8, height - 14);
+    }
+    for (let i = -100; i <= 100; i += 50) {
+      const y = mapCurrentToY(i, height, padding);
+      ctx.beginPath();
+      ctx.moveTo(padding.left, y);
+      ctx.lineTo(width - padding.right, y);
+      ctx.stroke();
+      ctx.fillText(`${i}µA`, 8, y + 4);
+    }
+  }
+
+  function mapTimeToX(timeMs, width, padding) {
+    return padding.left + (Math.min(timeMs, durationMs) / durationMs) * (width - padding.left - padding.right);
+  }
+
+  function drawTrace(elapsedMs) {
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = { top: 26, right: 22, bottom: 42, left: 54 };
+    drawGrid(width, height, padding);
+
+    ctx.strokeStyle = "#0891b2";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    samples.forEach((sample, index) => {
+      const x = mapTimeToX(sample.time, width, padding);
+      const y = mapCurrentToY(sample.current, height, padding);
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    ctx.stroke();
+
+    const cursorX = mapTimeToX(elapsedMs, width, padding);
+    ctx.strokeStyle = "#f97316";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cursorX, padding.top);
+    ctx.lineTo(cursorX, height - padding.bottom);
+    ctx.stroke();
+  }
+
+  function tick(now) {
+    const elapsedMs = Math.min(now - startTime, durationMs);
+    const current = simulateCurrent(elapsedMs);
+    samples.push({ time: elapsedMs, current });
+    reading.textContent = `${current.toFixed(2)} µA`;
+    timeReadout.textContent = `${(elapsedMs / 1000).toFixed(2)} s / 5.00 s`;
+    drawTrace(elapsedMs);
+
+    if (elapsedMs < durationMs) {
+      animationId = window.requestAnimationFrame(tick);
+    }
+  }
+
+  function restart() {
+    samples.length = 0;
+    startTime = performance.now();
+    window.cancelAnimationFrame(animationId);
+    animationId = window.requestAnimationFrame(tick);
+  }
+
+  function handleSliderInput() {
+    currentValue.textContent = `${currentSlider.value} µA`;
+  }
+
+  currentSlider.addEventListener("input", handleSliderInput);
+  restartButton.addEventListener("click", restart);
+  handleSliderInput();
+  restart();
+
+  return () => {
+    window.cancelAnimationFrame(animationId);
+    currentSlider.removeEventListener("input", handleSliderInput);
+    restartButton.removeEventListener("click", restart);
+  };
+}
+
 function renderLanguagesRoute() {
   const spokenLanguagesByPopularity = [
     {
@@ -2104,6 +2263,7 @@ const routes = {
   "/three-superneat": renderThreeSuperneatRoute,
   "/cross-product": renderCrossProductRoute,
   "/torque-visualizer": renderTorqueRoute,
+  "/potentiostat": renderPotentiostatRoute,
   "/languages": renderLanguagesRoute,
   "/grocery-translations": renderGroceryRoute,
   "/french-talking": renderFrenchTalkingPageRoute,

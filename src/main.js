@@ -32,6 +32,7 @@ document.querySelector("#app").innerHTML = `
           <li><a class="menu-link" data-route="/" href="#/">Home</a></li>
           <li><a class="menu-link" data-route="/piano" href="#/piano">Piano</a></li>
           <li><a class="menu-link" data-route="/shows" href="#/shows">Shows</a></li>
+          <li><a class="menu-link" data-route="/lemonade" href="#/lemonade">Lemonade</a></li>
           <li><a class="menu-link" data-route="/shows-crud" href="#/shows-crud">Shows CRUD</a></li>
           <li><a class="menu-link" data-route="/botany" href="#/botany">Botany</a></li>
           <li><a class="menu-link" data-route="/camera" href="#/camera">Camera</a></li>
@@ -2337,6 +2338,60 @@ function renderRubixCubeRoute() {
   `;
 }
 
+function renderLemonadeRoute() {
+  routeContent.innerHTML = `
+    <article class="lemonade-page" aria-labelledby="lemonade-title">
+      <section class="lemonade-hero" aria-label="Lemonade sales page">
+        <div class="lemonade-hero__copy">
+          <p class="lemonade-kicker">small-batch citrus stand</p>
+          <h1 id="lemonade-title">Lemonade with the bright parts left in.</h1>
+          <p class="lemonade-lede">
+            Tart Eureka lemons, cold spring water, and a little cane sugar—shaken to order for people who like their refreshment loud, fresh, and unapologetically sunny.
+          </p>
+          <div class="lemonade-actions" aria-label="Purchase options">
+            <a class="lemonade-button" href="#lemonade-order">Order a bottle</a>
+            <a class="lemonade-link" href="#lemonade-flavors">See flavors</a>
+          </div>
+        </div>
+        <div class="lemonade-bottle" aria-hidden="true">
+          <span class="lemonade-bottle__cap"></span>
+          <span class="lemonade-bottle__label">ZEST</span>
+          <span class="lemonade-bottle__shine"></span>
+        </div>
+      </section>
+
+      <section class="lemonade-strip" aria-label="Product details">
+        <p><strong>12 oz</strong><span>glass bottle</span></p>
+        <p><strong>$4</strong><span>single pour</span></p>
+        <p><strong>0</strong><span>powder mixes</span></p>
+      </section>
+
+      <section class="lemonade-flavors" id="lemonade-flavors" aria-label="Lemonade flavors">
+        <div class="lemonade-flavor lemonade-flavor--classic">
+          <span>Classic snap</span>
+          <p>Lemon oil on the nose, clean tart finish, the one that tastes like a porch fan feels.</p>
+        </div>
+        <div class="lemonade-flavor lemonade-flavor--berry">
+          <span>Strawberry bruise</span>
+          <p>Crushed berries folded into the batch until the color goes pink and the sip goes jammy.</p>
+        </div>
+        <div class="lemonade-flavor lemonade-flavor--herb">
+          <span>Mint & salt</span>
+          <p>A grown-up cooler with torn mint, lemon pulp, and a tiny salt edge for extra thirst-quench.</p>
+        </div>
+      </section>
+
+      <section class="lemonade-order" id="lemonade-order" aria-label="Order lemonade">
+        <div>
+          <p class="lemonade-kicker">today's batch</p>
+          <h2>Cold bottles leave the stand at 2 PM.</h2>
+        </div>
+        <a class="lemonade-button lemonade-button--dark" href="mailto:orders@example.com?subject=Lemonade%20order">Reserve yours</a>
+      </section>
+    </article>
+  `;
+}
+
 function renderGroceryRoute() {
   return renderGroceryTranslationsRoute(routeContent);
 }
@@ -2356,6 +2411,7 @@ function renderAni1PageRoute() {
 const routes = {
   "/": renderHomeRoute,
   "/shows": renderShowsRoute,
+  "/lemonade": renderLemonadeRoute,
   "/shows-crud": renderShowsCrudRoute,
   "/botany": renderBotanyRoute,
   "/camera": renderCameraRoute,

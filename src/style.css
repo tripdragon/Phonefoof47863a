@@ -3293,3 +3293,186 @@ code {
   color: #312e81;
   font-weight: 700;
 }
+
+/* Lemonade page: intentionally overrides the surrounding Phonefoof card so this product page does not inherit the parent visual system. */
+.hero:has(.lemonade-page) {
+  width: min(1180px, 100%);
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0;
+  background: #f8e15c;
+  box-shadow: 18px 18px 0 #17331f;
+  border: 3px solid #17331f;
+}
+
+.hero:has(.lemonade-page) .menu {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: #17331f;
+  color: #fff7b0;
+  align-items: flex-start;
+}
+
+.hero:has(.lemonade-page) .brand,
+.hero:has(.lemonade-page) .brand-wrap p,
+.hero:has(.lemonade-page) .version {
+  color: #fff7b0;
+}
+
+.hero:has(.lemonade-page) .menu-link {
+  color: #17331f;
+  background: #fff7b0;
+  border-radius: 999px;
+  font-family: "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hero:has(.lemonade-page) .menu-link:hover,
+.hero:has(.lemonade-page) .menu-link:focus-visible,
+.hero:has(.lemonade-page) .menu-link.is-active {
+  color: #fff7b0;
+  background: #ff5c39;
+  outline: 3px solid #fff7b0;
+}
+
+.lemonade-page {
+  --lemon-rind: #f8e15c;
+  --lemon-pith: #fff7b0;
+  --leaf-ink: #17331f;
+  --pulp-orange: #ff9f1c;
+  --strawberry: #ff5c39;
+  --mint: #41b883;
+  color: var(--leaf-ink);
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 247, 176, 0.9) 0 8%, transparent 8.3%),
+    linear-gradient(135deg, var(--lemon-rind) 0%, #ffd33d 48%, var(--pulp-orange) 100%);
+  font-family: Georgia, "Times New Roman", serif;
+  padding: clamp(1.2rem, 4vw, 3rem);
+}
+
+.lemonade-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.58fr);
+  gap: clamp(1.5rem, 5vw, 4rem);
+  align-items: center;
+  min-height: 560px;
+}
+
+.lemonade-kicker {
+  margin: 0 0 1rem;
+  font: 900 0.82rem/1 "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.lemonade-hero h1 {
+  max-width: 8.6ch;
+  margin: 0;
+  font: 900 clamp(4rem, 13vw, 10.5rem)/0.74 "Arial Black", Impact, sans-serif;
+  letter-spacing: -0.1em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.lemonade-lede {
+  max-width: 58ch;
+  margin: 1.4rem 0 0;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.55;
+}
+
+.lemonade-actions,
+.lemonade-strip,
+.lemonade-flavors,
+.lemonade-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.lemonade-actions { margin-top: 2rem; }
+
+.lemonade-button,
+.lemonade-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.85rem 1.2rem;
+  border: 2px solid var(--leaf-ink);
+  color: var(--leaf-ink);
+  text-decoration: none;
+  font: 900 0.9rem/1 "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lemonade-button { background: var(--strawberry); box-shadow: 7px 7px 0 var(--leaf-ink); }
+.lemonade-link { background: var(--lemon-pith); }
+.lemonade-button--dark { background: var(--leaf-ink); color: var(--lemon-pith); border-color: var(--leaf-ink); }
+.lemonade-button:focus-visible,
+.lemonade-link:focus-visible { outline: 4px solid var(--mint); outline-offset: 4px; }
+
+.lemonade-bottle {
+  position: relative;
+  width: min(100%, 330px);
+  height: 470px;
+  justify-self: center;
+  border: 7px solid var(--leaf-ink);
+  border-radius: 46% 46% 2.5rem 2.5rem;
+  background: linear-gradient(90deg, rgba(255,255,255,0.55), rgba(255,247,176,0.2) 22%, rgba(255,159,28,0.62));
+  box-shadow: 22px 20px 0 rgba(23, 51, 31, 0.18);
+  transform: rotate(5deg);
+}
+
+.lemonade-bottle::before,
+.lemonade-bottle::after {
+  content: "";
+  position: absolute;
+  border: 5px solid var(--leaf-ink);
+  background: var(--mint);
+}
+
+.lemonade-bottle::before { width: 92px; height: 54px; left: -48px; top: 92px; border-radius: 90% 10% 90% 10%; transform: rotate(-28deg); }
+.lemonade-bottle::after { width: 75px; height: 44px; right: -42px; top: 152px; border-radius: 10% 90% 10% 90%; transform: rotate(24deg); }
+
+.lemonade-bottle__cap { position: absolute; left: 34%; top: -42px; width: 32%; height: 58px; background: var(--strawberry); border: 7px solid var(--leaf-ink); }
+.lemonade-bottle__label { position: absolute; inset: 48% 8% auto; padding: 1rem 0; background: var(--lemon-pith); border-block: 6px solid var(--leaf-ink); font: 900 3.2rem/1 Impact, sans-serif; letter-spacing: 0.04em; text-align: center; }
+.lemonade-bottle__shine { position: absolute; left: 19%; top: 17%; width: 26px; height: 210px; border-radius: 999px; background: rgba(255,255,255,0.55); }
+
+.lemonade-strip {
+  justify-content: space-between;
+  margin: 1rem 0 1.5rem;
+  padding: 1rem;
+  border-block: 3px solid var(--leaf-ink);
+  background: rgba(255, 247, 176, 0.55);
+}
+
+.lemonade-strip p { margin: 0; display: grid; }
+.lemonade-strip strong { font: 900 2.4rem/1 Impact, sans-serif; }
+.lemonade-strip span { font: 800 0.78rem/1.2 "Arial Narrow", sans-serif; text-transform: uppercase; letter-spacing: 0.12em; }
+
+.lemonade-flavors { align-items: stretch; }
+.lemonade-flavor { flex: 1 1 210px; padding: 1rem; border: 3px solid var(--leaf-ink); background: var(--lemon-pith); }
+.lemonade-flavor--berry { background: #ffd1c8; }
+.lemonade-flavor--herb { background: #d9ffdf; }
+.lemonade-flavor span { font: 900 1.35rem/1 Impact, sans-serif; text-transform: uppercase; }
+.lemonade-flavor p { margin: 0.6rem 0 0; }
+
+.lemonade-order {
+  margin-top: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.6rem);
+  align-items: center;
+  justify-content: space-between;
+  border: 3px solid var(--leaf-ink);
+  background: var(--strawberry);
+}
+
+.lemonade-order h2 { max-width: 12ch; margin: 0; font: 900 clamp(2.2rem, 6vw, 5rem)/0.82 Impact, sans-serif; text-transform: uppercase; }
+
+@media (max-width: 760px) {
+  .lemonade-hero { grid-template-columns: 1fr; min-height: auto; }
+  .lemonade-hero h1 { font-size: clamp(3.5rem, 22vw, 7rem); }
+  .lemonade-bottle { height: 360px; transform: rotate(2deg); }
+}

@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { SlightlyPriceyPool } from './slightlyPriceyPool.js';
-import { _setMinAndMaxByKey } from "chart.js/helpers";
 import { DebugSelectionDownLine } from "./DebugSelectionDownLine.js";
 // A lot of this might should be from superneatlike pointer events
 
@@ -54,6 +53,9 @@ export class FingersAPI {
   arrowDirHelper;
   arrowDirV = new THREE.Vector3();
   arrowDirOriginV = new THREE.Vector3();
+  crossDirHelper;
+  crossDirV = new THREE.Vector3();
+  crossDirOriginV = new THREE.Vector3();
 
   screenCoordsV = new THREE.Vector2();
   selectedPiece = null;
@@ -85,6 +87,7 @@ export class FingersAPI {
   worldNormal = new THREE.Vector3();
   box1 = new THREE.Box3();
   centerV = new THREE.Vector3();
+  faceCenterV = new THREE.Vector3();
   sizeV = new THREE.Vector3();
 
   constructor({ camera, domElement, scene, controls, cube, planeHitsMax = 42, triggerDistance = 0.35 } = {}) {
@@ -165,6 +168,9 @@ export class FingersAPI {
     if (this.selectionDownLine) {
       this.selectionDownLine.visible = false;
     }
+    if (this.crossDirHelper) {
+      this.crossDirHelper.visible = false;
+    }
   }
 
   buildPlanePool(){
@@ -234,6 +240,10 @@ export class FingersAPI {
     this.arrowDirHelper = new THREE.ArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xffffff, 0.18, 0.1);
     //this.arrowDirHelper.visible = false;
     this.debuggersObject3D.add(this.arrowDirHelper);
+
+    this.crossDirHelper = new THREE.ArrowHelper(this.crossDirV, this.crossDirOriginV, 1.2, 0xff33cc, 0.18, 0.1);
+    this.crossDirHelper.visible = false;
+    this.debuggersObject3D.add(this.crossDirHelper);
 
     this.selectionDownLine = new DebugSelectionDownLine({ length: 1.5, radius: 0.03, color: 0x000000 });
     this.debuggersObject3D.add(this.selectionDownLine);
@@ -386,6 +396,7 @@ export class FingersAPI {
     if (this.showDirectionArrow) {
       this.arrowDirHelper.visible = true;
     }
+    this.updateCrossProductHelper();
   }
 
   refreshPieceFaceNormal(hit){
@@ -405,6 +416,7 @@ export class FingersAPI {
       this.box1.getCenter(this.centerV);
       // project onto face using normal
       this.centerV.addScaledVector(this.worldNormal, this.box1.getSize(this.sizeV).length() / 6);
+      this.faceCenterV.copy(this.centerV);
 
       // --- position arrow at hit point ---
       this.faceArrow.position.copy(this.centerV);
@@ -415,6 +427,25 @@ export class FingersAPI {
  
   }
 
+
+
+  updateCrossProductHelper() {
+    if (!this.crossDirHelper) return;
+
+    this.crossDirV.crossVectors(this.worldNormal, this.arrowDirV);
+    const crossLength = this.crossDirV.length();
+    if (crossLength <= 0.000001) {
+      this.crossDirHelper.visible = false;
+      return;
+    }
+
+    this.crossDirV.multiplyScalar(1 / crossLength);
+    this.crossDirOriginV.copy(this.faceCenterV);
+    this.crossDirHelper.position.copy(this.crossDirOriginV);
+    this.crossDirHelper.setDirection(this.crossDirV);
+    this.crossDirHelper.setLength(1.2, 0.18, 0.1);
+    this.crossDirHelper.visible = true;
+  }
 
   // previous
   trySelectingPiece(ev){
@@ -488,6 +519,7 @@ export class FingersAPI {
               this.arrowDirV.multiplyScalar(1 / dirLen);
               this.arrowDirHelper.position.copy(this.arrowDirOriginV);
               this.arrowDirHelper.setDirection(this.arrowDirV);
+              this.updateCrossProductHelper();
             }
           }
         }
@@ -594,6 +626,7 @@ export class FingersAPI {
       this.arrowDirV.multiplyScalar(1 / dirLen);
       this.arrowDirHelper.position.copy(this.arrowDirOriginV);
       this.arrowDirHelper.setDirection(this.arrowDirV);
+      this.updateCrossProductHelper();
     }
 
     // // ok from here we need to atan2 in local space

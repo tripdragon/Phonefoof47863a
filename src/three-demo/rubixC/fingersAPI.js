@@ -60,6 +60,12 @@ export class FingersAPI {
   crossDirOffsetV = new THREE.Vector3();
   crossDirHelperLength = 3;
   crossDirHelperNormalOffset = 0.06;
+  positiveCrossDirHelper;
+  positiveCrossDirV = new THREE.Vector3();
+  positiveCrossDirOriginV = new THREE.Vector3();
+  positiveCrossDirOffsetV = new THREE.Vector3();
+  positiveCrossDirHelperLength = 2.5;
+  positiveCrossDirHelperNormalOffset = 0.16;
 
   screenCoordsV = new THREE.Vector2();
   selectedPiece = null;
@@ -247,6 +253,18 @@ export class FingersAPI {
     this.crossDirHelper = new ThickArrowHelper(this.crossDirV, this.crossDirOriginV, 1.2, 0xff33cc, 0.18, 0.1);
     this.crossDirHelper.visible = false;
     this.debuggersObject3D.add(this.crossDirHelper);
+
+    this.positiveCrossDirHelper = new ThickArrowHelper(
+      this.positiveCrossDirV,
+      this.positiveCrossDirOriginV,
+      this.positiveCrossDirHelperLength,
+      0x6f8fa6,
+      0.32,
+      0.18,
+      0.08,
+    );
+    this.positiveCrossDirHelper.visible = false;
+    this.debuggersObject3D.add(this.positiveCrossDirHelper);
 
     this.selectionDownLine = new DebugSelectionDownLine({ length: 1.5, radius: 0.03, color: 0x000000 });
     this.debuggersObject3D.add(this.selectionDownLine);
@@ -439,6 +457,9 @@ export class FingersAPI {
     const crossLength = this.crossDirV.length();
     if (crossLength <= 0.000001) {
       this.crossDirHelper.visible = false;
+      if (this.positiveCrossDirHelper) {
+        this.positiveCrossDirHelper.visible = false;
+      }
       return;
     }
 
@@ -450,6 +471,32 @@ export class FingersAPI {
     this.crossDirHelper.setDirection(this.crossDirV);
     this.crossDirHelper.setLength(this.crossDirHelperLength, 0.24, 0.14);
     this.crossDirHelper.visible = true;
+
+    this.updatePositiveCrossProductHelper();
+  }
+
+  updatePositiveCrossProductHelper() {
+    if (!this.positiveCrossDirHelper) return;
+
+    this.positiveCrossDirV.copy(this.crossDirV);
+    if (this.positiveCrossDirV.x < 0) this.positiveCrossDirV.x *= -1;
+    if (this.positiveCrossDirV.y < 0) this.positiveCrossDirV.y *= -1;
+    if (this.positiveCrossDirV.z < 0) this.positiveCrossDirV.z *= -1;
+
+    const positiveCrossLength = this.positiveCrossDirV.length();
+    if (positiveCrossLength <= 0.000001) {
+      this.positiveCrossDirHelper.visible = false;
+      return;
+    }
+
+    this.positiveCrossDirV.multiplyScalar(1 / positiveCrossLength);
+    this.positiveCrossDirOriginV
+      .copy(this.pointDown3D)
+      .add(this.positiveCrossDirOffsetV.copy(this.worldNormal).multiplyScalar(this.positiveCrossDirHelperNormalOffset));
+    this.positiveCrossDirHelper.position.copy(this.positiveCrossDirOriginV);
+    this.positiveCrossDirHelper.setDirection(this.positiveCrossDirV);
+    this.positiveCrossDirHelper.setLength(this.positiveCrossDirHelperLength, 0.32, 0.18);
+    this.positiveCrossDirHelper.visible = true;
   }
 
   // previous

@@ -9,16 +9,17 @@
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   margin: 0;
+  padding: 10px;
   line-height: 1.5;
   color: #1f2937;
   background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
 }
 
 main {
-  min-height: 100vh;
+  min-height: calc(100vh - 20px);
   display: grid;
   place-items: center;
-  padding: 2rem;
+  padding: 0;
 }
 
 .hero {
@@ -26,7 +27,7 @@ main {
   background: white;
   border-radius: 20px;
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
-  padding: clamp(1.5rem, 4vw, 3rem);
+  padding: 0;
 
 
 }
@@ -716,7 +717,7 @@ code {
   background: white;
   border-radius: 20px;
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
-  padding: clamp(1.5rem, 4vw, 3rem);
+  padding: 0;
 }
 
 .shows-header {
@@ -1742,10 +1743,10 @@ code {
 }
 
 .hero-showcase {
-  width: 100vw;
-  margin-top: clamp(2rem, 6vw, 4rem);
-  margin-inline: calc(50% - 50vw);
-  padding: clamp(3rem, 8vw, 6rem) clamp(1.25rem, 6vw, 4rem);
+  width: 100%;
+  margin-top: 0;
+  margin-inline: 0;
+  padding: 0;
   background:
     radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.25), transparent 40%),
     radial-gradient(circle at 80% 0%, rgba(56, 189, 248, 0.25), transparent 35%),

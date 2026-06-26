@@ -15,10 +15,13 @@ gugireh6932
       </h1>
     <p class="hero-subtitle">For every one face turn, you affect 4 others. But not its reflection side.</p>
     <p class="hero-subtitle">Corner pieces are in 3 groups. Center and edge pieces are in 2 groups. </p>
-    <div class="three-demo-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo"></div>
+    <div class="three-demo-canvas-wrap rubixc-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo">
+      <button class="rubixc-fullscreen-button" type="button" id="rubixc-fullscreen-button" aria-label="Make RubixC scene full screen" aria-pressed="false">Full screen</button>
+    </div>
   `;
 
   const canvasWrap = container.querySelector("#rubixc-canvas-wrap");
+  const fullscreenButton = container.querySelector("#rubixc-fullscreen-button");
 
   window.THREE = THREE;
 
@@ -404,13 +407,67 @@ requestAnimationFrame(spinGroup);
   //scene.add(grid);
 
   let animationFrameId = null;
+  let isFullscreenFallback = false;
+
+  function isNativeFullscreen() {
+    return document.fullscreenElement === canvasWrap || document.webkitFullscreenElement === canvasWrap;
+  }
+
+  function updateFullscreenButton() {
+    const isFullscreen = isNativeFullscreen() || isFullscreenFallback;
+    fullscreenButton.setAttribute("aria-pressed", String(isFullscreen));
+    fullscreenButton.textContent = isFullscreen ? "Exit full screen" : "Full screen";
+  }
 
   function resizeRenderer() {
-    const width = canvasWrap.clientWidth;
-    const height = canvasWrap.clientHeight;
+    const width = canvasWrap.clientWidth || window.innerWidth;
+    const height = canvasWrap.clientHeight || window.innerHeight;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
+  }
+
+  function setFullscreenFallback(enabled) {
+    isFullscreenFallback = enabled;
+    canvasWrap.classList.toggle("is-rubixc-fullscreen", enabled);
+    document.body.classList.toggle("rubixc-fullscreen-active", enabled);
+    updateFullscreenButton();
+    requestAnimationFrame(resizeRenderer);
+  }
+
+  async function enterFullscreen() {
+    if (canvasWrap.requestFullscreen) {
+      await canvasWrap.requestFullscreen();
+    } else if (canvasWrap.webkitRequestFullscreen) {
+      canvasWrap.webkitRequestFullscreen();
+    } else {
+      setFullscreenFallback(true);
+    }
+  }
+
+  async function exitFullscreen() {
+    if (isFullscreenFallback) {
+      setFullscreenFallback(false);
+    } else if (document.exitFullscreen) {
+      await document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+
+  async function toggleFullscreen() {
+    try {
+      if (isNativeFullscreen() || isFullscreenFallback) {
+        await exitFullscreen();
+      } else {
+        await enterFullscreen();
+      }
+    } catch {
+      setFullscreenFallback(!isFullscreenFallback);
+    }
+
+    updateFullscreenButton();
+    requestAnimationFrame(resizeRenderer);
   }
 
   function animate() {
@@ -424,7 +481,13 @@ requestAnimationFrame(spinGroup);
   resizeRenderer();
   animate();
 
+  const resizeObserver = new ResizeObserver(resizeRenderer);
+  resizeObserver.observe(canvasWrap);
+  fullscreenButton.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", updateFullscreenButton);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
   window.addEventListener("resize", resizeRenderer);
+  window.visualViewport?.addEventListener("resize", resizeRenderer);
 
   return () => {
     if (animationFrameId !== null) {
@@ -432,6 +495,14 @@ requestAnimationFrame(spinGroup);
     }
 
     window.removeEventListener("resize", resizeRenderer);
+    window.visualViewport?.removeEventListener("resize", resizeRenderer);
+    document.removeEventListener("fullscreenchange", updateFullscreenButton);
+    document.removeEventListener("webkitfullscreenchange", updateFullscreenButton);
+    fullscreenButton.removeEventListener("click", toggleFullscreen);
+    resizeObserver.disconnect();
+    if (isFullscreenFallback) {
+      setFullscreenFallback(false);
+    }
     fingersAPI.dispose();
     controls.dispose();
     renderer.dispose();

@@ -60,6 +60,10 @@ export class FingersAPI {
   crossDirOffsetV = new THREE.Vector3();
   crossDirHelperLength = 3;
   crossDirHelperNormalOffset = 0.06;
+  absCrossDirHelper;
+  absCrossDirV = new THREE.Vector3();
+  absCrossDirHelperLength = 2.5;
+
 
   screenCoordsV = new THREE.Vector2();
   selectedPiece = null;
@@ -247,6 +251,10 @@ export class FingersAPI {
     this.crossDirHelper = new ThickArrowHelper(this.crossDirV, this.crossDirOriginV, 1.2, 0xff33cc, 0.18, 0.1);
     this.crossDirHelper.visible = false;
     this.debuggersObject3D.add(this.crossDirHelper);
+
+    this.absCrossDirHelper = new ThickArrowHelper(this.absCrossDirV, this.crossDirOriginV, 1.2, 0x0000ff, 0.24, 0.14, 0.08);
+    this.absCrossDirHelper.visible = false;
+    this.debuggersObject3D.add(this.absCrossDirHelper);
 
     this.selectionDownLine = new DebugSelectionDownLine({ length: 1.5, radius: 0.03, color: 0x000000 });
     this.debuggersObject3D.add(this.selectionDownLine);
@@ -439,10 +447,18 @@ export class FingersAPI {
     const crossLength = this.crossDirV.length();
     if (crossLength <= 0.000001) {
       this.crossDirHelper.visible = false;
+      if (this.absCrossDirHelper) {
+        this.absCrossDirHelper.visible = false;
+      }
       return;
     }
 
     this.crossDirV.multiplyScalar(1 / crossLength);
+    this.absCrossDirV.copy(this.crossDirV).set(
+      Math.abs(this.crossDirV.x),
+      Math.abs(this.crossDirV.y),
+      Math.abs(this.crossDirV.z),
+    );
     this.crossDirOriginV
       .copy(this.pointDown3D)
       .add(this.crossDirOffsetV.copy(this.worldNormal).multiplyScalar(this.crossDirHelperNormalOffset));
@@ -450,6 +466,13 @@ export class FingersAPI {
     this.crossDirHelper.setDirection(this.crossDirV);
     this.crossDirHelper.setLength(this.crossDirHelperLength, 0.24, 0.14);
     this.crossDirHelper.visible = true;
+
+    if (this.absCrossDirHelper) {
+      this.absCrossDirHelper.position.copy(this.crossDirOriginV);
+      this.absCrossDirHelper.setDirection(this.absCrossDirV);
+      this.absCrossDirHelper.setLength(this.absCrossDirHelperLength, 0.32, 0.18);
+      this.absCrossDirHelper.visible = true;
+    }
   }
 
   // previous

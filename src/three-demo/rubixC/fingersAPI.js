@@ -56,6 +56,9 @@ export class FingersAPI {
   crossDirHelper;
   crossDirV = new THREE.Vector3();
   crossDirOriginV = new THREE.Vector3();
+  crossDirOffsetV = new THREE.Vector3();
+  crossDirHelperLength = 3;
+  crossDirHelperNormalOffset = 0.06;
 
   screenCoordsV = new THREE.Vector2();
   selectedPiece = null;
@@ -168,9 +171,8 @@ export class FingersAPI {
     if (this.selectionDownLine) {
       this.selectionDownLine.visible = false;
     }
-    if (this.crossDirHelper) {
-      this.crossDirHelper.visible = false;
-    }
+    // Keep the last cross-product direction visible after the touch ends so it
+    // remains available as a visual reference until the next selection updates it.
   }
 
   buildPlanePool(){
@@ -440,10 +442,12 @@ export class FingersAPI {
     }
 
     this.crossDirV.multiplyScalar(1 / crossLength);
-    this.crossDirOriginV.copy(this.faceCenterV);
+    this.crossDirOriginV
+      .copy(this.pointDown3D)
+      .add(this.crossDirOffsetV.copy(this.worldNormal).multiplyScalar(this.crossDirHelperNormalOffset));
     this.crossDirHelper.position.copy(this.crossDirOriginV);
     this.crossDirHelper.setDirection(this.crossDirV);
-    this.crossDirHelper.setLength(1.2, 0.18, 0.1);
+    this.crossDirHelper.setLength(this.crossDirHelperLength, 0.24, 0.14);
     this.crossDirHelper.visible = true;
   }
 

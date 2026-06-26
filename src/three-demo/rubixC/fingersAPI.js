@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { SlightlyPriceyPool } from './slightlyPriceyPool.js';
 import { DebugSelectionDownLine } from "./DebugSelectionDownLine.js";
+import { ThickArrowHelper, ThickAxesHelper } from "./thickAxesHelper.js";
 // A lot of this might should be from superneatlike pointer events
 
     // on pointer down first test if on the cube
@@ -196,7 +197,7 @@ export class FingersAPI {
     this.planeHitZone3D = plane;
     //plane.visible = false;
     
-    const axesHelper = new THREE.AxesHelper( 5 );
+    const axesHelper = new ThickAxesHelper({ length: 5, radius: 0.035 });
     plane.add( axesHelper );
     
     
@@ -219,14 +220,14 @@ export class FingersAPI {
   }
   
   buildVisualHelpers(){
-    // this.arrowOut = new THREE.ArrowHelper(this.arrowDirection, this.arrowOrigin, 0.01, 0x111111, 0.15, 0.08);
+    // this.arrowOut = new ThickArrowHelper(this.arrowDirection, this.arrowOrigin, 0.01, 0x111111, 0.15, 0.08);
     // this.arrowOut.visible = false;
     // this.planePoolHolder3D.add(this.arrowOut);
 
     this.debuggersObject3D = new THREE.Group();
     this.scene.add(this.debuggersObject3D);
 
-    this.faceArrow = new THREE.ArrowHelper(this.arrowDirectionV, this.arrowOriginV, 1.1, 0x2d7fff, 0.18, 0.1);
+    this.faceArrow = new ThickArrowHelper(this.arrowDirectionV, this.arrowOriginV, 1.1, 0x2d7fff, 0.18, 0.1);
     this.faceArrow.visible = false;
     this.debuggersObject3D.add(this.faceArrow);
 
@@ -239,11 +240,11 @@ export class FingersAPI {
     //this.debuggersObject3D.add( this.planeHelper );
 
     
-    this.arrowDirHelper = new THREE.ArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xffffff, 0.18, 0.1);
+    this.arrowDirHelper = new ThickArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xffffff, 0.18, 0.1);
     //this.arrowDirHelper.visible = false;
     this.debuggersObject3D.add(this.arrowDirHelper);
 
-    this.crossDirHelper = new THREE.ArrowHelper(this.crossDirV, this.crossDirOriginV, 1.2, 0xff33cc, 0.18, 0.1);
+    this.crossDirHelper = new ThickArrowHelper(this.crossDirV, this.crossDirOriginV, 1.2, 0xff33cc, 0.18, 0.1);
     this.crossDirHelper.visible = false;
     this.debuggersObject3D.add(this.crossDirHelper);
 

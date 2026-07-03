@@ -12,10 +12,24 @@ export class RubixCubeLike extends THREE.Group {
   static EPSILON = 1e-5;
 
   core;
+  // Object3D, was used for attaching the pieces to an invisible object
+  // to transform with, replacing for matrix routines perhaps
 
-  // transitionalGroups
-  // sides and rings of cube
   tGS = {
+    // transitionalGroups
+    // sides and rings of cube
+    // the pieces all keep swapping out
+    // so dont cache this in a reference
+    // the concept of visual world space applies to the positions of groups
+    // like what is top for example
+    /*
+      for (const key in tGS) {
+      console.log(key, tGS[key]);
+      }
+    */
+    // in seeking we only need the first 6, not the ring systems
+    // to find their up y vector and crossproduct
+
     // faces / cornersets
     top: new PiecesGroup("top"),        // +y
     bottom: new PiecesGroup("bottom"),     // -y
@@ -28,7 +42,15 @@ export class RubixCubeLike extends THREE.Group {
     ringHorizontal: new PiecesGroup("ringHorizontal"),     // x ~= 0
     ringVertical: new PiecesGroup("ringVertical"),     // z ~= 0
     ringBow: new PiecesGroup("ringBow") // y ~= 0
-  };
+  }
+
+  getPiecesGroup(name){
+    // we refish cause its pointless if everything is out of sync
+    // no that "should" break it when its moving
+    // // this.refishGroups();
+    // so just refish before or after
+    return this.tGS[name];
+  }
 
   constructor() {
     super();
@@ -62,6 +84,10 @@ export class RubixCubeLike extends THREE.Group {
   }
 
   refishGroups() {
+    // after every spin, 3 sides have produced new groups for 
+    // their respective sides,
+    // so calling this on all and always after a spin is a nessesary
+    // computations for anything to work
     this.clearAllFish();
 
     this.fishTop();
@@ -393,8 +419,8 @@ export class RubixCubeLike extends THREE.Group {
     this.add(this.core);
   }
 
-
-  showNormals(){
+  // 
+  showCenterNormals(){
     this.pieces.forEach(x=>{
         //const axesHelper = new THREE.AxesHelper( 2 );
         // x.add( axesHelper );
@@ -417,4 +443,105 @@ export class RubixCubeLike extends THREE.Group {
       x.updateMatrix();
     });
   }
-                          }
+
+  colorAllPieces(colorHex = 0xfffaaa){
+    if (!this.pieces?.length) return;
+    this.pieces.forEach((x) => {
+      x.setColorOverAll(colorHex);
+    });
+  }
+
+  axis = new THREE.Vector3(0,0,0);
+
+  getAxisFromName(name){
+    // switch(name){
+    //   name :"left" 
+    //   break;
+    // }
+
+    if(name === "left"){
+      this.axis.set(-1,0,0);
+    }
+    else if(name === "right"){
+      this.axis.set(1,0,0);
+    }
+    else if(name === "top"){
+      this.axis.set(0,1,0);
+    }
+    else if(name === "bottom"){
+      this.axis.set(0,-1,0);
+    }
+    else if(name === "front"){
+      this.axis.set(0,0,-1);
+    }
+    else if(name === "back"){
+      this.axis.set(0,0,1);
+    }
+    else if(name === "ringHorizontal"){
+      this.axis.set(0,1,0);
+    }
+    else if(name === "ringVertical"){
+      this.axis.set(1,0,0);
+    }
+    else if(name === "ringBow"){
+      this.axis.set(0,0,1);
+    }
+    return this.axis;
+  }
+
+
+  m = new THREE.Matrix4();
+  t = new THREE.Vector3();
+  q = new THREE.Quaternion()
+  s = new THREE.Vector3(1, 1, 1);
+
+  // spinGroup({name,axis,pivot, angle}) {
+  spinGroup({name,deltaAngle}) {
+    // this type is a accumulation rotation from the angle in
+    // the accumulation is from the .applyMatrix
+    // meaning the only way to get a "smooth" would be a physics
+    // friction or dampenning into its value
+
+    // before running call cube.refishGroups()
+    // call cube.getPiecesGroup() before running
+    // this is run in a loop
+    // has no magnet, so handle that outside as well
+
+
+    const m = this.m;
+    const t = this.t;
+    const q = this.q;
+    const s = this.s;
+    const axis = this.getAxisFromName(name);
+
+
+    // pivot would actually be found within the group center
+    // const pivot = new THREE.Vector3(0,0,0);
+    // const pivot = new THREE.Vector3(px, py, pz);
+    // const axis = new THREE.Vector3(-1, 0, 0); // already normalized
+    // const angle = Math.PI / 4;
+    // const angle = 1.2;
+    // const angle = Math.PI / 2;
+
+    const yy = this.getPiecesGroup(name);
+    const pivot = yy.center.position;
+    // is this "poping" in place, and who can you send a smooth?
+    // q.identity()
+    q.setFromAxisAngle(axis, deltaAngle);
+
+    // translation = pivot - (rotation * pivot)
+    t.copy(pivot).applyQuaternion(q).sub(pivot).negate();
+
+    m.compose(t, q, s);
+
+    yy.forEach(x=>{
+      // x.rotation.set(1,-1,1)
+      // x.position.set(0,0,1);
+      x.applyMatrix4(m);
+    })
+
+
+  }
+
+
+}

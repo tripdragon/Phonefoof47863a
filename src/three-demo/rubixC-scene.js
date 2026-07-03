@@ -8,6 +8,11 @@ import { smoothstep, remapPiToPI2 } from "./rubixC/math.js";
 import { FingersAPI } from "./rubixC/fingersAPI.js";
 
 export function renderRubixCRoute(container) {
+
+  const kjdfg = document.querySelector(".menu");
+  kjdfg.style.display = "none";
+  console.log("hidden menu");
+
   container.innerHTML = `
     <p class="hero-label">Three.js + SuperNeatLib</p>
     <h1 class="hero-title">
@@ -130,7 +135,7 @@ magicCube.rotation.y = Math.PI;
 //   iim++;
 // }
 
-magicCube.showNormals();
+magicCube.showCenterNormals();
 
   window.magicCube = magicCube;
   
@@ -169,7 +174,158 @@ const groupsNames = [
   "ringBow"
 ];
 
+const START_DELAY = 200;
+const SPEED = 100;
+const DURATION = 1000;
+const IDLE_DELAY = 10;
+const DELTA_SPEED = 0.02;
+
+
+
+
+
+//
+// Spin test 222
+//
+
+// this type simply move the rotation with a delta from the durtation
+// does not do any snapping, so its gonna drift
+
+// dur 
+// angle PI / 2
+// delta angle / dur
+// would need to know the stopping remaining delta
+// so instead would subtract speed from an angle and at < 0 its whatever remains
+
+
+  const DURATION_2 = 4000;
+
+  // this starts the spin animation
+  setTimeout(x=>{
+    // return
+
+   StartSpin_2({selected: magicCube.tGS.top});
+  },START_DELAY);
   
+
+  // this method just subtracts PI / 2 for a quater spin
+  function StartSpin_2(){
+    // let gain = 0;
+    magicCube.refishGroups();
+    let MAX_Angle = Math.PI / 2;
+    const speedDelta = MAX_Angle / DURATION_2;
+    console.log("MAX_Angle", MAX_Angle)
+    console.log("speedDelta", speedDelta)
+
+    function spinGroup_2(time) {
+      let m_angle = MAX_Angle;
+      MAX_Angle -= speedDelta;
+      let delta = MAX_Angle;
+      console.log("delta", delta)
+      if(delta < 0) {delta = m_angle;}
+
+      if(delta === 0){
+        // exits animation
+        debugger
+        return;
+      }
+      
+      magicCube.spinGroup({name:"top", 
+        // axis : new THREE.Vector3(0, 1, 0), 
+        // pivot : new THREE.Vector3(0,0,0),
+        // angle: 0.2
+        deltaAngle: delta
+        // angle: easedT
+      })
+
+      requestAnimationFrame(spinGroup_2);
+    }
+
+    // start
+    requestAnimationFrame(spinGroup_2);
+      
+  }
+
+
+  
+function StartSpin_3({selected,direction="counter"}={}){
+
+  // replaced??
+  magicCube.refishGroups();
+
+// cube.refishGroups()
+    
+  
+  // const duration = SPEED;
+  // const duration = DURATION;
+  const duration = Math.PI / 2 / DELTA_SPEED;
+  let startTime = null;
+  
+  console.log("duration", duration)
+
+  
+  function spinGroup_2(time) {
+      if (!startTime) startTime = time;
+      const elapsed = time - startTime;
+      let t = elapsed / duration;
+      console.log("t",t);
+      if (t >= 1) {
+          // Snap exactly at the end
+          //target.quaternion.copy(targetQuaternion);
+
+          
+          setTimeout(x=>{
+
+            // loops
+            index++;
+            if(index === groupsNames.length){
+              index = 0;
+            }
+
+            StartSpin_2({direction:"counter", selected: magicCube.tGS[groupsNames[index]]});
+            
+          },IDLE_DELAY);
+
+          return; // stop animation
+      }
+  
+      // Apply easing
+      const easedT = smoothstep(t);
+
+      // Interpolate rotation
+      // THREE.Quaternion.slerp(startQuaternion, targetQuaternion, target.quaternion, easedT);
+      // target.quaternion.slerp(targetQuaternion, easedT);
+
+
+      // cube.refishGroups()
+magicCube.spinGroup({name:"top", 
+  // axis : new THREE.Vector3(0, 1, 0), 
+  // pivot : new THREE.Vector3(0,0,0),
+  // angle: 0.2
+  deltaAngle: DELTA_SPEED
+  // angle: easedT
+})
+
+
+  
+      requestAnimationFrame(spinGroup_2);
+  }
+
+  // start
+  requestAnimationFrame(spinGroup_2);
+    
+}
+
+ 
+
+
+
+  
+
+// 
+// Previous spin system
+// 
+
   
 /*
 
@@ -390,7 +546,12 @@ requestAnimationFrame(spinGroup);
 }
 
   
+  /*
   
+  +++++++++++
+  fingersAPI
+
+  */
   
 
   const fingersAPI = new FingersAPI({
@@ -401,6 +562,7 @@ requestAnimationFrame(spinGroup);
     cube: magicCube
   });
   fingersAPI.beginPointerEvents();
+
 
   const grid = new THREE.GridHelper(10, 10, 0x94a3b8, 0xcbd5e1);
   //grid.position.y = -1.1;

@@ -499,7 +499,8 @@ export class FingersAPI {
     this.positiveCrossDirHelper.visible = true;
   }
 
-  // previous
+
+  // previous func, removed
   trySelectingPiece(ev){
     return;
     if (false) {
@@ -591,6 +592,7 @@ export class FingersAPI {
   seeking(ev){
     if (this.state === states.onCube) {
       this.state = states.seeking;
+      // this.colapsePlaneBalls();
     }
     if (this.state !== states.seeking) return;
     this.getHits(ev);
@@ -851,5 +853,19 @@ export class FingersAPI {
       this.thresholdBubbleTimeout = null;
     }
   }
+
+  colapseCubeBalls(){
+    this.planePool.forEach(x=>{
+      x.position.set(0,0,0);
+    })
+    console.log("colapseCubeBalls");
+  }
+  colapsePlaneBalls(){
+    this.planePoolGrid.forEach(x=>{
+      x.position.set(0,0,0);
+    })
+    console.log("colapsePlaneBalls");
+  }
+
 
 }

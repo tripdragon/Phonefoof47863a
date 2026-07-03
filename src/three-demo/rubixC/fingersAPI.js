@@ -66,6 +66,16 @@ export class FingersAPI {
   positiveCrossDirOffsetV = new THREE.Vector3();
   positiveCrossDirHelperLength = 2.5;
   positiveCrossDirHelperNormalOffset = 0.16;
+  nearestCompassDirHelper;
+  nearestCompassDirV = new THREE.Vector3();
+  nearestCompassDirOriginV = new THREE.Vector3();
+  nearestCompassDirOffsetV = new THREE.Vector3();
+  nearestCompassLocalDirV = new THREE.Vector3();
+  nearestCompassHelperLength = 2.2;
+  nearestCompassHelperNormalOffset = 0.28;
+  nearestCompassHelperColor = 0xff7a00;
+  planeWorldQuat = new THREE.Quaternion();
+  planeInverseWorldQuat = new THREE.Quaternion();
 
   screenCoordsV = new THREE.Vector2();
   selectedPiece = null;
@@ -266,6 +276,18 @@ export class FingersAPI {
     this.positiveCrossDirHelper.visible = false;
     this.debuggersObject3D.add(this.positiveCrossDirHelper);
 
+    this.nearestCompassDirHelper = new ThickArrowHelper(
+      this.nearestCompassDirV,
+      this.nearestCompassDirOriginV,
+      this.nearestCompassHelperLength,
+      this.nearestCompassHelperColor,
+      0.28,
+      0.16,
+      0.07,
+    );
+    this.nearestCompassDirHelper.visible = false;
+    this.debuggersObject3D.add(this.nearestCompassDirHelper);
+
     this.selectionDownLine = new DebugSelectionDownLine({ length: 1.5, radius: 0.03, color: 0x000000 });
     this.debuggersObject3D.add(this.selectionDownLine);
 
@@ -460,6 +482,9 @@ export class FingersAPI {
       if (this.positiveCrossDirHelper) {
         this.positiveCrossDirHelper.visible = false;
       }
+      if (this.nearestCompassDirHelper) {
+        this.nearestCompassDirHelper.visible = false;
+      }
       return;
     }
 
@@ -473,6 +498,7 @@ export class FingersAPI {
     this.crossDirHelper.visible = true;
 
     this.updatePositiveCrossProductHelper();
+    this.updateNearestCompassDirectionHelper();
   }
 
   updatePositiveCrossProductHelper() {
@@ -499,6 +525,41 @@ export class FingersAPI {
     this.positiveCrossDirHelper.visible = true;
   }
 
+
+
+  updateNearestCompassDirectionHelper() {
+    if (!this.nearestCompassDirHelper) return;
+
+    this.planeHitZone3D.getWorldQuaternion(this.planeWorldQuat);
+    this.planeInverseWorldQuat.copy(this.planeWorldQuat).invert();
+
+    this.nearestCompassLocalDirV
+      .copy(this.arrowDirV)
+      .applyQuaternion(this.planeInverseWorldQuat);
+
+    const eastWest = Math.abs(this.nearestCompassLocalDirV.x);
+    const northSouth = Math.abs(this.nearestCompassLocalDirV.z);
+
+    if (eastWest >= northSouth) {
+      this.nearestCompassLocalDirV.set(this.nearestCompassLocalDirV.x >= 0 ? 1 : -1, 0, 0);
+    } else {
+      this.nearestCompassLocalDirV.set(0, 0, this.nearestCompassLocalDirV.z >= 0 ? 1 : -1);
+    }
+
+    this.nearestCompassDirV
+      .copy(this.nearestCompassLocalDirV)
+      .applyQuaternion(this.planeWorldQuat)
+      .normalize();
+
+    this.nearestCompassDirOriginV
+      .copy(this.pointDown3D)
+      .add(this.nearestCompassDirOffsetV.copy(this.worldNormal).multiplyScalar(this.nearestCompassHelperNormalOffset));
+
+    this.nearestCompassDirHelper.position.copy(this.nearestCompassDirOriginV);
+    this.nearestCompassDirHelper.setDirection(this.nearestCompassDirV);
+    this.nearestCompassDirHelper.setLength(this.nearestCompassHelperLength, 0.28, 0.16);
+    this.nearestCompassDirHelper.visible = true;
+  }
 
   // previous func, removed
   trySelectingPiece(ev){

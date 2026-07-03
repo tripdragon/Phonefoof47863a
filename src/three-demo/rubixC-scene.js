@@ -202,9 +202,10 @@ const DELTA_SPEED = 0.02;
 
   // this starts the spin animation
   setTimeout(x=>{
-    // return
+    return
 
    StartSpin_2({selected: magicCube.tGS.top});
+   // StartSpin_3({selected: magicCube.tGS.top});
   },START_DELAY);
   
 
@@ -230,11 +231,16 @@ const DELTA_SPEED = 0.02;
         return;
       }
       
-      magicCube.spinGroup({name:"top", 
+      
+
+      magicCube.spinGroup({name:"left", 
         // axis : new THREE.Vector3(0, 1, 0), 
         // pivot : new THREE.Vector3(0,0,0),
         // angle: 0.2
-        deltaAngle: delta
+
+        // deltaAngle: delta // this acumulates
+        deltaAngle: 0.1 // its fine with a constant
+
         // angle: easedT
       })
 
@@ -247,7 +253,7 @@ const DELTA_SPEED = 0.02;
   }
 
 
-  
+  // ?????
 function StartSpin_3({selected,direction="counter"}={}){
 
   // replaced??

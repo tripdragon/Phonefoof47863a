@@ -103,6 +103,10 @@ export class FingersAPI {
   centerV = new THREE.Vector3();
   faceCenterV = new THREE.Vector3();
   sizeV = new THREE.Vector3();
+  pluckerVectors = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+  pluckerNormalPointV = new THREE.Vector3();
+  pluckerBall = null;
+
 
   constructor({ camera, domElement, scene, controls, cube, planeHitsMax = 42, triggerDistance = 0.35 } = {}) {
 
@@ -288,6 +292,12 @@ export class FingersAPI {
     this.selectionDownLine = new DebugSelectionDownLine({ length: 1.5, radius: 0.03, color: 0x000000 });
     this.debuggersObject3D.add(this.selectionDownLine);
 
+    const pluckerBallGeo = new THREE.SphereGeometry(0.5, 16, 16);
+    const pluckerBallMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    this.pluckerBall = new THREE.Mesh(pluckerBallGeo, pluckerBallMat);
+    this.pluckerBall.visible = false;
+    this.debuggersObject3D.add(this.pluckerBall);
+
   }
 
   buildDistanceHud() {
@@ -371,6 +381,8 @@ export class FingersAPI {
 
       this.refreshPieceFaceNormal(this.hitDown);
 
+      this.plucker(this.hitDown);
+
       this.refreshFacePlane(ev);
 
       this.refreshDirectionArrow(ev);
@@ -438,6 +450,30 @@ export class FingersAPI {
     }
     this.updateClampedDirectionHelper();
     this.updateCrossProductHelper();
+  }
+
+  plucker(hit) {
+    if (!hit?.object || !hit?.face) return this.pluckerVectors;
+
+    this.normalMatrix.getNormalMatrix(hit.object.matrixWorld);
+    this.worldNormal.copy(hit.face.normal).applyMatrix3(this.normalMatrix).normalize();
+
+    this.box1.setFromObject(hit.object);
+    this.box1.getCenter(this.centerV);
+    this.centerV.addScaledVector(this.worldNormal, this.box1.getSize(this.sizeV).length() / 6);
+
+    this.pluckerNormalPointV.copy(this.centerV).addScaledVector(this.worldNormal, 0.5);
+
+    this.pluckerVectors[0].copy(this.centerV);
+    this.pluckerVectors[1].copy(this.pluckerNormalPointV);
+    this.pluckerVectors[2].copy(this.pluckerNormalPointV).sub(this.centerV);
+
+    if (this.pluckerBall) {
+      this.pluckerBall.position.copy(this.pluckerNormalPointV);
+      this.pluckerBall.visible = true;
+    }
+
+    return this.pluckerVectors;
   }
 
   refreshPieceFaceNormal(hit){
@@ -883,6 +919,12 @@ export class FingersAPI {
     if (this.thresholdBubbleTimeout) {
       window.clearTimeout(this.thresholdBubbleTimeout);
       this.thresholdBubbleTimeout = null;
+    }
+    if (this.pluckerBall) {
+      this.pluckerBall.geometry?.dispose?.();
+      this.pluckerBall.material?.dispose?.();
+      this.pluckerBall.removeFromParent();
+      this.pluckerBall = null;
     }
   }
 

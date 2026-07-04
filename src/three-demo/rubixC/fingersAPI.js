@@ -60,6 +60,10 @@ export class FingersAPI {
   crossDirOffsetV = new THREE.Vector3();
   crossDirHelperLength = 3;
   crossDirHelperNormalOffset = 0.06;
+  clampedDirectionHelper;
+  clampedDirectionV = new THREE.Vector3(0, 1, 0);
+  clampedDirectionOriginV = new THREE.Vector3();
+  clampedDirectionHelperLength = 0.5;
   positiveCrossDirHelper;
   positiveCrossDirV = new THREE.Vector3();
   positiveCrossDirOriginV = new THREE.Vector3();
@@ -178,6 +182,9 @@ export class FingersAPI {
     if (this.selectionDownLine) {
       this.selectionDownLine.visible = false;
     }
+    if (this.clampedDirectionHelper) {
+      this.clampedDirectionHelper.visible = false;
+    }
     // Keep the last cross-product direction visible after the touch ends so it
     // remains available as a visual reference until the next selection updates it.
   }
@@ -253,6 +260,18 @@ export class FingersAPI {
     this.crossDirHelper = new ThickArrowHelper(this.crossDirV, this.crossDirOriginV, 1.2, 0xff33cc, 0.18, 0.1);
     this.crossDirHelper.visible = false;
     this.debuggersObject3D.add(this.crossDirHelper);
+
+    this.clampedDirectionHelper = new ThickArrowHelper(
+      this.clampedDirectionV,
+      this.clampedDirectionOriginV,
+      this.clampedDirectionHelperLength,
+      0xff8c00,
+      0.16,
+      0.12,
+      0.08,
+    );
+    this.clampedDirectionHelper.visible = false;
+    this.debuggersObject3D.add(this.clampedDirectionHelper);
 
     this.positiveCrossDirHelper = new ThickArrowHelper(
       this.positiveCrossDirV,
@@ -417,6 +436,7 @@ export class FingersAPI {
     if (this.showDirectionArrow) {
       this.arrowDirHelper.visible = true;
     }
+    this.updateClampedDirectionHelper();
     this.updateCrossProductHelper();
   }
 
@@ -446,6 +466,18 @@ export class FingersAPI {
       
     }
  
+  }
+
+
+  updateClampedDirectionHelper() {
+    if (!this.clampedDirectionHelper) return;
+
+    this.clampedDirectionV.set(0, 1, 0);
+    this.clampedDirectionOriginV.copy(this.pointDown3D);
+    this.clampedDirectionHelper.position.copy(this.clampedDirectionOriginV);
+    this.clampedDirectionHelper.setDirection(this.clampedDirectionV);
+    this.clampedDirectionHelper.setLength(this.clampedDirectionHelperLength, 0.16, 0.12);
+    this.clampedDirectionHelper.visible = true;
   }
 
 

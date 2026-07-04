@@ -292,12 +292,12 @@ export class FingersAPI {
     this.selectionDownLine = new DebugSelectionDownLine({ length: 1.5, radius: 0.03, color: 0x000000 });
     this.debuggersObject3D.add(this.selectionDownLine);
 
-    const pluckerBallGeo = new THREE.SphereGeometry(0.5, 16, 16);
+    const pluckerBallGeo = new THREE.SphereGeometry(1, 16, 16);
     const pluckerBallMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     this.pluckerBall = new THREE.Mesh(pluckerBallGeo, pluckerBallMat);
     this.pluckerBall.visible = false;
     this.debuggersObject3D.add(this.pluckerBall);
-
+this.pluckerBall.scale.setScalar(0.05);
   }
 
   buildDistanceHud() {

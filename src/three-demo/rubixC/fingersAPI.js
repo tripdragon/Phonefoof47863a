@@ -63,7 +63,7 @@ export class FingersAPI {
   clampedDirectionHelper;
   clampedDirectionV = new THREE.Vector3(0, 1, 0);
   clampedDirectionOriginV = new THREE.Vector3();
-  clampedDirectionHelperLength = 0.5;
+  clampedDirectionHelperLength = 1.0;
   positiveCrossDirHelper;
   positiveCrossDirV = new THREE.Vector3();
   positiveCrossDirOriginV = new THREE.Vector3();

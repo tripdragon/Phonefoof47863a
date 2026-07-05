@@ -1,4 +1,5 @@
-import * as THREE from "three";
+// import * as THREE from "three";
+import { Vector3, Raycaster } from "three";
 import { SlightlyPriceyPool } from './slightlyPriceyPool.js';
 import { DebugSelectionDownLine } from "./DebugSelectionDownLine.js";
 import { ThickArrowHelper, ThickAxesHelper } from "./thickAxesHelper.js";

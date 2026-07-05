@@ -104,6 +104,18 @@ export class FingersAPI {
   faceCenterV = new THREE.Vector3();
   sizeV = new THREE.Vector3();
   pluckerVectors = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+  pluckerGroupCenterVectors = [];
+  selectedScreenAxises = [];
+  selectedScreenAxisInverseVectors = [new THREE.Vector3(), new THREE.Vector3()];
+  selectedScreenAxisCandidates = [];
+  selectedFaceNormalLocalV = new THREE.Vector3();
+  selectedFaceNormalLocalPointV = new THREE.Vector3();
+  selectedFaceNormalLocalOriginV = new THREE.Vector3();
+  selectedScreenAxisDotV = new THREE.Vector3();
+  clampedDirectionLocalOriginV = new THREE.Vector3();
+  clampedDirectionLocalPointV = new THREE.Vector3();
+  clampedDirectionLocalV = new THREE.Vector3();
+  clampedDirectionLocalAxisV = new THREE.Vector3();
   pluckerNormalPointV = new THREE.Vector3();
   pluckerBall = null;
 
@@ -455,6 +467,8 @@ this.pluckerBall.scale.setScalar(0.05);
   plucker(hit) {
     if (!hit?.object || !hit?.face) return this.pluckerVectors;
 
+    this.pluckerVectors.length = 3;
+
     this.normalMatrix.getNormalMatrix(hit.object.matrixWorld);
     this.worldNormal.copy(hit.face.normal).applyMatrix3(this.normalMatrix).normalize();
 
@@ -468,12 +482,88 @@ this.pluckerBall.scale.setScalar(0.05);
     this.pluckerVectors[1].copy(this.pluckerNormalPointV);
     this.pluckerVectors[2].copy(this.pluckerNormalPointV).sub(this.centerV);
 
+    this.addSelectedGroupCenterVectorsToPlucker();
+    this.refreshSelectedScreenAxises();
+
     if (this.pluckerBall) {
       this.pluckerBall.position.copy(this.pluckerNormalPointV);
       this.pluckerBall.visible = true;
     }
 
     return this.pluckerVectors;
+  }
+
+
+  addSelectedGroupCenterVectorsToPlucker() {
+    const groups = this.getAllGroupsSelectedIsIn();
+
+    groups.forEach((group, index) => {
+      const centerPiece = group?.center;
+      if (!centerPiece) return;
+
+      const centerVector = this.pluckerGroupCenterVectors[index] ?? new THREE.Vector3();
+      this.pluckerGroupCenterVectors[index] = centerVector;
+      centerPiece.getWorldPosition(centerVector);
+      this.pluckerVectors.push(centerVector);
+    });
+  }
+
+
+  refreshSelectedScreenAxises() {
+    this.selectedScreenAxises.length = 0;
+
+    const localSpace = this.cube?.core ?? this.cube;
+    const groupCenterVectorOffset = 3;
+    const groupCenterVectorCount = this.pluckerVectors.length - groupCenterVectorOffset;
+    if (!localSpace || groupCenterVectorCount < 2) return this.selectedScreenAxises;
+
+    this.selectedFaceNormalLocalOriginV.copy(this.centerV);
+    this.selectedFaceNormalLocalPointV.copy(this.centerV).add(this.worldNormal);
+    localSpace.worldToLocal(this.selectedFaceNormalLocalOriginV);
+    localSpace.worldToLocal(this.selectedFaceNormalLocalPointV);
+    this.selectedFaceNormalLocalV
+      .copy(this.selectedFaceNormalLocalPointV)
+      .sub(this.selectedFaceNormalLocalOriginV)
+      .normalize();
+
+    for (let index = 0; index < groupCenterVectorCount; index++) {
+      const groupCenterVector = this.pluckerVectors[index + groupCenterVectorOffset];
+      const candidate = this.selectedScreenAxisCandidates[index] ?? { axis: new THREE.Vector3(), dotDistance: 0 };
+      candidate.axis.copy(groupCenterVector);
+      localSpace.worldToLocal(candidate.axis);
+      candidate.dotDistance = Math.abs(this.selectedScreenAxisDotV.copy(candidate.axis).normalize().dot(this.selectedFaceNormalLocalV));
+      this.selectedScreenAxisCandidates[index] = candidate;
+    }
+    this.selectedScreenAxisCandidates.length = groupCenterVectorCount;
+
+    let closestAxisIndex = -1;
+    if (groupCenterVectorCount > 2) {
+      closestAxisIndex = this.selectedScreenAxisCandidates.reduce((closestIndex, candidate, index, candidates) => {
+        if (!candidates[closestIndex] || candidate.dotDistance > candidates[closestIndex].dotDistance) {
+          return index;
+        }
+        return closestIndex;
+      }, 0);
+    }
+
+    this.selectedScreenAxisCandidates.forEach((candidate, index) => {
+      if (index !== closestAxisIndex && this.selectedScreenAxises.length < 2) {
+        this.selectedScreenAxises.push(candidate.axis);
+      }
+    });
+    this.addInverseSelectedScreenAxises();
+
+    return this.selectedScreenAxises;
+  }
+
+  addInverseSelectedScreenAxises() {
+    const selectedAxisCount = this.selectedScreenAxises.length;
+    for (let index = 0; index < selectedAxisCount; index++) {
+      const inverseAxis = this.selectedScreenAxisInverseVectors[index] ?? new THREE.Vector3();
+      this.selectedScreenAxisInverseVectors[index] = inverseAxis;
+      inverseAxis.copy(this.selectedScreenAxises[index]).negate();
+      this.selectedScreenAxises.push(inverseAxis);
+    }
   }
 
   refreshPieceFaceNormal(hit){
@@ -516,6 +606,49 @@ this.pluckerBall.scale.setScalar(0.05);
     this.clampedDirectionHelper.visible = true;
   }
 
+
+
+  updateClampedDirectionFromSelectedScreenAxises() {
+    if (!this.clampedDirectionHelper || this.selectedScreenAxises.length === 0) return;
+
+    const localSpace = this.cube?.core ?? this.cube;
+    if (!localSpace) return;
+
+    this.clampedDirectionLocalOriginV.copy(this.arrowDirOriginV);
+    this.clampedDirectionLocalPointV.copy(this.arrowDirOriginV).add(this.arrowDirV);
+    localSpace.worldToLocal(this.clampedDirectionLocalOriginV);
+    localSpace.worldToLocal(this.clampedDirectionLocalPointV);
+    this.clampedDirectionLocalV
+      .copy(this.clampedDirectionLocalPointV)
+      .sub(this.clampedDirectionLocalOriginV)
+      .normalize();
+
+    let closestAxis = null;
+    let closestDot = -Infinity;
+    this.selectedScreenAxises.forEach((axis) => {
+      const dot = this.clampedDirectionLocalAxisV.copy(axis).normalize().dot(this.clampedDirectionLocalV);
+      if (dot > closestDot) {
+        closestDot = dot;
+        closestAxis = axis;
+      }
+    });
+
+    if (!closestAxis) return;
+
+    this.clampedDirectionLocalV.copy(closestAxis).normalize();
+    this.clampedDirectionLocalPointV.copy(this.clampedDirectionLocalOriginV).add(this.clampedDirectionLocalV);
+    localSpace.localToWorld(this.clampedDirectionLocalPointV);
+    this.clampedDirectionV
+      .copy(this.clampedDirectionLocalPointV)
+      .sub(this.arrowDirOriginV)
+      .normalize();
+
+    this.clampedDirectionOriginV.copy(this.pointDown3D);
+    this.clampedDirectionHelper.position.copy(this.clampedDirectionOriginV);
+    this.clampedDirectionHelper.setDirection(this.clampedDirectionV);
+    this.clampedDirectionHelper.setLength(this.clampedDirectionHelperLength, 0.16, 0.12);
+    this.clampedDirectionHelper.visible = true;
+  }
 
 
   updateCrossProductHelper() {
@@ -640,6 +773,7 @@ this.pluckerBall.scale.setScalar(0.05);
               this.arrowDirV.multiplyScalar(1 / dirLen);
               this.arrowDirHelper.position.copy(this.arrowDirOriginV);
               this.arrowDirHelper.setDirection(this.arrowDirV);
+              this.updateClampedDirectionFromSelectedScreenAxises();
               this.updateCrossProductHelper();
             }
           }
@@ -748,6 +882,7 @@ this.pluckerBall.scale.setScalar(0.05);
       this.arrowDirV.multiplyScalar(1 / dirLen);
       this.arrowDirHelper.position.copy(this.arrowDirOriginV);
       this.arrowDirHelper.setDirection(this.arrowDirV);
+      this.updateClampedDirectionFromSelectedScreenAxises();
       this.updateCrossProductHelper();
     }
 

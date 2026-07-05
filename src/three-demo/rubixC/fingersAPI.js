@@ -18,6 +18,171 @@ import { ThickArrowHelper, ThickAxesHelper } from "./thickAxesHelper.js";
     // + begin its rotating using the delta
     // + delegate further work to different api to follow finger
   
+
+class PointerTracker {
+  activePointers = new Map();
+
+  recordDown(ev) {
+    this.activePointers.set(ev.pointerId, ev);
+    return this.activePointers.size;
+  }
+
+  recordMove(ev) {
+    this.activePointers.set(ev.pointerId, ev);
+    return this.activePointers.size;
+  }
+
+  recordUp(ev) {
+    this.activePointers.delete(ev.pointerId);
+    return this.activePointers.size;
+  }
+
+  get size() {
+    return this.activePointers.size;
+  }
+}
+
+class DistanceHud {
+  element = null;
+  thresholdBubbleTimeout = null;
+
+  constructor({ triggerDistance }) {
+    this.triggerDistance = triggerDistance;
+    this.build();
+  }
+
+  build() {
+    if (typeof document === "undefined") return;
+    const hud = document.createElement("output");
+    hud.className = "superneat-top-log";
+    hud.setAttribute("aria-live", "polite");
+    hud.textContent = "Drag distance: 0.000";
+    document.body.appendChild(hud);
+    this.element = hud;
+  }
+
+  update(distance) {
+    if (!this.element) return;
+    this.element.textContent = `Drag distance: ${distance.toFixed(3)}`;
+  }
+
+  popThresholdBubble(distance) {
+    if (typeof document === "undefined") return;
+    const bubble = document.createElement("output");
+    bubble.className = "superneat-top-log";
+    bubble.style.top = "2.8rem";
+    bubble.style.background = "rgba(22, 101, 52, 0.94)";
+    bubble.style.borderColor = "#14532d";
+    bubble.textContent = `Distance reached ${distance.toFixed(3)} (threshold ${this.triggerDistance.toFixed(3)})`;
+    document.body.appendChild(bubble);
+
+    if (this.thresholdBubbleTimeout) {
+      window.clearTimeout(this.thresholdBubbleTimeout);
+    }
+    this.thresholdBubbleTimeout = window.setTimeout(() => {
+      bubble.remove();
+      if (this.thresholdBubbleTimeout) {
+        this.thresholdBubbleTimeout = null;
+      }
+    }, 1600);
+  }
+
+  dispose() {
+    if (this.element) {
+      this.element.remove();
+      this.element = null;
+    }
+    if (this.thresholdBubbleTimeout) {
+      window.clearTimeout(this.thresholdBubbleTimeout);
+      this.thresholdBubbleTimeout = null;
+    }
+  }
+}
+
+class PieceColorController {
+  constructor(cube) {
+    this.cube = cube;
+  }
+
+  setPieceMainColor(piece, colorHex = 0xffffff) {
+    if (!piece?.planes?.length) return;
+    piece.planes.forEach((entry) => {
+      if (entry?.color) {
+        entry.color.set(colorHex);
+      }
+      const mat = entry?.plane?.material;
+      if (mat?.uniforms?.uMainColor?.value) {
+        mat.uniforms.uMainColor.value.set(colorHex);
+      }
+    });
+  }
+
+  colorAllPieces(colorHex = 0xffffff) {
+    if (!this.cube?.pieces?.length) return;
+    this.cube.pieces.forEach((piece) => {
+      this.setPieceMainColor(piece, colorHex);
+    });
+  }
+
+  getGroupsForPiece(piece) {
+    if (!piece || !this.cube?.tGS) return [];
+    return Object.values(this.cube.tGS).filter((group) => group?.includes?.(piece));
+  }
+
+  colorGroups(groups, colorHex) {
+    groups.forEach((group) => {
+      group.forEach((piece) => {
+        this.setPieceMainColor(piece, colorHex);
+      });
+    });
+  }
+}
+
+class FacePlaneMarkerPool {
+  holder3D = null;
+  planePool = null;
+  planePoolGrid = null;
+  planeHitZone3D = null;
+
+  constructor({ scene, planeHitsMax }) {
+    this.scene = scene;
+    this.planeHitsMax = planeHitsMax;
+    this.build();
+  }
+
+  build() {
+    if (!this.scene) return;
+    this.holder3D = new THREE.Group();
+    this.scene.add(this.holder3D);
+    this.planePool = new SlightlyPriceyPool({ rootObject3D: this.holder3D });
+    this.planePoolGrid = new SlightlyPriceyPool({ rootObject3D: this.holder3D });
+
+    const geometry = new THREE.PlaneGeometry(10, 10);
+    const matrix = new THREE.Matrix4().makeRotationX(-Math.PI / 2);
+    geometry.applyMatrix4(matrix);
+    const material = new THREE.MeshBasicMaterial({ color: 0xff22ff, opacity: 0.2, transparent: true });
+    this.planeHitZone3D = new THREE.Mesh(geometry, material);
+    this.scene.add(this.planeHitZone3D);
+    this.planeHitZone3D.add(new ThickAxesHelper({ length: 5, radius: 0.035 }));
+
+    const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);
+    const markerMat = new THREE.MeshBasicMaterial({ color: 0xffff22 });
+    const gridMarkerMat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+
+    for (let i = 0; i < this.planeHitsMax; i++) {
+      const marker = new THREE.Mesh(markerGeo, markerMat);
+      marker.visible = false;
+      this.planePool.add(marker);
+      this.holder3D.add(marker);
+
+      const gridMarker = new THREE.Mesh(markerGeo, gridMarkerMat);
+      gridMarker.visible = false;
+      this.planePoolGrid.add(gridMarker);
+      this.holder3D.add(gridMarker);
+    }
+  }
+}
+
 const states = {
   idle : "idle",
   onCube : "onCube",
@@ -33,7 +198,7 @@ export class FingersAPI {
   state = states.idle;
   isOnCube = false;
 
-  activePointers = new Map();
+  pointerTracker = new PointerTracker();
   
   planePool; // CheapPoolIsh
   planePoolGrid; // stupid names
@@ -85,8 +250,7 @@ export class FingersAPI {
   currentDragDistance = 0;
   lastTriggeredDistance = 0;
   triggerDistance = 0.35;
-  distanceHudEl = null;
-  thresholdBubbleTimeout = null;
+  distanceHud = null;
 
   showDirectionArrow = true;
   showPlaneBallDebugger = true;
@@ -135,9 +299,10 @@ export class FingersAPI {
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
     
+    this.pieceColorController = new PieceColorController(this.cube);
     this.buildPlanePool();
     this.buildVisualHelpers();
-    this.buildDistanceHud();
+    this.distanceHud = new DistanceHud({ triggerDistance: this.triggerDistance });
     this.debugSetAllPieceInnerFacesToWhite();
 
   }
@@ -152,8 +317,8 @@ export class FingersAPI {
   }
 
   onPointerDown(ev){
-    this.activePointers.set(ev.pointerId, ev);
-    if (this.activePointers.size > 1) {
+    this.pointerTracker.recordDown(ev);
+    if (this.pointerTracker.size > 1) {
       this.resetInteractionState();
       return;
     }
@@ -167,8 +332,8 @@ export class FingersAPI {
     this.tryPointerDown(ev);
   }
   onPointerMove(ev){
-    this.activePointers.set(ev.pointerId, ev);
-    if (this.activePointers.size > 1) {
+    this.pointerTracker.recordMove(ev);
+    if (this.pointerTracker.size > 1) {
       this.resetInteractionState();
       return;
     }
@@ -181,8 +346,8 @@ export class FingersAPI {
   }
   
   onPointerUp(ev){
-    this.activePointers.delete(ev.pointerId);
-    if (this.activePointers.size > 0) return;
+    this.pointerTracker.recordUp(ev);
+    if (this.pointerTracker.size > 0) return;
     this.resetInteractionState();
   }
 
@@ -206,46 +371,11 @@ export class FingersAPI {
   }
 
   buildPlanePool(){
-
-    if (!this.scene) return;
-    this.planePoolHolder3D = new THREE.Group();
-    this.scene.add(this.planePoolHolder3D);
-    this.planePool  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
-    this.planePoolGrid  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
-
-    // need the plane facing up for other calculations later
-    const geometry = new THREE.PlaneGeometry( 10, 10 );
-    const matrix = new THREE.Matrix4().makeRotationX(-Math.PI / 2);
-    geometry.applyMatrix4(matrix);
-
-
-      
-    const material = new THREE.MeshBasicMaterial( { color: 0xff22ff, opacity:0.2, transparent : true} );
-    const plane = new THREE.Mesh( geometry, material );
-    scene.add( plane );
-    this.planeHitZone3D = plane;
-    //plane.visible = false;
-    
-    const axesHelper = new ThickAxesHelper({ length: 5, radius: 0.035 });
-    plane.add( axesHelper );
-    
-    
-    const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);
-    const markerMat = new THREE.MeshBasicMaterial({ color: 0xffff22 });
-    const markerMat2 = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-    
-    for (let i = 0; i < this.planeHitsMax; i++) {
-      const marker = new THREE.Mesh(markerGeo, markerMat);
-      marker.visible = false;
-      this.planePool.add(marker);
-      this.planePoolHolder3D.add(marker);
-      // other type for the face grid
-      const markerB = new THREE.Mesh(markerGeo, markerMat2);
-      markerB.visible = false;
-      this.planePoolGrid.add(markerB);
-      this.planePoolHolder3D.add(markerB);
-    }
-
+    const markerPool = new FacePlaneMarkerPool({ scene: this.scene, planeHitsMax: this.planeHitsMax });
+    this.planePoolHolder3D = markerPool.holder3D;
+    this.planePool = markerPool.planePool;
+    this.planePoolGrid = markerPool.planePoolGrid;
+    this.planeHitZone3D = markerPool.planeHitZone3D;
   }
   
   buildVisualHelpers(){
@@ -313,40 +443,17 @@ this.pluckerBall.scale.setScalar(0.05);
   }
 
   buildDistanceHud() {
-    if (typeof document === "undefined") return;
-    const hud = document.createElement("output");
-    hud.className = "superneat-top-log";
-    hud.setAttribute("aria-live", "polite");
-    hud.textContent = "Drag distance: 0.000";
-    document.body.appendChild(hud);
-    this.distanceHudEl = hud;
+    this.distanceHud = new DistanceHud({ triggerDistance: this.triggerDistance });
   }
 
   updateDistanceHud(distance) {
-    if (!this.distanceHudEl) return;
-    this.distanceHudEl.textContent = `Drag distance: ${distance.toFixed(3)}`;
+    this.distanceHud?.update(distance);
   }
 
   popThresholdBubble(distance) {
-    if (typeof document === "undefined") return;
-    const bubble = document.createElement("output");
-    bubble.className = "superneat-top-log";
-    bubble.style.top = "2.8rem";
-    bubble.style.background = "rgba(22, 101, 52, 0.94)";
-    bubble.style.borderColor = "#14532d";
-    bubble.textContent = `Distance reached ${distance.toFixed(3)} (threshold ${this.triggerDistance.toFixed(3)})`;
-    document.body.appendChild(bubble);
-
-    if (this.thresholdBubbleTimeout) {
-      window.clearTimeout(this.thresholdBubbleTimeout);
-    }
-    this.thresholdBubbleTimeout = window.setTimeout(() => {
-      bubble.remove();
-      if (this.thresholdBubbleTimeout) {
-        this.thresholdBubbleTimeout = null;
-      }
-    }, 1600);
+    this.distanceHud?.popThresholdBubble(distance);
   }
+
 
 
   getHits(ev){
@@ -412,37 +519,20 @@ this.pluckerBall.scale.setScalar(0.05);
   }
 
   setPieceMainColor(piece, colorHex = 0xffffff) {
-    if (!piece?.planes?.length) return;
-    piece.planes.forEach((entry) => {
-      if (entry?.color) {
-        entry.color.set(colorHex);
-      }
-      const mat = entry?.plane?.material;
-      if (mat?.uniforms?.uMainColor?.value) {
-        mat.uniforms.uMainColor.value.set(colorHex);
-      }
-    });
+    this.pieceColorController.setPieceMainColor(piece, colorHex);
   }
 
   colorAllPiecesWhite() {
-    if (!this.cube?.pieces?.length) return;
-    this.cube.pieces.forEach((piece) => {
-      this.setPieceMainColor(piece, 0xffffff);
-    });
+    this.pieceColorController.colorAllPieces(0xffffff);
   }
 
   getAllGroupsSelectedIsIn() {
-    if (!this.selectedPiece || !this.cube?.tGS) return [];
-    return Object.values(this.cube.tGS).filter((group) => group?.includes?.(this.selectedPiece));
+    return this.pieceColorController.getGroupsForPiece(this.selectedPiece);
   }
 
   colorSelectedGroupsCyan() {
     const groups = this.getAllGroupsSelectedIsIn();
-    groups.forEach((group) => {
-      group.forEach((piece) => {
-        this.setPieceMainColor(piece, 0x00ffff);
-      });
-    });
+    this.pieceColorController.colorGroups(groups, 0x00ffff);
   }
 
 
@@ -1047,14 +1137,8 @@ this.pluckerBall.scale.setScalar(0.05);
     this.domElement?.removeEventListener("pointerup", this.onPointerUp);
     this.domElement?.removeEventListener("pointercancel", this.onPointerUp);
     this.domElement?.removeEventListener("pointerleave", this.onPointerUp);
-    if (this.distanceHudEl) {
-      this.distanceHudEl.remove();
-      this.distanceHudEl = null;
-    }
-    if (this.thresholdBubbleTimeout) {
-      window.clearTimeout(this.thresholdBubbleTimeout);
-      this.thresholdBubbleTimeout = null;
-    }
+    this.distanceHud?.dispose();
+    this.distanceHud = null;
     if (this.pluckerBall) {
       this.pluckerBall.geometry?.dispose?.();
       this.pluckerBall.material?.dispose?.();

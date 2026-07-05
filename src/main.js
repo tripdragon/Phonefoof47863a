@@ -620,10 +620,11 @@ function renderHomeRoute() {
       renderWeather(data, label);
     };
 
-    if (!navigator.geolocation) {
-      await loadFromCoordinates(fallback.latitude, fallback.longitude, fallback.label);
-      return;
-    }
+    console.log("turned off weather");
+    // if (!navigator.geolocation) {
+    //   await loadFromCoordinates(fallback.latitude, fallback.longitude, fallback.label);
+    //   return;
+    // }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {

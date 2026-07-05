@@ -1,5 +1,9 @@
 // import * as THREE from "three";
-import { Vector3, Raycaster } from "three";
+import { 
+  Vector2, Vector3, Raycaster, Matrix3, Matrix4, Box3, Group, 
+  PlaneGeometry, MeshBasicMaterial, 
+  SphereGeometry, Mesh, BoxGeometry, GridHelper  } from "three";
+
 import { SlightlyPriceyPool } from './slightlyPriceyPool.js';
 import { DebugSelectionDownLine } from "./DebugSelectionDownLine.js";
 import { ThickArrowHelper, ThickAxesHelper } from "./thickAxesHelper.js";
@@ -7,7 +11,7 @@ import { ThickArrowHelper, ThickAxesHelper } from "./thickAxesHelper.js";
 
     // on pointer down first test if on the cube
     // + test if on a piece
-    // + get the face of the piece and its normal
+    // + get the face of the piece and its 
     // + draw a giant 3d plane on the face
     // + continue hit tests now onto this plane
     // + over time test the form of points gesture
@@ -44,35 +48,35 @@ export class FingersAPI {
   planeHitsMax;
   hits1 = [];// for raycaster
   hitsPlane = [];// for racaster
-  raycaster = new THREE.Raycaster();
+  raycaster = new Raycaster();
   pointsPlane = []; // as finger moves
   planeHelper;
   hitDown = null; // is a hit object with .point for position
-  pointDown3D = new THREE.Vector3(); // world position
+  pointDown3D = new Vector3(); // world position
   // the math does not line up on 3d without 
   // even more math to get the proper constant 
   // planeMath;
   arrowDirHelper;
-  arrowDirV = new THREE.Vector3();
-  arrowDirOriginV = new THREE.Vector3();
+  arrowDirV = new Vector3();
+  arrowDirOriginV = new Vector3();
   crossDirHelper;
-  crossDirV = new THREE.Vector3();
-  crossDirOriginV = new THREE.Vector3();
-  crossDirOffsetV = new THREE.Vector3();
+  crossDirV = new Vector3();
+  crossDirOriginV = new Vector3();
+  crossDirOffsetV = new Vector3();
   crossDirHelperLength = 3;
   crossDirHelperNormalOffset = 0.06;
   clampedDirectionHelper;
-  clampedDirectionV = new THREE.Vector3(0, 1, 0);
-  clampedDirectionOriginV = new THREE.Vector3();
+  clampedDirectionV = new Vector3(0, 1, 0);
+  clampedDirectionOriginV = new Vector3();
   clampedDirectionHelperLength = 0.5;
   positiveCrossDirHelper;
-  positiveCrossDirV = new THREE.Vector3();
-  positiveCrossDirOriginV = new THREE.Vector3();
-  positiveCrossDirOffsetV = new THREE.Vector3();
+  positiveCrossDirV = new Vector3();
+  positiveCrossDirOriginV = new Vector3();
+  positiveCrossDirOffsetV = new Vector3();
   positiveCrossDirHelperLength = 2.5;
   positiveCrossDirHelperNormalOffset = 0.16;
 
-  screenCoordsV = new THREE.Vector2();
+  screenCoordsV = new Vector2();
   selectedPiece = null;
 
   faceArrow;
@@ -80,9 +84,9 @@ export class FingersAPI {
   useFaceArrowDebugger = true;
   useFaceGridDebugger = true;
   lockGridDown = false;
-  arrowDirectionV = new THREE.Vector3();
-  arrowOriginV = new THREE.Vector3();
-  movingAveragePointV = new THREE.Vector3();
+  arrowDirectionV = new Vector3();
+  arrowOriginV = new Vector3();
+  movingAveragePointV = new Vector3();
   currentDragDistance = 0;
   lastTriggeredDistance = 0;
   triggerDistance = 0.35;
@@ -93,31 +97,31 @@ export class FingersAPI {
   showPlaneBallDebugger = true;
   selectionDownLine;
 
-  //movingAvV = new THREE.Vector3();
+  //movingAvV = new Vector3();
 
   IS_DOWN = false;
 
   // reuseables
-  normalMatrix = new THREE.Matrix3();
-  worldNormal = new THREE.Vector3();
-  box1 = new THREE.Box3();
-  centerV = new THREE.Vector3();
-  faceCenterV = new THREE.Vector3();
-  sizeV = new THREE.Vector3();
-  pluckerVectors = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+  normalMatrix = new Matrix3();
+  worldNormal = new Vector3();
+  box1 = new Box3();
+  centerV = new Vector3();
+  faceCenterV = new Vector3();
+  sizeV = new Vector3();
+  pluckerVectors = [new Vector3(), new Vector3(), new Vector3()];
   pluckerGroupCenterVectors = [];
   selectedScreenAxises = [];
-  selectedScreenAxisInverseVectors = [new THREE.Vector3(), new THREE.Vector3()];
+  selectedScreenAxisInverseVectors = [new Vector3(), new Vector3()];
   selectedScreenAxisCandidates = [];
-  selectedFaceNormalLocalV = new THREE.Vector3();
-  selectedFaceNormalLocalPointV = new THREE.Vector3();
-  selectedFaceNormalLocalOriginV = new THREE.Vector3();
-  selectedScreenAxisDotV = new THREE.Vector3();
-  clampedDirectionLocalOriginV = new THREE.Vector3();
-  clampedDirectionLocalPointV = new THREE.Vector3();
-  clampedDirectionLocalV = new THREE.Vector3();
-  clampedDirectionLocalAxisV = new THREE.Vector3();
-  pluckerNormalPointV = new THREE.Vector3();
+  selectedFaceNormalLocalV = new Vector3();
+  selectedFaceNormalLocalPointV = new Vector3();
+  selectedFaceNormalLocalOriginV = new Vector3();
+  selectedScreenAxisDotV = new Vector3();
+  clampedDirectionLocalOriginV = new Vector3();
+  clampedDirectionLocalPointV = new Vector3();
+  clampedDirectionLocalV = new Vector3();
+  clampedDirectionLocalAxisV = new Vector3();
+  pluckerNormalPointV = new Vector3();
   pluckerBall = null;
 
 
@@ -209,20 +213,20 @@ export class FingersAPI {
   buildPlanePool(){
 
     if (!this.scene) return;
-    this.planePoolHolder3D = new THREE.Group();
+    this.planePoolHolder3D = new Group();
     this.scene.add(this.planePoolHolder3D);
     this.planePool  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
     this.planePoolGrid  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
 
     // need the plane facing up for other calculations later
-    const geometry = new THREE.PlaneGeometry( 10, 10 );
-    const matrix = new THREE.Matrix4().makeRotationX(-Math.PI / 2);
+    const geometry = new PlaneGeometry( 10, 10 );
+    const matrix = new Matrix4().makeRotationX(-Math.PI / 2);
     geometry.applyMatrix4(matrix);
 
 
       
-    const material = new THREE.MeshBasicMaterial( { color: 0xff22ff, opacity:0.2, transparent : true} );
-    const plane = new THREE.Mesh( geometry, material );
+    const material = new MeshBasicMaterial( { color: 0xff22ff, opacity:0.2, transparent : true} );
+    const plane = new Mesh( geometry, material );
     scene.add( plane );
     this.planeHitZone3D = plane;
     //plane.visible = false;
@@ -231,17 +235,17 @@ export class FingersAPI {
     plane.add( axesHelper );
     
     
-    const markerGeo = new THREE.SphereGeometry(0.03, 8, 8);
-    const markerMat = new THREE.MeshBasicMaterial({ color: 0xffff22 });
-    const markerMat2 = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+    const markerGeo = new SphereGeometry(0.03, 8, 8);
+    const markerMat = new MeshBasicMaterial({ color: 0xffff22 });
+    const markerMat2 = new MeshBasicMaterial({ color: 0x0000ff });
     
     for (let i = 0; i < this.planeHitsMax; i++) {
-      const marker = new THREE.Mesh(markerGeo, markerMat);
+      const marker = new Mesh(markerGeo, markerMat);
       marker.visible = false;
       this.planePool.add(marker);
       this.planePoolHolder3D.add(marker);
       // other type for the face grid
-      const markerB = new THREE.Mesh(markerGeo, markerMat2);
+      const markerB = new Mesh(markerGeo, markerMat2);
       markerB.visible = false;
       this.planePoolGrid.add(markerB);
       this.planePoolHolder3D.add(markerB);
@@ -254,18 +258,18 @@ export class FingersAPI {
     // this.arrowOut.visible = false;
     // this.planePoolHolder3D.add(this.arrowOut);
 
-    this.debuggersObject3D = new THREE.Group();
+    this.debuggersObject3D = new Group();
     this.scene.add(this.debuggersObject3D);
 
     this.faceArrow = new ThickArrowHelper(this.arrowDirectionV, this.arrowOriginV, 1.1, 0x2d7fff, 0.18, 0.1);
     this.faceArrow.visible = false;
     this.debuggersObject3D.add(this.faceArrow);
 
-    this.faceGridHelper = new THREE.GridHelper(3, 12, 0x2d7fff, 0x2d7fff);
+    this.faceGridHelper = new GridHelper(3, 12, 0x2d7fff, 0x2d7fff);
     this.faceGridHelper.visible = false;
     this.planeHitZone3D.add(this.faceGridHelper);
 
-    //this.planeMath = new THREE.Plane( new THREE.Vector3( 1, 1, 0 ), 4 );
+    //this.planeMath = new THREE.Plane( new Vector3( 1, 1, 0 ), 4 );
     //this.planeHelper = new THREE.PlaneHelper( this.planeMath, 4, 0xafff00 );
     //this.debuggersObject3D.add( this.planeHelper );
 
@@ -305,9 +309,9 @@ export class FingersAPI {
     this.selectionDownLine = new DebugSelectionDownLine({ length: 1.5, radius: 0.03, color: 0x000000 });
     this.debuggersObject3D.add(this.selectionDownLine);
 
-    const pluckerBallGeo = new THREE.SphereGeometry(1, 16, 16);
-    const pluckerBallMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    this.pluckerBall = new THREE.Mesh(pluckerBallGeo, pluckerBallMat);
+    const pluckerBallGeo = new SphereGeometry(1, 16, 16);
+    const pluckerBallMat = new MeshBasicMaterial({ color: 0xff0000 });
+    this.pluckerBall = new Mesh(pluckerBallGeo, pluckerBallMat);
     this.pluckerBall.visible = false;
     this.debuggersObject3D.add(this.pluckerBall);
 this.pluckerBall.scale.setScalar(0.05);
@@ -502,7 +506,7 @@ this.pluckerBall.scale.setScalar(0.05);
       const centerPiece = group?.center;
       if (!centerPiece) return;
 
-      const centerVector = this.pluckerGroupCenterVectors[index] ?? new THREE.Vector3();
+      const centerVector = this.pluckerGroupCenterVectors[index] ?? new Vector3();
       this.pluckerGroupCenterVectors[index] = centerVector;
       centerPiece.getWorldPosition(centerVector);
       this.pluckerVectors.push(centerVector);
@@ -529,7 +533,7 @@ this.pluckerBall.scale.setScalar(0.05);
 
     for (let index = 0; index < groupCenterVectorCount; index++) {
       const groupCenterVector = this.pluckerVectors[index + groupCenterVectorOffset];
-      const candidate = this.selectedScreenAxisCandidates[index] ?? { axis: new THREE.Vector3(), dotDistance: 0 };
+      const candidate = this.selectedScreenAxisCandidates[index] ?? { axis: new Vector3(), dotDistance: 0 };
       candidate.axis.copy(groupCenterVector);
       localSpace.worldToLocal(candidate.axis);
       candidate.dotDistance = Math.abs(this.selectedScreenAxisDotV.copy(candidate.axis).normalize().dot(this.selectedFaceNormalLocalV));
@@ -560,7 +564,7 @@ this.pluckerBall.scale.setScalar(0.05);
   addInverseSelectedScreenAxises() {
     const selectedAxisCount = this.selectedScreenAxises.length;
     for (let index = 0; index < selectedAxisCount; index++) {
-      const inverseAxis = this.selectedScreenAxisInverseVectors[index] ?? new THREE.Vector3();
+      const inverseAxis = this.selectedScreenAxisInverseVectors[index] ?? new Vector3();
       this.selectedScreenAxisInverseVectors[index] = inverseAxis;
       inverseAxis.copy(this.selectedScreenAxises[index]).negate();
       this.selectedScreenAxises.push(inverseAxis);
@@ -837,32 +841,32 @@ this.pluckerBall.scale.setScalar(0.05);
     
   }
 
-  pv0 = new THREE.Vector3();
-  pv1 = new THREE.Vector3();
-  pv2 = new THREE.Vector3();
+  pv0 = new Vector3();
+  pv1 = new Vector3();
+  pv2 = new Vector3();
 
 
   has_dihffg = false;
   ballA = null;
   ballB = null;
-  matrixA = new THREE.Matrix3();
+  matrixA = new Matrix3();
   boxaA1 = null;
-  Vsdhjkf111 = new THREE.Vector3();
+  Vsdhjkf111 = new Vector3();
   updateDirectionCheck(ev){
     if(!this.has_dihffg){
       this.has_dihffg = true;
-      const ballGeoA = new THREE.SphereGeometry(0.1, 8, 8);
-      const markerMat = new THREE.MeshBasicMaterial({ color: 0xffbb22 });
-      const markerMat2 = new THREE.MeshBasicMaterial({ color: 0xaa22ff });
-      this.ballA = new THREE.Mesh(ballGeoA, markerMat);
-      this.ballB = new THREE.Mesh(ballGeoA, markerMat2);
+      const ballGeoA = new SphereGeometry(0.1, 8, 8);
+      const markerMat = new MeshBasicMaterial({ color: 0xffbb22 });
+      const markerMat2 = new MeshBasicMaterial({ color: 0xaa22ff });
+      this.ballA = new Mesh(ballGeoA, markerMat);
+      this.ballB = new Mesh(ballGeoA, markerMat2);
       this.scene.add(this.ballA);
       this.scene.add(this.ballB);
 
       const aa = 0.2;
-      const c1 = new THREE.BoxGeometry( aa,aa,aa );
-      const markerMat2sdf = new THREE.MeshBasicMaterial({ color: 0xaa22ff });
-      this.boxaA1 = new THREE.Mesh(c1, markerMat2sdf);
+      const c1 = new BoxGeometry( aa,aa,aa );
+      const markerMat2sdf = new MeshBasicMaterial({ color: 0xaa22ff });
+      this.boxaA1 = new Mesh(c1, markerMat2sdf);
       this.scene.add(this.boxaA1);
 
     }
@@ -970,7 +974,7 @@ this.pluckerBall.scale.setScalar(0.05);
     
   }
 
-  upV = new THREE.Vector3(0,1,0);
+  upV = new Vector3(0,1,0);
   displayFacePlane(hit){
 
     // this is already done in refreshPieceFaceNormal

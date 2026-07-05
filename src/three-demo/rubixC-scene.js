@@ -5,7 +5,7 @@ import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
 import { RubixCubeLike } from "./rubixC/RubixCubeLike.js";
 import { PiecesGroup } from "./rubixC/PiecesGroup.js";
 import { smoothstep, remapPiToPI2 } from "./rubixC/math.js";
-import { FingersAPI } from "./rubixC/fingersAPI.js";
+import { FingersAPI } from "./rubixC/fingers_api/fingersAPI.js";
 
 export function renderRubixCRoute(container) {
 

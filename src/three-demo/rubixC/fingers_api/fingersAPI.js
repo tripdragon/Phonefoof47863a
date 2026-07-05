@@ -4,9 +4,9 @@ import {
   PlaneGeometry, MeshBasicMaterial, 
   SphereGeometry, Mesh, BoxGeometry, GridHelper  } from "three";
 
-import { SlightlyPriceyPool } from './slightlyPriceyPool.js';
-import { DebugSelectionDownLine } from "./DebugSelectionDownLine.js";
-import { ThickArrowHelper, ThickAxesHelper } from "./thickAxesHelper.js";
+import { SlightlyPriceyPool } from '../slightlyPriceyPool.js';
+import { DebugSelectionDownLine } from "../DebugSelectionDownLine.js";
+import { ThickArrowHelper, ThickAxesHelper } from "../thickAxesHelper.js";
 // A lot of this might should be from superneatlike pointer events
 
     // on pointer down first test if on the cube

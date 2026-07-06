@@ -1,3 +1,6 @@
+
+// V: 1
+
 // import * as THREE from "three";
 import { 
   Vector2, Vector3, Raycaster, Matrix3, Matrix4, Box3, Group, 
@@ -11,7 +14,7 @@ import { ThickArrowHelper, ThickAxesHelper } from "../thickAxesHelper.js";
 
     // on pointer down first test if on the cube
     // + test if on a piece
-    // + get the face of the piece and its 
+    // + get the face of the piece and its center? 
     // + draw a giant 3d plane on the face
     // + continue hit tests now onto this plane
     // + over time test the form of points gesture
@@ -19,8 +22,12 @@ import { ThickArrowHelper, ThickAxesHelper } from "../thickAxesHelper.js";
     //   ++ or in a radial circular
     // + convert the points to local space onto the face
     // + once gesture is picked get the delta distance
-    // + locate which side of cube is effected
-    // + begin its rotating using the delta
+    // + locate which side of cube is affected
+    //   ++ using the opposite axises from the selected face axis
+    //   ++ using a dot product distance filter out the current axis,
+    //   ++ then using torque for figuring out which axis will be effected
+    //   ++ the least to none, select that side of the cube to then apply the torque
+    // + begin its rotating using the delta of the torque
     // + delegate further work to different api to follow finger
   
 const states = {
@@ -140,12 +147,19 @@ export class FingersAPI {
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
     
-    this.buildPlanePool();
-    this.buildVisualHelpers();
-    this.buildDistanceHud();
-    this.debugSetAllPieceInnerFacesToWhite();
+    // these should be able to toggle off
+    // this.buildPlanePool();
+    // this.buildVisualHelpers();
+    // this.buildDistanceHud();
+    // this.debugSetAllPieceInnerFacesToWhite();
 
   }
+
+
+  /*
+    Touch events
+  */
+
   beginPointerEvents() {
     if (!this.domElement) return;
     this.domElement.style.touchAction = "none";
@@ -191,6 +205,10 @@ export class FingersAPI {
     this.resetInteractionState();
   }
 
+  /*
+    State cleaners
+  */
+
   resetInteractionState() {
     this.state = states.idle;
     this.isOnCube = false;
@@ -210,6 +228,19 @@ export class FingersAPI {
     // remains available as a visual reference until the next selection updates it.
   }
 
+
+
+
+
+
+
+
+  /*
+    core tool and debugger view
+    while intergaral to the system needs its own file space
+  */
+
+
   buildPlanePool(){
 
     if (!this.scene) return;
@@ -227,7 +258,7 @@ export class FingersAPI {
       
     const material = new MeshBasicMaterial( { color: 0xff22ff, opacity:0.2, transparent : true} );
     const plane = new Mesh( geometry, material );
-    scene.add( plane );
+    this.scene.add( plane );
     this.planeHitZone3D = plane;
     //plane.visible = false;
     
@@ -253,6 +284,11 @@ export class FingersAPI {
 
   }
   
+
+  /*
+    ai just dumped eveything into here, its now a mess
+
+  */
   buildVisualHelpers(){
     // this.arrowOut = new ThickArrowHelper(this.arrowDirection, this.arrowOrigin, 0.01, 0x111111, 0.15, 0.08);
     // this.arrowOut.visible = false;
@@ -317,6 +353,12 @@ export class FingersAPI {
 this.pluckerBall.scale.setScalar(0.05);
   }
 
+
+
+  /*
+    This HUD can be put into its own class
+    with event linster
+  */
   buildDistanceHud() {
     if (typeof document === "undefined") return;
     const hud = document.createElement("output");
@@ -368,6 +410,14 @@ this.pluckerBall.scale.setScalar(0.05);
     // return this.hits1;
   }
 
+
+
+
+  /*
+    
+    Core logic event from touch events
+    
+  */
 
   tryPointerDown(ev){
     
@@ -429,16 +479,15 @@ this.pluckerBall.scale.setScalar(0.05);
     });
   }
 
+
+  /*
+    debugger item
+  */
   colorAllPiecesWhite() {
     if (!this.cube?.pieces?.length) return;
     this.cube.pieces.forEach((piece) => {
       this.setPieceMainColor(piece, 0xffffff);
     });
-  }
-
-  getAllGroupsSelectedIsIn() {
-    if (!this.selectedPiece || !this.cube?.tGS) return [];
-    return Object.values(this.cube.tGS).filter((group) => group?.includes?.(this.selectedPiece));
   }
 
   colorSelectedGroupsCyan() {
@@ -449,6 +498,15 @@ this.pluckerBall.scale.setScalar(0.05);
       });
     });
   }
+
+
+
+
+  getAllGroupsSelectedIsIn() {
+    if (!this.selectedPiece || !this.cube?.tGS) return [];
+    return Object.values(this.cube.tGS).filter((group) => group?.includes?.(this.selectedPiece));
+  }
+
 
 
   refreshFacePlane(ev){
@@ -468,6 +526,14 @@ this.pluckerBall.scale.setScalar(0.05);
     this.updateClampedDirectionHelper();
     this.updateCrossProductHelper();
   }
+
+
+
+
+  /*
+    ai made this from coders fine grained logic
+    its messy and needs its own space
+  */
 
   plucker(hit) {
     if (!hit?.object || !hit?.face) return this.pluckerVectors;
@@ -498,7 +564,7 @@ this.pluckerBall.scale.setScalar(0.05);
     return this.pluckerVectors;
   }
 
-
+/* plucker 2*/
   addSelectedGroupCenterVectorsToPlucker() {
     const groups = this.getAllGroupsSelectedIsIn();
 
@@ -513,7 +579,7 @@ this.pluckerBall.scale.setScalar(0.05);
     });
   }
 
-
+/*plucker 3*/
   refreshSelectedScreenAxises() {
     this.selectedScreenAxises.length = 0;
 
@@ -560,7 +626,7 @@ this.pluckerBall.scale.setScalar(0.05);
 
     return this.selectedScreenAxises;
   }
-
+/* plucker */
   addInverseSelectedScreenAxises() {
     const selectedAxisCount = this.selectedScreenAxises.length;
     for (let index = 0; index < selectedAxisCount; index++) {
@@ -571,6 +637,9 @@ this.pluckerBall.scale.setScalar(0.05);
     }
   }
 
+/*
+?
+*/
   refreshPieceFaceNormal(hit){
     // stores the face normal for later stuff
     // also moves the faceArrow into the face of the selected hitzone

@@ -157,6 +157,20 @@ export class Piece extends THREE.Object3D {
     });
   }
 
+  setColorOverAll(colorHex = 0xffffff) {
+    if (!this.planes?.length) return;
+    this.planes.forEach((entry) => {
+      if (entry?.color) {
+        entry.color.set(colorHex);
+      }
+      const mat = entry?.plane?.material;
+      if (mat?.uniforms?.uMainColor?.value) {
+        mat.uniforms.uMainColor.value.set(colorHex);
+      }
+    });
+  }
+
+
   // add raycast to type of Group, Object3D
   // since default only allows geometry
   // and in this case DONT draw a box over ALL objects

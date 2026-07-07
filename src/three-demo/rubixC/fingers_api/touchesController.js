@@ -6,6 +6,7 @@ import { SlightlyPriceyPool } from '../slightlyPriceyPool.js';
 import { Session } from './session.js';
 import { Pools } from './pools.js';
 import { MagicPlane } from './magicPlane.js';
+import { Plucker } from './plucker.js';
 
 
 const states = {
@@ -32,6 +33,8 @@ export class TouchesController {
 	activePointers = new Map();
 
 	session = new Session();
+
+	plucker;
 
   hitDown = null; // is a hit object with .point for position
 
@@ -104,17 +107,17 @@ export class TouchesController {
 
 		this.magicPlane = new MagicPlane({fingersAPI:this.ff});
 
-		// this.buildHitZonePlane();
+		this.plucker = new Plucker({fingersAPI:this.ff});
 
 		/*
 		visual helpers
 		*/
     // this.buildVisualHelpers();
+
 		this.pools = new Pools({fingersAPI:this.ff, cubePointsMax:22});
 
 
 
-		// this.buildPlanePool();
 	}
 
 
@@ -145,11 +148,6 @@ export class TouchesController {
 		// multi touch would break this for now
 		this.session.reset();
 
-    // this.screenData.reset();
-    // this.cubeData.reset();
-    // // this.pointsPlane.length = 0;
-    // // this.planePoints.length = 0;
-    // this.planeData.reset();
     
     this.tryPointerDown(ev);
 
@@ -231,6 +229,8 @@ export class TouchesController {
 
   tryPointerDown(ev){
 
+  	this.plucker.reset();
+  	
     this.getHitsOnCube(ev);
 
     // this block checks if there was a hit on the cube, if so
@@ -304,6 +304,8 @@ export class TouchesController {
   	this.seekOnCube(ev);
     
     this.seekingOnHitZonePlane(ev);
+
+    this.plucker.refreshDirectionArrow();
   }
 
 
@@ -372,32 +374,6 @@ export class TouchesController {
   /*
 		Builders
   */
-
-	// buildHitZonePlane(){
-  // /*
-	// 	this is a core unit of the selecting and logic
-	// 	so while it is also a visual, it belongs at top level
-  // */
-
-	//   // this.planePoolGrid  = new SlightlyPriceyPool({rootObject3D:this.planePoolHolder3D});
-
-	//   // // need the plane facing up for other calculations later
-	//   const geometry = new PlaneGeometry( 10, 10 );
-	//   const matrix = new Matrix4().makeRotationX(-Math.PI / 2);
-	//   geometry.applyMatrix4(matrix);
-
-
-	    
-	//   const material = new MeshBasicMaterial( { color: 0xff22ff, opacity:0.2, transparent : true} );
-	//   const plane = new Mesh( geometry, material );
-	//   this.ff.cube.add( plane );
-	//   this.hitZonePlane3D = plane;
-	  
-	//   // const axesHelper = new ThickAxesHelper({ length: 5, radius: 0.035 });
-	//   // plane.add( axesHelper );
-	  
-
-	// }
 
 
 

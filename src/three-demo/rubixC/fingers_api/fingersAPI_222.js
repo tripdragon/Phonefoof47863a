@@ -87,4 +87,16 @@ export class FingersAPI {
 
   }
 
+  getPlanePoints(){
+    return this.touchesController?.session?.points?.plane;
+  }
+
+  getCubePoints(){
+    return this.touchesController?.session?.points?.cube;
+  }
+
+  getPointDown(){
+    return this.touchesController.pointDown3D;
+  }
+
 }

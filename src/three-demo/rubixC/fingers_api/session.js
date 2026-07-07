@@ -11,7 +11,7 @@ export class Session{
 	points = {
 		screen : [], // vector2
 		cube : [], // THREE.Point ?
-		plane : [], // ???¿¿,
+		plane : [], // ???¿¿, also THREE.Point
 		// this one is just to prevent flooding arrays into memory
 		// from raycaster, only need [0] from it typically
 		cubeRayHits : [], // THREE.Point

@@ -96,7 +96,8 @@ export class FingersAPI {
   }
 
   getPointDown(){
-    return this.touchesController.pointDown3D;
+    // return this.touchesController.pointDown3D;
+    return this.touchesController?.hitDown?.point;
   }
 
 }

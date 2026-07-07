@@ -7,6 +7,7 @@ import { Session } from './session.js';
 import { Pools } from './pools.js';
 import { MagicPlane } from './magicPlane.js';
 import { Plucker } from './plucker.js';
+import { DirectionArrow } from './directionArrow.js';
 
 
 const states = {
@@ -36,6 +37,8 @@ export class TouchesController {
 
 	plucker;
 
+	directionArrow;
+
   hitDown = null; // is a hit object with .point for position
 
 
@@ -52,7 +55,7 @@ export class TouchesController {
 
 	raycaster = new Raycaster();
 	screenCoordsV = new Vector2();
-  pointDown3D = new Vector3(); // world position
+  // pointDown3D = new Vector3(); // world position
 
   visualsObject3D; // visuals...
 
@@ -109,6 +112,9 @@ export class TouchesController {
 
 		this.plucker = new Plucker({fingersAPI:this.ff});
 
+		// this.buildArrow();
+		this.directionArrow = new DirectionArrow({fingersAPI:this.ff});
+
 		/*
 		visual helpers
 		*/
@@ -145,6 +151,7 @@ export class TouchesController {
     this.currentDragDistance = 0;
     this.lastTriggeredDistance = 0;
 		
+		window.ff = this.ff;
 		// multi touch would break this for now
 		this.session.reset();
 
@@ -229,8 +236,9 @@ export class TouchesController {
 
   tryPointerDown(ev){
 
-  	this.plucker.reset();
-  	
+  	this.directionArrow.reset();
+  	// this.plucker.reset();
+
     this.getHitsOnCube(ev);
 
     // this block checks if there was a hit on the cube, if so
@@ -243,7 +251,7 @@ export class TouchesController {
       this.isOnCube = true;
 
 			this.hitDown = this.session.points.cubeRayHits[0];
-      this.pointDown3D.copy(this.hitDown.point);
+      // this.pointDown3D.copy(this.hitDown.point);
 
       this.ff.controls.enabled = false;
 
@@ -305,7 +313,11 @@ export class TouchesController {
     
     this.seekingOnHitZonePlane(ev);
 
-    this.plucker.refreshDirectionArrow();
+    this.directionArrow.refresh();
+    // looks like Plucker will be doing the maths
+    // hrrrrmmmm nesty
+
+
   }
 
 

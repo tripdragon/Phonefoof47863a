@@ -30,23 +30,27 @@ export class TouchesController {
 	isOnCube = false;
 	IS_DOWN = false;
 
-
 	activePointers = new Map();
+	
+	engines = {
+		
 
-	session = new Session();
+	magicPlane,
 
-	plucker;
 
-	directionArrow;
+	session : new Session(),
+
+	plucker,
+
+	directionArrow
+
+}
 
   hitDown = null; // is a hit object with .point for position
 
 
 	hitZones; // [] zones on the piece to hit instead of faces
 
-	// hitZonePlane3D;
-	// hitZonePlane3D;
-	magicPlane;
 
 	selectedPiece = null;
 

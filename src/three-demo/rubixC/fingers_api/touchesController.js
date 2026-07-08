@@ -119,8 +119,8 @@ export class TouchesController {
     // this.buildVisualHelpers();
 
 		this.engines.pools = new Pools({fingersAPI:this.ff, cubePointsMax:22});
-this.debugColorAllFaces(
-0x0000ff);
+
+		//this.debugColorAllFaces(0x0000ff);
 
 	}
 

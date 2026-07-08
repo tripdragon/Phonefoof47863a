@@ -119,8 +119,8 @@ export class TouchesController {
     // this.buildVisualHelpers();
 
 		this.engines.pools = new Pools({fingersAPI:this.ff, cubePointsMax:22});
-
-
+this.debugColorAllFaces(
+0x0000ff);
 
 	}
 
@@ -385,12 +385,12 @@ export class TouchesController {
 		Builders
   */
 
-  debugColorAllFacesBlue(){
+  debugColorAllFaces(color){
     const pieces = this.ff.cube?.pieces;
     if(!pieces?.length) return;
 
     pieces.forEach(piece => {
-      piece.setColorOverAll?.(0x0000ff);
+      piece.setColorOverAll(color);
     });
   }
 

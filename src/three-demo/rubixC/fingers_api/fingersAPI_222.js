@@ -88,16 +88,20 @@ export class FingersAPI {
   }
 
   getPlanePoints(){
-    return this.touchesController?.engines?.session?.points?.plane;
+    return this.touchesController?.engines?.session?.points?.plane ?? null;
   }
 
   getCubePoints(){
-    return this.touchesController?.engines?.session?.points?.cube;
+    return this.touchesController?.engines?.session?.points?.cube ?? null;
   }
 
   getPointDown(){
     // return this.touchesController.pointDown3D;
-    return this.touchesController?.hitDown?.point;
+    return this.touchesController?.hitDown?.point ?? null;
+  }
+
+  getSelectedPiece(){
+    return this.touchesController?.selectedPiece ?? null;
   }
 
 }

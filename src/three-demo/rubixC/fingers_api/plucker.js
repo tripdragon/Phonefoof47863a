@@ -1,7 +1,22 @@
 
 import { 
-	Vector2, Vector3
+	Vector2, Vector3, Matrix4
 } from "three";
+
+
+const lever = new Vector3();
+const inverseWorldMatrix = new Matrix4();
+
+
+export class AxisModel{
+	group = null;
+	axis = new Vector3();
+
+	constructor({group = null, axis = new Vector3()}={}){
+		this.group = group;
+		this.axis.copy(axis);
+	}
+}
 
 
 /*
@@ -23,6 +38,8 @@ import {
 */
 export class Plucker{
 	ff;
+	axises = [];
+	selectedFaceNormalLocalV = new Vector3();
 	// touchesController;
 
 
@@ -36,10 +53,53 @@ export class Plucker{
 		// this.buildArrow();
 	}
 
+	constructAxisesFrom(selectedPiece){
+		this.axises.length = 0;
+		this.refreshSelectedFaceNormalLocalDirection();
+
+		if(!selectedPiece || !this.ff?.cube?.tGS){
+			return this.axises;
+		}
+
+		Object.values(this.ff.cube.tGS).forEach((group) => {
+			if(!group?.includes?.(selectedPiece)){
+				return;
+			}
+
+			const axisModel = new AxisModel({group});
+			const centerPiece = group?.center;
+
+			if(centerPiece?.getWorldPosition){
+				centerPiece.getWorldPosition(axisModel.axis);
+			}
+
+			this.axises.push(axisModel);
+		});
+
+		return this.axises;
+	}
+
+	refreshSelectedFaceNormalLocalDirection(){
+		const localSpace = this.ff?.cube?.core ?? this.ff?.cube;
+		const worldNormal = this.ff?.touchesController?.engines?.magicPlane?.worldNormal;
+
+		this.selectedFaceNormalLocalV.set(0, 0, 0);
+
+		if(!localSpace || !worldNormal){
+			return this.selectedFaceNormalLocalV;
+		}
+
+		localSpace.updateMatrixWorld?.(true);
+		inverseWorldMatrix.copy(localSpace.matrixWorld).invert();
+		lever.copy(worldNormal).transformDirection(inverseWorldMatrix).normalize();
+		this.selectedFaceNormalLocalV.copy(lever);
+
+		return this.selectedFaceNormalLocalV;
+	}
+
 
 
 
 
 	// console.log(nearlyEqual(0.1 + 0.2, 0.3)); // true
 }
-

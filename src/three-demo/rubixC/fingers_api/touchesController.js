@@ -33,18 +33,13 @@ export class TouchesController {
 	activePointers = new Map();
 	
 	engines = {
-		
+		session: new Session(),
+		magicPlane: null,
+		plucker: null,
+		directionArrow: null,
+		pools: null
+	};
 
-	magicPlane,
-
-
-	session : new Session(),
-
-	plucker,
-
-	directionArrow
-
-}
 
   hitDown = null; // is a hit object with .point for position
 
@@ -64,7 +59,7 @@ export class TouchesController {
   visualsObject3D; // visuals...
 
   // this.hits1 is now
-  // this.session.points.cubeRayHits
+  // this.engines.session.points.cubeRayHits
 
   /*
   debugger toggles
@@ -82,7 +77,6 @@ export class TouchesController {
   // 	plane : new SlightlyPriceyPool()
   // }
 
-  pools;
 
 
 
@@ -112,19 +106,19 @@ export class TouchesController {
 
 		this.beginPointerEvents();
 
-		this.magicPlane = new MagicPlane({fingersAPI:this.ff});
+		this.engines.magicPlane = new MagicPlane({fingersAPI:this.ff});
 
-		this.plucker = new Plucker({fingersAPI:this.ff});
+		this.engines.plucker = new Plucker({fingersAPI:this.ff});
 
 		// this.buildArrow();
-		this.directionArrow = new DirectionArrow({fingersAPI:this.ff});
+		this.engines.directionArrow = new DirectionArrow({fingersAPI:this.ff});
 
 		/*
 		visual helpers
 		*/
     // this.buildVisualHelpers();
 
-		this.pools = new Pools({fingersAPI:this.ff, cubePointsMax:22});
+		this.engines.pools = new Pools({fingersAPI:this.ff, cubePointsMax:22});
 
 
 
@@ -157,7 +151,7 @@ export class TouchesController {
 		
 		window.ff = this.ff;
 		// multi touch would break this for now
-		this.session.reset();
+		this.engines.session.reset();
 
     
     this.tryPointerDown(ev);
@@ -240,28 +234,28 @@ export class TouchesController {
 
   tryPointerDown(ev){
 
-  	this.directionArrow.reset();
-  	// this.plucker.reset();
+		this.engines.directionArrow.reset();
+		// this.engines.plucker.reset();
 
     this.getHitsOnCube(ev);
 
     // this block checks if there was a hit on the cube, if so
     // store stuff and lock the orbit controls to begin dragging points
-    if(this.session.points.cubeRayHits.length > 0){
+    if(this.engines.session.points.cubeRayHits.length > 0){
 
       // figuring out the nessesary flag states
       this.IS_DOWN = true;
       this.state = states.onCube;
       this.isOnCube = true;
 
-			this.hitDown = this.session.points.cubeRayHits[0];
+			this.hitDown = this.engines.session.points.cubeRayHits[0];
       // this.pointDown3D.copy(this.hitDown.point);
 
       this.ff.controls.enabled = false;
 
 			this.selectPiece(this.hitDown);
 			
-			this.magicPlane.refresh(this.hitDown);
+			this.engines.magicPlane.refresh(this.hitDown);
 
     }
 
@@ -277,15 +271,15 @@ export class TouchesController {
     this.raycaster.setFromCamera(v1, this.ff.camera);
 
     // it retain when its an argument
-    this.session.points.cubeRayHits = this.raycaster.intersectObjects(this.hitZones, false);
+    this.engines.session.points.cubeRayHits = this.raycaster.intersectObjects(this.hitZones, false);
 
     // here well store that new point
-    if(this.session.points.cubeRayHits.length > 0){
-	    this.session.points.cube.push(this.session.points.cubeRayHits[0]);
+    if(this.engines.session.points.cubeRayHits.length > 0){
+	    this.engines.session.points.cube.push(this.engines.session.points.cubeRayHits[0]);
     }
 
-    // console.log("hits", this.session.points.cube);
-    console.log("hits", this.session.points.cubeRayHits);
+    // console.log("hits", this.engines.session.points.cube);
+    console.log("hits", this.engines.session.points.cubeRayHits);
 
   }
 
@@ -317,7 +311,7 @@ export class TouchesController {
     
     this.seekingOnHitZonePlane(ev);
 
-    this.directionArrow.refresh();
+    this.engines.directionArrow.refresh();
     // looks like Plucker will be doing the maths
     // hrrrrmmmm nesty
 
@@ -341,11 +335,11 @@ export class TouchesController {
     if(this.visuals.showCubePoints){
 
 	    // const ball = this.planePool.requestItem();
-	    const ball = this.pools.cube.meshes.requestItem();
-	    if(this.session.points.cubeRayHits.length > 0){
+	    const ball = this.engines.pools.cube.meshes.requestItem();
+	    if(this.engines.session.points.cubeRayHits.length > 0){
 	      ball.visible = true;
 	      // ball.position.copy(this.hits1[0].point);
-	      ball.position.copy(this.session.points.cubeRayHits[0].point);
+	      ball.position.copy(this.engines.session.points.cubeRayHits[0].point);
 	      // this.selectPiece();
 	    }
 
@@ -361,18 +355,18 @@ export class TouchesController {
     // raycaster has been updated before this
     
     // this.hitsPlane = this.raycaster.intersectObject(this.planeHitZone3D, false);
-    this.session.points.planeRayHits = this.raycaster.intersectObject(this.magicPlane.hitZonePlane, false);
+    this.engines.session.points.planeRayHits = this.raycaster.intersectObject(this.engines.magicPlane.hitZonePlane, false);
     
-    const hits = this.session.points.planeRayHits;
+    const hits = this.engines.session.points.planeRayHits;
     if(hits.length > 0){
       
-      this.session.points.plane.push(hits[0]);
+      this.engines.session.points.plane.push(hits[0]);
       
-      if(this.session.points.plane.length>0){
+      if(this.engines.session.points.plane.length>0){
         console.log("????");
         
         if(this.visuals.showPlanePoints){
-          const ballOnPlane = this.pools.plane.meshes.requestItem();
+          const ballOnPlane = this.engines.pools.plane.meshes.requestItem();
           ballOnPlane.visible = true;
           ballOnPlane.position.copy(hits[0].point);
         }
@@ -390,6 +384,15 @@ export class TouchesController {
   /*
 		Builders
   */
+
+  debugColorAllFacesBlue(){
+    const pieces = this.ff.cube?.pieces;
+    if(!pieces?.length) return;
+
+    pieces.forEach(piece => {
+      piece.setColorOverAll?.(0x0000ff);
+    });
+  }
 
 
 

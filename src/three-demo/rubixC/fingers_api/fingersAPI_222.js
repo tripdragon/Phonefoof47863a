@@ -88,11 +88,11 @@ export class FingersAPI {
   }
 
   getPlanePoints(){
-    return this.touchesController?.session?.points?.plane;
+    return this.touchesController?.engines?.session?.points?.plane;
   }
 
   getCubePoints(){
-    return this.touchesController?.session?.points?.cube;
+    return this.touchesController?.engines?.session?.points?.cube;
   }
 
   getPointDown(){

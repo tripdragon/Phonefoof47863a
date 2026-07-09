@@ -8,6 +8,7 @@ import { Pools } from './pools.js';
 import { MagicPlane } from './magicPlane.js';
 import { Plucker } from './plucker.js';
 import { DirectionArrow } from './directionArrow.js';
+import { MultitouchEngine } from './multitouchEngine.js';
 
 
 const states = {
@@ -33,6 +34,7 @@ export class TouchesController {
 	activePointers = new Map();
 	
 	engines = {
+		multitouch: new MultitouchEngine(),
 		session: new Session(),
 		magicPlane: null,
 		plucker: null,
@@ -146,14 +148,18 @@ export class TouchesController {
 
 
   onPointerDown(ev){
-  	if (this.checkIsMultitouch(ev)) return;
+    const touchState = this.engines.multitouch.pointerDown(ev);
+
+    if (touchState.shouldAbortDrawing) {
+      this.quitDrawingForMultitouch(ev);
+      return;
+    }
 
     this.IS_DOWN = true;
     this.currentDragDistance = 0;
     this.lastTriggeredDistance = 0;
 		
 		window.ff = this.ff;
-		// multi touch would break this for now
 		this.engines.session.reset();
 
     
@@ -167,7 +173,9 @@ export class TouchesController {
 
 
   onPointerMove(ev){
-  	if (this.checkIsMultitouch(ev)) return;
+    const touchState = this.engines.multitouch.pointerMove(ev);
+    if (touchState.shouldAbortDrawing) this.quitDrawingForMultitouch(ev);
+    if (!touchState.shouldDraw) return;
 
     if (!this.isOnCube) return;
     
@@ -175,25 +183,15 @@ export class TouchesController {
   }
   
   onPointerUp(ev){
-  	// keeping tracks of touches count
-    this.activePointers.delete(ev.pointerId);
-    if (this.activePointers.size > 0) return;
+    const touchState = this.engines.multitouch.pointerUp(ev);
+
+    if (touchState.hasActivePointers) return;
+    if (touchState.shouldSkipTouchUp) {
+      this.releasePools();
+      return;
+    }
 
     this.resetInteractionState();
-  }
-
-
-  checkIsMultitouch(ev){
-		// here we need to ignore multi touch??¿¿
-		// and quit touch events
-		// so orbit works
-
-    this.activePointers.set(ev.pointerId, ev);
-    if (this.activePointers.size > 1) {
-      this.resetInteractionState();
-      return true;
-    }
-    return false;
   }
 
 
@@ -202,6 +200,7 @@ export class TouchesController {
   */
 
   resetInteractionState() {
+    this.releasePools();
     this.state = states.idle;
     this.isOnCube = false;
     this.ff.controls.enabled = true;
@@ -224,6 +223,41 @@ export class TouchesController {
   }
 
 
+
+
+
+
+
+  quitDrawingForMultitouch(ev){
+    this.releaseActivePointerCaptures();
+    this.resetInteractionState();
+    this.engines.session.reset();
+  }
+
+
+  releaseActivePointerCaptures(){
+    const domElement = this.ff.domElement;
+    const releasePointerCapture = domElement?.releasePointerCapture?.bind(domElement);
+    if(!releasePointerCapture) return;
+
+    this.engines.multitouch.activePointers.forEach((_, pointerId) => {
+      releasePointerCapture(pointerId);
+    });
+  }
+
+
+  releasePools(){
+    const pools = this.engines.pools;
+    const meshPools = [pools?.cube?.meshes, pools?.plane?.meshes];
+
+    meshPools.forEach(pool => {
+      if(!pool) return;
+      pool.selectedIndex = 0;
+      pool.forEach(mesh => {
+        mesh.visible = false;
+      });
+    });
+  }
 
 
 

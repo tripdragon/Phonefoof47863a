@@ -12,9 +12,11 @@ export class AxisModel{
 	group = null;
 	axis = new Vector3();
 
-	constructor({group = null, axis = new Vector3()}={}){
+	constructor({group = null, axis}={}){
 		this.group = group;
-		this.axis.copy(axis);
+		if(axis){
+			this.axis.copy(axis);
+		}
 	}
 }
 

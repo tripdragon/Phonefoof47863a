@@ -1,6 +1,6 @@
 import { 
 	Vector2, Vector3, Raycaster, Group, PlaneGeometry,
-	Matrix4, MeshBasicMaterial, Mesh
+	Matrix4, MeshBasicMaterial, Mesh, ArrowHelper
 } from "three";
 import { SlightlyPriceyPool } from '../slightlyPriceyPool.js';
 import { Session } from './session.js';
@@ -37,7 +37,8 @@ export class TouchesController {
 		magicPlane: null,
 		plucker: null,
 		directionArrow: null,
-		pools: null
+		pools: null,
+		normalsDebugger: null
 	};
 
 
@@ -119,6 +120,8 @@ export class TouchesController {
     // this.buildVisualHelpers();
 
 		this.engines.pools = new Pools({fingersAPI:this.ff, cubePointsMax:22});
+
+		this.engines.normalsDebugger = new NormalsDebugger({fingersAPI:this.ff});
 
 		//this.debugColorAllFaces(0x0000ff);
 
@@ -486,6 +489,58 @@ export class TouchesController {
 
 
 
+}
+
+
+class NormalsDebugger {
+	group = new Group();
+	localNormal = new Vector3(0, 0, 1);
+	worldNormal = new Vector3();
+	worldOrigin = new Vector3();
+
+	constructor({fingersAPI, length = 0.22, color = 0xff00ff}={}){
+		this.ff = fingersAPI;
+		this.length = length;
+		this.color = color;
+
+		this.group.name = "NormalsDebugger";
+		this.ff?.scene?.add(this.group);
+
+		this.build();
+	}
+
+	build(){
+		const pieces = this.ff?.cube?.pieces;
+		if(!pieces?.length) return;
+
+		const cubeRoot = this.ff.cube?.core ?? this.ff.cube;
+		cubeRoot?.updateMatrixWorld?.(true);
+
+		pieces.forEach(piece => {
+			piece.updateMatrixWorld?.(true);
+
+			piece.planes?.forEach(({plane}) => {
+				if(!plane) return;
+
+				plane.updateMatrixWorld?.(true);
+				plane.getWorldPosition(this.worldOrigin);
+				this.worldNormal.copy(this.localNormal)
+					.transformDirection(plane.matrixWorld)
+					.normalize();
+
+				const arrow = new ArrowHelper(
+					this.worldNormal.clone(),
+					this.worldOrigin.clone(),
+					this.length,
+					this.color,
+					this.length * 0.35,
+					this.length * 0.18,
+				);
+				arrow.name = "face-normal-helper";
+				this.group.add(arrow);
+			});
+		});
+	}
 }
 
 

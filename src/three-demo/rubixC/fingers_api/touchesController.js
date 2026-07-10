@@ -11,6 +11,10 @@ import { DirectionArrow } from './directionArrow.js';
 import { MultitouchEngine } from './multitouchEngine.js';
 
 
+const magicPlaneEvents = {
+  thresholdReached: "magicplane:threshold-reached",
+};
+
 const states = {
   idle : "idle",
   onCube : "onCube",
@@ -58,6 +62,7 @@ export class TouchesController {
 	IS_DOWN = false;
 
 	activePointers = new Map();
+	events = new EventTarget();
 	
 	engines = {
 		multitouch: new MultitouchEngine(),
@@ -131,7 +136,7 @@ export class TouchesController {
 		this.onPointerDown = this.onPointerDown.bind(this);
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.onPointerUp = this.onPointerUp.bind(this);
-
+		this.onMagicPlaneThresholdReached = this.onMagicPlaneThresholdReached.bind(this);
 
 		this.beginPointerEvents();
 
@@ -151,6 +156,8 @@ export class TouchesController {
 
 		this.engines.normalsDebugger = new NormalsDebugger({fingersAPI:this.ff});
 
+		this.addEventListener(magicPlaneEvents.thresholdReached, this.onMagicPlaneThresholdReached);
+
 		//this.debugColorAllFaces(0x0000ff);
 
 	}
@@ -159,6 +166,19 @@ export class TouchesController {
   /*
     Touch events
   */
+
+
+  addEventListener(type, listener, options){
+    this.events.addEventListener(type, listener, options);
+  }
+
+  removeEventListener(type, listener, options){
+    this.events.removeEventListener(type, listener, options);
+  }
+
+  emit(type, detail = {}){
+    this.events.dispatchEvent(new CustomEvent(type, { detail }));
+  }
 
 
   beginPointerEvents() {
@@ -374,6 +394,8 @@ export class TouchesController {
     
     this.seekingOnHitZonePlane(ev);
 
+    this.checkMagicPlaneDistanceThreshold();
+
     this.engines.directionArrow.refresh();
     // looks like Plucker will be doing the maths
     // hrrrrmmmm nesty
@@ -442,6 +464,34 @@ export class TouchesController {
     
   }
 
+
+
+  checkMagicPlaneDistanceThreshold(){
+    const planePoints = this.engines.session.points.plane;
+    const pointDown = this.hitDown?.point;
+    const recentPoint = planePoints[planePoints.length - 1]?.point;
+    const triggerDistance = this.ff.triggerDistance ?? 0.35;
+
+    if(!pointDown || !recentPoint || triggerDistance <= 0) return;
+
+    this.currentDragDistance = pointDown.distanceTo(recentPoint);
+
+    if(this.currentDragDistance < triggerDistance) return;
+    if(this.currentDragDistance - this.lastTriggeredDistance < triggerDistance) return;
+
+    this.lastTriggeredDistance = this.currentDragDistance;
+    this.emit(magicPlaneEvents.thresholdReached, {
+      distance: this.currentDragDistance,
+      threshold: triggerDistance,
+      hitDown: this.hitDown,
+      recentPoint,
+    });
+  }
+
+
+  onMagicPlaneThresholdReached(){
+    this.debugColorAllFaces(Math.floor(Math.random() * 0xffffff));
+  }
 
 
   /*

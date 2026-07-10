@@ -1,6 +1,6 @@
 import { 
 	Vector2, Vector3, Raycaster, Group, PlaneGeometry,
-	Matrix4, Matrix3, MeshBasicMaterial, Mesh, Box3
+	Matrix4, MeshBasicMaterial, Mesh, Box3
 } from "three";
 
 import { ThickArrowHelper, ThickAxesHelper } from "../thickAxesHelper.js";
@@ -12,7 +12,6 @@ export class MagicPlane{
 
 	hitZonePlane;
 
-	normalMatrix = new Matrix3();
 	worldNormal = new Vector3();
 	faceCenterV = new Vector3();
 	sizeV = new Vector3();
@@ -87,9 +86,11 @@ export class MagicPlane{
 	*/	
 	refreshPieceFaceNormal(hit){
 
+		const selectedPiece = this.ff.getSelectedPiece();
+		if(!selectedPiece) return;
+
 		// --- get world normal ---
-		this.normalMatrix.getNormalMatrix(hit.object.matrixWorld);
-		this.worldNormal.copy(hit.face.normal).applyMatrix3(this.normalMatrix).normalize();
+		this.worldNormal.copy(selectedPiece.worldNormal);
 		// at this point this.worldNormal is the nessesary first axis for the cross product
 
 		if(this.useVisuals){
@@ -115,8 +116,7 @@ export class MagicPlane{
 	displayFacePlane(hit){
 
 		// this is already done in refreshPieceFaceNormal
-		// this.normalMatrix.getNormalMatrix(hit.object.matrixWorld);
-		// this.worldNormal.copy(hit.face.normal).applyMatrix3(this.normalMatrix).normalize();
+		// this.worldNormal is now copied from selectedPiece.worldNormal in refreshPieceFaceNormal.
 
 		// this.faceGridHelper.quaternion.setFromUnitVectors(this.upV, hit.normal);
 

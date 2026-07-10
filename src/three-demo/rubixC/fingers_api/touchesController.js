@@ -1,6 +1,6 @@
 import { 
 	Vector2, Vector3, Raycaster, Group, PlaneGeometry,
-	Matrix4, MeshBasicMaterial, Mesh, ArrowHelper
+	Matrix4, Matrix3, MeshBasicMaterial, Mesh, ArrowHelper
 } from "three";
 import { SlightlyPriceyPool } from '../slightlyPriceyPool.js';
 import { Session } from './session.js';
@@ -18,6 +18,32 @@ const states = {
   found : "found",
   following : "following",
   rolling : "rolling"
+}
+
+export class SelectedPiece {
+	normalMatrix = new Matrix3();
+	worldNormal = new Vector3();
+
+	constructor(hit){
+		this.hit = hit;
+
+		if(this.face && this.hit?.object){
+			this.normalMatrix.getNormalMatrix(this.hit.object.matrixWorld);
+			this.worldNormal.copy(this.face.normal).applyMatrix3(this.normalMatrix).normalize();
+		}
+	}
+
+	get object(){
+		return this.hit?.object?.parent?.isPiece ? this.hit.object.parent : null;
+	}
+
+	get position(){
+		return this.hit?.point ?? null;
+	}
+
+	get face(){
+		return this.hit?.face ?? null;
+	}
 }
 
 export class TouchesController {
@@ -327,7 +353,7 @@ export class TouchesController {
   		// this.selectedPiece.revertColor();
   	}
     if(hit.object.parent?.isPiece){
-      this.selectedPiece = hit.object.parent;
+      this.selectedPiece = new SelectedPiece(hit);
       this.selectionDownLine?.syncFromSelection(this.selectedPiece, this.ff.cube?.core ?? this.ff.cube);
     }
 
@@ -558,9 +584,7 @@ class NormalsDebugger {
 
 				plane.updateMatrixWorld?.(true);
 				plane.getWorldPosition(this.worldOrigin);
-				this.worldNormal.copy(this.localNormal)
-					.transformDirection(plane.matrixWorld)
-					.normalize();
+				this.worldNormal.copy(new SelectedPiece({ object: plane, face: { normal: this.localNormal } }).worldNormal);
 
 				const arrow = new ArrowHelper(
 					this.worldNormal.clone(),

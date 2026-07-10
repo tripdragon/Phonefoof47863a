@@ -21,7 +21,9 @@ export class DebugSelectionDownLine extends THREE.Object3D {
     this.visible = false;
   }
 
-  syncFromSelection(piece, cube) {
+  syncFromSelection(selectedPiece, cube) {
+    const piece = selectedPiece?.object ?? selectedPiece;
+
     if (!piece || !cube) {
       this.visible = false;
       return;

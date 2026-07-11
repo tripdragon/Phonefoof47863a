@@ -1,6 +1,6 @@
 import { 
   Vector2, Vector3,
-  Matrix4, Matrix3
+  Matrix3
 } from "three";
 
 
@@ -8,7 +8,7 @@ const normalMatrix = new Matrix3();
 const worldNormal = new Vector3();
 
 
-const torqueV = new THREE.Vector3();
+const torqueV = new Vector3();
 
 
 export function smoothstep(t) {
@@ -67,7 +67,7 @@ export function worldNormalFromLocal(object3D, localNormal) {
 
 
     const t = this.t;
-    const tq = this.torqueV;
+    const tq = torqueV;
     const q = this.q;
     const s = this.s;
     const m = this.m;
@@ -99,7 +99,7 @@ export function worldNormalFromLocal(object3D, localNormal) {
 
     // all the same as torqueGroup
     const t = this.t;
-    const tq = this.torqueV;
+    const tq = torqueV;
     const q = this.q;
     const s = this.s;
     const m = this.m;

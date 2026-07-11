@@ -5,6 +5,7 @@ import { CheapPool } from "superneatlib";
 import { PiecesGroup } from "./PiecesGroup.js";
 // import { AxisHelperWithLetters } from "superneatlib";
 import { ThickAxesHelper } from "./thickAxesHelper.js";
+import { torqueGroup, measureTorqueOnPiece } from "./math.js";
 
 export class RubixCubeLike extends THREE.Group {
   pieces = [];
@@ -544,6 +545,14 @@ export class RubixCubeLike extends THREE.Group {
     });
   }
 
+
+  torqueGroup(options) {
+    return torqueGroup.call(this, options);
+  }
+
+  measureTorqueOnPiece(options) {
+    return measureTorqueOnPiece.call(this, options);
+  }
 
   getSelectedPieceGroups(piece){
     // return [];

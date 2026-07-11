@@ -83,6 +83,9 @@ export class MagicPlane{
 	/*	
 		stores the face normal for later stuff
 		also moves the faceArrow into the face of the selected hitzone
+
+		move to something else
+		
 	*/	
 	refreshPieceFaceNormal(hit){
 

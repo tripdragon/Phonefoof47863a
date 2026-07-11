@@ -3,6 +3,7 @@ import {
 	Vector2, Vector3
 } from "three";
 
+import { worldNormalFromLocal } from "../math.js";
 
 /*
 	
@@ -25,6 +26,8 @@ export class Plucker{
 	ff;
 	// touchesController;
 
+	worldNormal = new Vector3();
+	localNormal = new Vector3();
 
 
 	constructor({fingersAPI}={}){
@@ -34,6 +37,20 @@ export class Plucker{
 	}
 	build(){
 		// this.buildArrow();
+	}
+
+
+	// hitDown : THREE.Hit object
+	refreshAxises(hitDown){
+		// const piece = this.ff.getSelectedPiece();
+
+		if(hitDown?.object){
+			hitDown.object.updateMatrixWorld();
+			// this.worldNormal.copy(worldNormalFromLocal(hitDown.object,hitDown.normal));
+			// console.log("this.worldNormal", this.worldNormal);
+		}
+		
+		
 	}
 
 

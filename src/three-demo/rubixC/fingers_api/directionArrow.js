@@ -32,12 +32,6 @@ export class DirectionArrow{
 	workV = new Vector3();
 	startV = new Vector3();
 
-	// arrowDirHelper;
-	// arrowDirV = new Vector3();
-	// arrowDirOriginV = new Vector3();
-
-	// movingAveragePointV = new Vector3();
-	// pointDown3D = new Vector3();
 
 	currentDragDistance = 0;
 

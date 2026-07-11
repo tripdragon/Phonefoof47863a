@@ -1,3 +1,8 @@
+
+/*
+all ai built
+deals with two fingers on cube to zooom again, does not work yet
+*/
 const pointerTypes = {
   touch: "touch",
 };

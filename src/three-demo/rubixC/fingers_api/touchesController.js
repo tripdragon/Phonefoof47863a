@@ -9,6 +9,8 @@ import { MagicPlane } from './magicPlane.js';
 import { Plucker } from './plucker.js';
 import { DirectionArrow } from './directionArrow.js';
 import { MultitouchEngine } from './multitouchEngine.js';
+import { SelectedPiece } from './selectedPiece.js';
+import { NormalsDebugger } from './normalsDebugger.js';
 
 
 const magicPlaneEvents = {
@@ -22,32 +24,6 @@ const states = {
   found : "found",
   following : "following",
   rolling : "rolling"
-}
-
-export class SelectedPiece {
-	normalMatrix = new Matrix3();
-	worldNormal = new Vector3();
-
-	constructor(hit){
-		this.hit = hit;
-
-		if(this.face && this.hit?.object){
-			this.normalMatrix.getNormalMatrix(this.hit.object.matrixWorld);
-			this.worldNormal.copy(this.face.normal).applyMatrix3(this.normalMatrix).normalize();
-		}
-	}
-
-	get object(){
-		return this.hit?.object?.parent?.isPiece ? this.hit.object.parent : null;
-	}
-
-	get position(){
-		return this.hit?.point ?? null;
-	}
-
-	get face(){
-		return this.hit?.face ?? null;
-	}
 }
 
 export class TouchesController {
@@ -64,15 +40,16 @@ export class TouchesController {
 	activePointers = new Map();
 	events = new EventTarget();
 	
+	multitouch = new MultitouchEngine(); // not an engine to the solver
+
 	engines = {
-		multitouch: new MultitouchEngine(),
 		session: new Session(),
 		magicPlane: null,
 		plucker: null,
 		directionArrow: null,
 		pools: null,
-		normalsDebugger: null
-	};
+		normalsDebugger: null // not an engine, sillyt ai
+	}
 
 
   hitDown = null; // is a hit object with .point for position
@@ -194,7 +171,7 @@ export class TouchesController {
 
 
   onPointerDown(ev){
-    const touchState = this.engines.multitouch.pointerDown(ev);
+    const touchState = this.multitouch.pointerDown(ev);
 
     if (touchState.shouldAbortDrawing) {
       this.quitDrawingForMultitouch(ev);
@@ -219,7 +196,7 @@ export class TouchesController {
 
 
   onPointerMove(ev){
-    const touchState = this.engines.multitouch.pointerMove(ev);
+    const touchState = this.multitouch.pointerMove(ev);
     if (touchState.shouldAbortDrawing) this.quitDrawingForMultitouch(ev);
     if (!touchState.shouldDraw) return;
 
@@ -229,7 +206,7 @@ export class TouchesController {
   }
   
   onPointerUp(ev){
-    const touchState = this.engines.multitouch.pointerUp(ev);
+    const touchState = this.multitouch.pointerUp(ev);
 
     if (touchState.hasActivePointers) return;
     if (touchState.shouldSkipTouchUp) {
@@ -286,7 +263,7 @@ export class TouchesController {
     const releasePointerCapture = domElement?.releasePointerCapture?.bind(domElement);
     if(!releasePointerCapture) return;
 
-    this.engines.multitouch.activePointers.forEach((_, pointerId) => {
+    this.multitouch.activePointers.forEach((_, pointerId) => {
       releasePointerCapture(pointerId);
     });
   }
@@ -339,6 +316,8 @@ export class TouchesController {
 			this.selectPiece(this.hitDown);
 			
 			this.engines.magicPlane.refresh(this.hitDown);
+
+      this.engines.plucker.refreshAxises(this.hitDown);
 
     }
 
@@ -600,57 +579,6 @@ export class TouchesController {
 
 
 }
-
-
-class NormalsDebugger {
-	group = new Group();
-	localNormal = new Vector3(0, 0, 1);
-	worldNormal = new Vector3();
-	worldOrigin = new Vector3();
-
-	constructor({fingersAPI, length = 0.22, color = 0xff00ff}={}){
-		this.ff = fingersAPI;
-		this.length = length;
-		this.color = color;
-
-		this.group.name = "NormalsDebugger";
-		this.ff?.scene?.add(this.group);
-
-		this.build();
-	}
-
-	build(){
-		const pieces = this.ff?.cube?.pieces;
-		if(!pieces?.length) return;
-
-		const cubeRoot = this.ff.cube?.core ?? this.ff.cube;
-		cubeRoot?.updateMatrixWorld?.(true);
-
-		pieces.forEach(piece => {
-			piece.updateMatrixWorld?.(true);
-
-			piece.planes?.forEach(({plane}) => {
-				if(!plane) return;
-
-				plane.updateMatrixWorld?.(true);
-				plane.getWorldPosition(this.worldOrigin);
-				this.worldNormal.copy(new SelectedPiece({ object: plane, face: { normal: this.localNormal } }).worldNormal);
-
-				const arrow = new ArrowHelper(
-					this.worldNormal.clone(),
-					this.worldOrigin.clone(),
-					this.length,
-					this.color,
-					this.length * 0.35,
-					this.length * 0.18,
-				);
-				arrow.name = "face-normal-helper";
-				this.group.add(arrow);
-			});
-		});
-	}
-}
-
 
 /*
 	

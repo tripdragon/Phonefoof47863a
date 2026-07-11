@@ -27,7 +27,7 @@ export class Plucker{
 	// touchesController;
 
 	worldNormal = new Vector3();
-	localNormal = new Vector3();
+	// localNormal = new Vector3();
 
 
 	constructor({fingersAPI}={}){
@@ -46,7 +46,7 @@ export class Plucker{
 
 		if(hitDown?.object){
 			hitDown.object.updateMatrixWorld();
-			// this.worldNormal.copy(worldNormalFromLocal(hitDown.object,hitDown.normal));
+			this.worldNormal.copy(worldNormalFromLocal(hitDown.object,hitDown.normal));
 			// console.log("this.worldNormal", this.worldNormal);
 		}
 		

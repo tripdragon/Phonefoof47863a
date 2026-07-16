@@ -2,7 +2,7 @@
 import { ThickArrowHelper, ThickAxesHelper } from "../thickAxesHelper.js";
 
 import { 
-	Vector2, Vector3
+	Matrix3, Vector2, Vector3
 } from "three";
 
 
@@ -25,6 +25,20 @@ export class DirectionArrow{
 			units : [new Vector3(), new Vector3(), new Vector3(), new Vector3()],
 			nearest: [],
 			workV: new Vector3()
+		},
+		crossProduct : {
+			visual: null,
+			dirV : new Vector3(),
+			originV : new Vector3(),
+			length : 2,
+			normalLocalV : new Vector3(),
+			normalWorldV : new Vector3(),
+			absoluteLocalV : new Vector3(),
+			localOriginV : new Vector3(),
+			localPointV : new Vector3(),
+			worldPointV : new Vector3(),
+			worldOriginV : new Vector3(),
+			normalMatrix : new Matrix3()
 		}
 
 	}
@@ -61,6 +75,11 @@ export class DirectionArrow{
 		a2.visual = new ThickArrowHelper(a2.dirV, a2.originV, 1.1, 0xffc702, 0.18, 0.1);
 		//this.arrowDirHelper.visible = false;
 		this.ff.visualsObject3D.add(a2.visual);
+
+		const cp = this.arrows.crossProduct;
+		cp.visual = new ThickArrowHelper(cp.dirV, cp.originV, cp.length, 0xff33cc, 0.32, 0.18);
+		cp.visual.visible = false;
+		this.ff.visualsObject3D.add(cp.visual);
 
 		
 	}
@@ -197,9 +216,11 @@ export class DirectionArrow{
 		  // a2.visual.setDirection(aa.dirV);
 		  
 		  const vv = this.getAbsoluteDir(aa.dirV);
+		  a2.dirV.copy(vv);
 
-		  a2.visual.setDirection(vv);
+		  a2.visual.setDirection(a2.dirV);
 		  a2.visual.visible = true;
+		  this.updateCrossProductDebugger();
 						  // this.updateClampedDirectionFromSelectedScreenAxises();
 						  // this.updateCrossProductHelper();
 		}
@@ -231,6 +252,53 @@ export class DirectionArrow{
 
 
 	}
+
+
+	updateCrossProductDebugger(){
+		const hit = this.ff?.touchesController?.hitDown;
+		const cp = this.arrows.crossProduct;
+		const a2 = this.arrows.absolute;
+		const localSpace = this.ff?.cube?.core ?? this.ff?.cube;
+
+		if(!cp.visual || !hit?.object || !hit?.face?.normal || !hit?.point || !localSpace){
+			return;
+		}
+
+		hit.object.updateMatrixWorld?.(true);
+		localSpace.updateMatrixWorld?.(true);
+
+		cp.normalMatrix.getNormalMatrix(hit.object.matrixWorld);
+		cp.normalWorldV.copy(hit.face.normal).applyMatrix3(cp.normalMatrix).normalize();
+
+		cp.localOriginV.copy(hit.point);
+		cp.localPointV.copy(hit.point).add(cp.normalWorldV);
+		localSpace.worldToLocal(cp.localOriginV);
+		localSpace.worldToLocal(cp.localPointV);
+		cp.normalLocalV.copy(cp.localPointV).sub(cp.localOriginV).normalize();
+
+		cp.localPointV.copy(hit.point).add(a2.dirV);
+		localSpace.worldToLocal(cp.localPointV);
+		cp.absoluteLocalV.copy(cp.localPointV).sub(cp.localOriginV).normalize();
+
+		cp.dirV.crossVectors(cp.normalLocalV, cp.absoluteLocalV);
+		if(cp.dirV.lengthSq() <= this.EPSILONish){
+			return;
+		}
+		cp.dirV.normalize();
+
+		cp.worldOriginV.copy(cp.localOriginV);
+		cp.worldPointV.copy(cp.localOriginV).add(cp.dirV);
+		localSpace.localToWorld(cp.worldOriginV);
+		localSpace.localToWorld(cp.worldPointV);
+
+		cp.originV.copy(cp.worldOriginV);
+		cp.dirV.copy(cp.worldPointV).sub(cp.worldOriginV).normalize();
+		cp.visual.position.copy(cp.originV);
+		cp.visual.setDirection(cp.dirV);
+		cp.visual.setLength(cp.length, 0.32, 0.18);
+		cp.visual.visible = true;
+	}
+
 
 	/*
 	hits: [THREE.Point]

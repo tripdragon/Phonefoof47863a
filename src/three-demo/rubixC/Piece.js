@@ -12,6 +12,9 @@ export class Piece extends THREE.Object3D {
   cc = { h: 0, s: 0, l: 0 };
   hitZone = null;
 
+  transparent = false;
+  opacity = 1;
+
   visuals = {
     normal : null
   }
@@ -172,6 +175,30 @@ export class Piece extends THREE.Object3D {
         mat.uniforms.uMainColor.value.set(colorHex);
       }
     });
+  }
+
+
+  setColorPlane(plane,colorHex=0xffffff){
+    if (!this.planes?.length) return;
+    plane.color.set(colorHex);
+    const mat = plane.material;
+    if (mat?.uniforms?.uMainColor?.value) {
+      mat.uniforms.uMainColor.value.set(colorHex);
+    }
+  }
+
+  setOpacity(val,onOutlines = false){
+    /*
+      needs shader rework, blend mode etc blegh
+    */
+    this.transparent = false;
+    this.opacity = 1.0;
+    if(val<1){
+      this.transparent = true;
+      this.opacity = val;
+    }
+
+
   }
 
 

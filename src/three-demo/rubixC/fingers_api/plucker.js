@@ -60,23 +60,35 @@ export class Plucker{
 		console.log("groups", groups)
 		window.groups = groups;
 
-		const centers = [];
-		for (var i = 0; i < groups.length; i++) {
-			centers.push(groups[i].center);
-		}
+		const centers = groups.map(x=>x.center);
+		
 		window.centers = centers;
 		console.log("centers", centers);
 
 		// centers[0].whichType
 
 		const axises = [];
-		worldNormalFromLocal(object3D, localNormal);
+		// ???
+		// selected
 
-		// groups.forEach((group, index) => {
-		// 	// const centerPiece = group?.center;
-		// 	// if (!centerPiece) return;
-		// 	// center.push(centerPiece);
-		// });
+		this.ff.cube.colorAllPieces(0xffffff);
+
+		let ii = 0;
+		const cc = [0xff0000,0x00ff00,0x0000ff];
+		groups.forEach(x=>{
+			x.forEach(yy=>{
+				yy.setColorOverAll(cc[ii]);
+			})
+			ii++;
+		})
+		
+		worldNormalFromLocal(hit.object, hit.normal);
+
+		// this.ff.cube.colorAllPieces(0xffffff);
+
+		centers.forEach((x, index) => {
+			x.setColorOverAll(0x111111)
+		});
 
 	}
 

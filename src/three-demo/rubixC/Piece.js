@@ -12,6 +12,10 @@ export class Piece extends THREE.Object3D {
   cc = { h: 0, s: 0, l: 0 };
   hitZone = null;
 
+  visuals = {
+    normal : null
+  }
+
   constructor({ colors = [], borderColor = 0x000000, borderWidth = 0.02546, debug = false } = {}) {
     super();
     this.colors = [...colors];

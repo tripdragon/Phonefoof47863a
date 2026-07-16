@@ -317,7 +317,11 @@ export class TouchesController {
 			
 			this.engines.magicPlane.refresh(this.hitDown);
 
-      this.engines.plucker.refreshAxises(this.hitDown);
+      // this.engines.plucker.refreshAxises(this.hitDown);
+      const piece = this.selectedPiece?.object;
+      if(piece){
+        this.engines.plucker.pluck(this.hitDown, piece);
+      }
 
     }
 

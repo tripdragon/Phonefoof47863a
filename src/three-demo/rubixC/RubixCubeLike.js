@@ -5,7 +5,7 @@ import { CheapPool } from "superneatlib";
 import { PiecesGroup } from "./PiecesGroup.js";
 // import { AxisHelperWithLetters } from "superneatlib";
 import { ThickAxesHelper } from "./thickAxesHelper.js";
-import { torqueGroup, measureTorqueOnPiece } from "./math.js";
+// import { torqueGroup, measureTorqueOnPiece } from "./math.js";
 
 export class RubixCubeLike extends THREE.Group {
   pieces = [];
@@ -427,8 +427,9 @@ export class RubixCubeLike extends THREE.Group {
         // x.add( axesHelper );
       // const yy = new AxisHelperWithLetters({size:2});
       if(x.whichType === "center"){
-      const yy = new ThickAxesHelper({length : 1.4, radius : 0.05});
+        const yy = new ThickAxesHelper({length : 1.4, radius : 0.05});
         x.add( yy );
+        x.visuals.normal = yy;
       }
     });
   }
@@ -452,6 +453,23 @@ export class RubixCubeLike extends THREE.Group {
     });
   }
 
+
+  getSelectedPieceGroups(piece){
+    // return [];
+
+    // debugger
+    // if (!this.selectedPiece || !this.cube?.tGS) return [];
+    return Object.values(this.tGS).filter((group) => group?.includes?.(piece));
+
+
+  }
+
+
+  /*
+    =================
+    Transforms on groups like Torque
+
+  */
   axis = new THREE.Vector3(0,0,0);
 
   getAxisFromName(name){
@@ -496,7 +514,7 @@ export class RubixCubeLike extends THREE.Group {
   q = new THREE.Quaternion()
   s = new THREE.Vector3(1, 1, 1);
 
-// torqueV = new THREE.Vector3();
+  torqueV = new THREE.Vector3();
 
   
   // spinGroup({name,axis,pivot, angle}) {
@@ -546,21 +564,80 @@ export class RubixCubeLike extends THREE.Group {
   }
 
 
-  torqueGroup(options) {
-    return torqueGroup.call(this, options);
+
+  /*
+
+    const f = {x:-0.0,y:-0.1,z:0.0};
+    const l = {x:0,y:0,z:1};
+    function jhhv() {
+      //f.y += -0.01;
+      magicCube.torqueGroup({name:"left",leverV:l,forceV:f});
+    }
+    setInterval(jhhv,100)
+
+  */
+  torqueGroup({name,leverV,forceV}){
+    // turns a group from the force of a torque and a lever
+    // does not respect the groups axis by design since the lever is its
+    // own special vector
+    // Originally built to handle finger direction turns¿
+    // NOTE: for perfect force effect, it should be perpendicular 90° to the lever
+
+
+    const t = this.t;
+    const tq = this.torqueV;
+    const q = this.q;
+    const s = this.s;
+    const m = this.m;
+
+    const yy = this.getPiecesGroup(name);
+    const pivot = yy.center.position;
+
+    tq.crossVectors(forceV,leverV);
+
+    const deltaAngle = tq.length();
+
+    // axis is torque here
+    q.setFromAxisAngle(tq.normalize(), deltaAngle);
+    
+    // translation = pivot - (rotation * pivot)
+    t.copy(pivot).applyQuaternion(q).sub(pivot).negate();
+
+    m.compose(t, q, s);
+
+    yy.forEach(x=>{
+      x.applyMatrix4(m);
+    });
   }
 
-  measureTorqueOnPiece(options) {
-    return measureTorqueOnPiece.call(this, options);
+  measureTorqueOnPiece({name,leverV,forceV}){
+    /*
+      this does not visually turn anything, its role is to give back a
+      vector and an angle dot product to know if an axis should have been locked to
+      an axis spin
+    */
+
+    // all the same as torqueGroup
+    const t = this.t;
+    const tq = this.torqueV;
+    const q = this.q;
+    const s = this.s;
+    const m = this.m;
+    const yy = this.getPiecesGroup(name);
+    const pivot = yy.center.position;
+
+    tq.crossVectors(forceV,leverV);
+    const deltaAngle = tq.length();
+    q.setFromAxisAngle(tq.normalize(), deltaAngle);
+    t.copy(pivot).applyQuaternion(q).sub(pivot).negate();
+    m.compose(t, q, s);
+
+    // except here we do new stuff
+    const axis = this.getAxisFromName(name);
+    
+    
   }
 
-  getSelectedPieceGroups(piece){
-    // return [];
 
-    // if (!this.selectedPiece || !this.cube?.tGS) return [];
-    return Object.values(this.tGS).filter((group) => group?.includes?.(piece));
-
-
-  }
   
 }

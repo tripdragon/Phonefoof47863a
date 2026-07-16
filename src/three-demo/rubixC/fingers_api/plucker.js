@@ -53,6 +53,32 @@ export class Plucker{
 		
 	}
 
+	pluck(hit, piece){
+		this.refreshAxises(hit);
+		// console.log("sdfklmdf")
+		const groups = this.ff.cube.getSelectedPieceGroups(piece);
+		console.log("groups", groups)
+		window.groups = groups;
+
+		const centers = [];
+		for (var i = 0; i < groups.length; i++) {
+			centers.push(groups[i].center);
+		}
+		window.centers = centers;
+		console.log("centers", centers);
+
+		// centers[0].whichType
+
+		const axises = [];
+		worldNormalFromLocal(object3D, localNormal);
+
+		// groups.forEach((group, index) => {
+		// 	// const centerPiece = group?.center;
+		// 	// if (!centerPiece) return;
+		// 	// center.push(centerPiece);
+		// });
+
+	}
 
 
 

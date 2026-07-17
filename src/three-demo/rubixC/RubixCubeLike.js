@@ -1,11 +1,14 @@
 import * as THREE from "three";
 import { Piece } from "./Piece.js";
+import { CoreObject3D } from "./coreObject3D.js";
 import { colors } from "./constants.js";
 import { CheapPool } from "superneatlib";
 import { PiecesGroup } from "./PiecesGroup.js";
 // import { AxisHelperWithLetters } from "superneatlib";
 import { ThickAxesHelper } from "./thickAxesHelper.js";
 // import { torqueGroup, measureTorqueOnPiece } from "./math.js";
+
+
 
 export class RubixCubeLike extends THREE.Group {
   pieces = [];
@@ -32,17 +35,17 @@ export class RubixCubeLike extends THREE.Group {
     // to find their up y vector and crossproduct
 
     // faces / cornersets
-    top: new PiecesGroup("top"),        // +y
-    bottom: new PiecesGroup("bottom"),     // -y
-    left: new PiecesGroup("left"),  // -x
-    right: new PiecesGroup("right"), // +x
-    back: new PiecesGroup("back"),   // +z
-    front: new PiecesGroup("front"),  // -z
+    top: new PiecesGroup("top","side"),        // +y
+    bottom: new PiecesGroup("bottom","side"),     // -y
+    left: new PiecesGroup("left","side"),  // -x
+    right: new PiecesGroup("right","side"), // +x
+    back: new PiecesGroup("back","side"),   // +z
+    front: new PiecesGroup("front","side"),  // -z
 
     // 8-piece middle slices (no visible center cubie)
-    ringHorizontal: new PiecesGroup("ringHorizontal"),     // x ~= 0
-    ringVertical: new PiecesGroup("ringVertical"),     // z ~= 0
-    ringBow: new PiecesGroup("ringBow") // y ~= 0
+    ringHorizontal: new PiecesGroup("ringHorizontal","ring"),     // x ~= 0
+    ringVertical: new PiecesGroup("ringVertical","ring"),     // z ~= 0
+    ringBow: new PiecesGroup("ringBow","ring") // y ~= 0
   }
 
   getPiecesGroup(name){
@@ -166,11 +169,14 @@ export class RubixCubeLike extends THREE.Group {
 
   // middle vertical slice where x is effectively 0
   fishRingHorizontal() {
+
     //this.clearGroup(this.tGS.slice1);
     this.tGS.ringHorizontal.clear();
+
     this.pieces.forEach((x) => {
       if (this.nearZero(x.position.y)) {
         this.tGS.ringHorizontal.add(x);
+        console.log("i",x.whichType);
       }
     });
   }
@@ -416,7 +422,7 @@ export class RubixCubeLike extends THREE.Group {
   }
 
   buildCore(){
-    this.core = new THREE.Object3D();
+    this.core = new CoreObject3D();
     this.add(this.core);
   }
 
@@ -458,6 +464,11 @@ export class RubixCubeLike extends THREE.Group {
     // return [];
 
     // debugger
+
+    /*
+      this needs to check if center is core 0 0 0
+    */
+
     // if (!this.selectedPiece || !this.cube?.tGS) return [];
     return Object.values(this.tGS).filter((group) => group?.includes?.(piece));
 

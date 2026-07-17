@@ -86,6 +86,7 @@ export class Plucker{
 
 		// this.ff.cube.colorAllPieces(0xffffff);
 
+		// center here is undefined for ring types
 		centers.forEach((x, index) => {
 			x.setColorOverAll(0x111111)
 		});

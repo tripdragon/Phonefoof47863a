@@ -1,7 +1,7 @@
 import { CheapPool } from "superneatlib";
 
 export class PiecesGroup extends CheapPool {
-  center;
+  center = null;
   isType; // ring side
   constructor(name="?",type="") {
     super();

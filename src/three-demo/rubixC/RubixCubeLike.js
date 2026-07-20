@@ -1,4 +1,10 @@
-import * as THREE from "three";
+// import * as THREE from "three";
+import { 
+  Vector2, Vector3, Group, 
+  Matrix4, Quaternion
+  // AxesHelper
+} from "three";
+
 import { Piece } from "./Piece.js";
 import { CoreObject3D } from "./coreObject3D.js";
 import { colors } from "./constants.js";
@@ -10,7 +16,7 @@ import { ThickAxesHelper } from "./thickAxesHelper.js";
 
 
 
-export class RubixCubeLike extends THREE.Group {
+export class RubixCubeLike extends Group {
   pieces = [];
 
   static EPSILON = 1e-5;
@@ -35,17 +41,20 @@ export class RubixCubeLike extends THREE.Group {
     // to find their up y vector and crossproduct
 
     // faces / cornersets
-    top: new PiecesGroup("top","side"),        // +y
-    bottom: new PiecesGroup("bottom","side"),     // -y
-    left: new PiecesGroup("left","side"),  // -x
-    right: new PiecesGroup("right","side"), // +x
-    back: new PiecesGroup("back","side"),   // +z
-    front: new PiecesGroup("front","side"),  // -z
+    // also now store the axis used for rotations
+    // in respect to the Cube Space not world space
+    top: new PiecesGroup("top","side",new Vector3(0,1,0)),        // +y
+    bottom: new PiecesGroup("bottom","side",new Vector3(0,-1,0)),     // -y
+    left: new PiecesGroup("left","side",new Vector3(-1,0,0)),  // -x
+    right: new PiecesGroup("right","side",new Vector3(1,0,0)), // +x
+    back: new PiecesGroup("back","side",new Vector3(0,0,1)),   // +z
+    front: new PiecesGroup("front","side",new Vector3(0,0,-1)),  // -z
 
     // 8-piece middle slices (no visible center cubie)
-    ringHorizontal: new PiecesGroup("ringHorizontal","ring"),     // x ~= 0
-    ringVertical: new PiecesGroup("ringVertical","ring"),     // z ~= 0
-    ringBow: new PiecesGroup("ringBow","ring") // y ~= 0
+    // the Axis here are the center visual rotations not the visual align of the pieces
+    ringHorizontal: new PiecesGroup("ringHorizontal","ring",new Vector3(0,1,0)),     // x ~= 0
+    ringVertical: new PiecesGroup("ringVertical","ring",new Vector3(0,1,0)),     // z ~= 0
+    ringBow: new PiecesGroup("ringBow","ring",new Vector3(0,0,1)) // y ~= 0
   }
 
   getPiecesGroup(name){
@@ -273,7 +282,7 @@ export class RubixCubeLike extends THREE.Group {
     this.add(p1);
     this.pieces.push(p1);
     //p1.rotation.x = Math.PI * -0.5;
-    p1.quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), Math.PI * -0.5 );
+    p1.quaternion.setFromAxisAngle( new Vector3( 1, 0, 0 ), Math.PI * -0.5 );
 
     p1.position.z = -0.5;
 
@@ -429,7 +438,7 @@ export class RubixCubeLike extends THREE.Group {
   // 
   showCenterNormals(){
     this.pieces.forEach(x=>{
-        //const axesHelper = new THREE.AxesHelper( 2 );
+        //const axesHelper = new AxesHelper( 2 );
         // x.add( axesHelper );
       // const yy = new AxisHelperWithLetters({size:2});
       if(x.whichType === "center"){
@@ -459,20 +468,20 @@ export class RubixCubeLike extends THREE.Group {
     });
   }
 
+  colorAllPiecesRandom(colorHex = 0xffffff){
+    if (!this.pieces?.length) return;
+    const cc = Math.random();
+    this.pieces.forEach((x) => {
+      x.setColorOverAll(cc * colorHex);
+    });
+  }
+
+
 
   getSelectedPieceGroups(piece){
-    // return [];
-
-    // debugger
-
-    /*
-      this needs to check if center is core 0 0 0
-    */
-
-    // if (!this.selectedPiece || !this.cube?.tGS) return [];
+    // ff.cube.tGS.top === groups[0]
+    // returns [groups references]
     return Object.values(this.tGS).filter((group) => group?.includes?.(piece));
-
-
   }
 
 
@@ -481,7 +490,7 @@ export class RubixCubeLike extends THREE.Group {
     Transforms on groups like Torque
 
   */
-  axis = new THREE.Vector3(0,0,0);
+  axis = new Vector3(0,0,0);
 
   getAxisFromName(name){
     // switch(name){
@@ -520,12 +529,12 @@ export class RubixCubeLike extends THREE.Group {
   }
 
 
-  m = new THREE.Matrix4();
-  t = new THREE.Vector3();
-  q = new THREE.Quaternion()
-  s = new THREE.Vector3(1, 1, 1);
+  m = new Matrix4();
+  t = new Vector3();
+  q = new Quaternion()
+  s = new Vector3(1, 1, 1);
 
-  torqueV = new THREE.Vector3();
+  torqueV = new Vector3();
 
   
   // spinGroup({name,axis,pivot, angle}) {
@@ -549,9 +558,9 @@ export class RubixCubeLike extends THREE.Group {
 
 
     // pivot would actually be found within the group center
-    // const pivot = new THREE.Vector3(0,0,0);
-    // const pivot = new THREE.Vector3(px, py, pz);
-    // const axis = new THREE.Vector3(-1, 0, 0); // already normalized
+    // const pivot = new Vector3(0,0,0);
+    // const pivot = new Vector3(px, py, pz);
+    // const axis = new Vector3(-1, 0, 0); // already normalized
     // const angle = Math.PI / 4;
     // const angle = 1.2;
     // const angle = Math.PI / 2;

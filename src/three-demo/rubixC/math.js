@@ -22,6 +22,10 @@ export function remapPiToPI2(v) {
 }
 
 
+/*
+Object3D.localToworld(vector)
+already does this
+*/
 export function worldNormalFromLocal(object3D, localNormal) {
   /*
     normalMatrix : Matrix3

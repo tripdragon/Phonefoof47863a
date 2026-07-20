@@ -473,7 +473,7 @@ export class TouchesController {
 
 
   onMagicPlaneThresholdReached(){
-    this.debugColorAllFaces(Math.floor(Math.random() * 0xffffff));
+    this.ff.cube.colorAllPiecesRandom();
   }
 
 
@@ -481,14 +481,6 @@ export class TouchesController {
 		Builders
   */
 
-  debugColorAllFaces(color){
-    const pieces = this.ff.cube?.pieces;
-    if(!pieces?.length) return;
-
-    pieces.forEach(piece => {
-      piece.setColorOverAll(color);
-    });
-  }
 
 
 

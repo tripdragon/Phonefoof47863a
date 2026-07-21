@@ -53,7 +53,7 @@ export class RubixCubeLike extends Group {
     // 8-piece middle slices (no visible center cubie)
     // the Axis here are the center visual rotations not the visual align of the pieces
     ringHorizontal: new PiecesGroup("ringHorizontal","ring",new Vector3(0,1,0)),     // x ~= 0
-    ringVertical: new PiecesGroup("ringVertical","ring",new Vector3(0,1,0)),     // z ~= 0
+    ringVertical: new PiecesGroup("ringVertical","ring",new Vector3(1,0,0)),     // z ~= 0
     ringBow: new PiecesGroup("ringBow","ring",new Vector3(0,0,1)) // y ~= 0
   }
 
@@ -542,7 +542,11 @@ export class RubixCubeLike extends Group {
 
   
   // spinGroup({name,axis,pivot, angle}) {
-  spinGroup({name,deltaAngle}) {
+  spinGroupByName({name,deltaAngle}) {
+    const yy = this.getPiecesGroup(name);
+    this.spinGroup({group:yy,deltaAngle});
+  }
+  spinGroup({group,deltaAngle}) {
     // this type is a accumulation rotation from the angle in
     // the accumulation is from the .applyMatrix
     // meaning the only way to get a "smooth" would be a physics
@@ -571,10 +575,10 @@ export class RubixCubeLike extends Group {
     // const angle = 1.2;
     // const angle = Math.PI / 2;
 
-    const yy = this.getPiecesGroup(name);
-    const axis = yy.axis;
+    // const yy = this.getPiecesGroup(name);
+    const axis = group.axis;
 
-    const pivot = yy.center.position;
+    const pivot = group.center.position;
     // is this "poping" in place, and who can you send a smooth?
     // q.identity()
     q.setFromAxisAngle(axis, deltaAngle);
@@ -584,7 +588,7 @@ export class RubixCubeLike extends Group {
 
     m.compose(t, q, s);
 
-    yy.forEach(x=>{
+    group.forEach(x=>{
       // x.rotation.set(1,-1,1)
       // x.position.set(0,0,1);
       x.applyMatrix4(m);

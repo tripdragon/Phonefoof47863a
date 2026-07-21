@@ -228,6 +228,7 @@ export class TouchesController {
       // its backward so for now we negate to figure it out later
       const force = plucked.force.setLength(0.2).negate();
       this.ff.cube.torqueGroup({group:plucked.group,leverV:plucked.leverV,forceV:force});
+      
     }
 
   }

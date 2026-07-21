@@ -59,6 +59,8 @@ export class TouchesController {
 
 
 	selectedPiece = null;
+  // just used to console debug with
+  m_selectedPiece = null;
 
 	currentDragDistance = 0;
 	lastTriggeredDistance = 0;
@@ -215,6 +217,19 @@ export class TouchesController {
     }
 
     this.resetInteractionState();
+
+    // testing plucked
+    let plucked = this.engines?.plucker?.plucked;
+    if(plucked){
+      // plucked.group
+      // plucked.leverV
+      // debugger
+      // WORKS!!! holds rotations for now
+      // its backward so for now we negate to figure it out later
+      const force = plucked.force.setLength(0.2).negate();
+      this.ff.cube.torqueGroup({group:plucked.group,leverV:plucked.leverV,forceV:force});
+    }
+
   }
 
 
@@ -228,7 +243,10 @@ export class TouchesController {
     this.isOnCube = false;
     this.ff.controls.enabled = true;
     this.IS_DOWN = false;
-    this.selectedPiece = null;
+    // once selectedPiece goes to null m_selectedPiece does as well...
+    // this.m_selectedPiece = this.selectedPiece;
+    // this.selectedPiece = null;
+    // this.selectedPiece = 4;
     this.lockGridDown = false;
     this.lastTriggeredDistance = 0;
 					    
@@ -277,7 +295,7 @@ export class TouchesController {
       if(!pool) return;
       pool.selectedIndex = 0;
       pool.forEach(mesh => {
-        mesh.visible = false;
+        // mesh.visible = false;
       });
     });
   }
@@ -318,9 +336,11 @@ export class TouchesController {
 			this.engines.magicPlane.refresh(this.hitDown);
 
       // this.engines.plucker.refreshAxises(this.hitDown);
-      const piece = this.selectedPiece?.object;
+      const piece = this.selectedPiece?.piece;
       if(piece){
-        this.engines.plucker.pluck(this.hitDown, piece);
+
+        // this.engines.plucker.pluck(this.hitDown, piece);
+        this.engines.plucker.onDown(this.hitDown, piece);
       }
 
     }
@@ -345,7 +365,7 @@ export class TouchesController {
     }
 
     // console.log("hits", this.engines.session.points.cube);
-    console.log("hits", this.engines.session.points.cubeRayHits);
+    // console.log("hits", this.engines.session.points.cubeRayHits);
 
   }
 
@@ -369,7 +389,7 @@ export class TouchesController {
 
   /*
 		seeking
-	
+    happens after two points are available
   */
 
   seeking(ev){
@@ -383,6 +403,15 @@ export class TouchesController {
     // looks like Plucker will be doing the maths
     // hrrrrmmmm nesty
 
+
+    const piece = this.selectedPiece?.piece;
+    if(piece){
+      const dir = this.engines.directionArrow.getAbsoluteDirection();
+      const group = this.engines.plucker.pluck(this.hitDown, piece, dir);
+      
+      // console.log("plucked group", group);
+
+    }
 
   }
 
@@ -425,13 +454,17 @@ export class TouchesController {
     // this.hitsPlane = this.raycaster.intersectObject(this.planeHitZone3D, false);
     this.engines.session.points.planeRayHits = this.raycaster.intersectObject(this.engines.magicPlane.hitZonePlane, false);
     
+    /*
+      THIS needs some more checks, its going THOUGh the cube
+      only SOMETIMES
+    */
     const hits = this.engines.session.points.planeRayHits;
     if(hits.length > 0){
       
       this.engines.session.points.plane.push(hits[0]);
       
       if(this.engines.session.points.plane.length>0){
-        console.log("????");
+        // console.log("????");
         
         if(this.visuals.showPlanePoints){
           const ballOnPlane = this.engines.pools.plane.meshes.requestItem();

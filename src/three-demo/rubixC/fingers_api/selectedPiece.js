@@ -7,18 +7,22 @@ import { worldNormalFromLocal } from '../math.js';
 
 export class SelectedPiece {
 	hit;
-	normalMatrix = new Matrix3();
+	// normalMatrix = new Matrix3();
 	worldNormal = new Vector3();
+
+	
 
 	constructor(hit){
 		this.hit = hit;
 
 		if(this.hit?.object){
 			this.worldNormal.copy(worldNormalFromLocal(this.hit.object, this.hit.normal));
+			//// this.worldNormal.copy(this.hit.object.localToWorld(hit.normal));
+			//// this.worldNormal.copy(this.hit.object.localToWorld(this.hit.face.normal));
 		}
 	}
 
-	get object(){
+	get piece(){
 		return this.hit?.object?.parent?.isPiece ? this.hit.object.parent : null;
 	}
 

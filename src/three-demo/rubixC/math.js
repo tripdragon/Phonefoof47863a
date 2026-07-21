@@ -25,6 +25,15 @@ export function remapPiToPI2(v) {
 /*
 Object3D.localToworld(vector)
 already does this
+this.worldNormal.copy(this.hit.object.localToWorld(hit.normal));
+
+NOT THE SAME!!!!
+ah
+needs 
+gs.hit.face.normal
+NOT .hit.normal < this one is something else
+its the same.... hrmmm
+for now this function will be continued to be used
 */
 export function worldNormalFromLocal(object3D, localNormal) {
   /*

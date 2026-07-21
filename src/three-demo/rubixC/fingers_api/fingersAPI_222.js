@@ -9,7 +9,8 @@ import {
 
 import { SlightlyPriceyPool } from '../slightlyPriceyPool.js';
 import { DebugSelectionDownLine } from "../DebugSelectionDownLine.js";
-import { ThickArrowHelper, ThickAxesHelper } from "../thickAxesHelper.js";
+import { ThickArrowHelper } from "../utilites/thickArrowHelper.js";
+import { ThickAxesHelper } from "../utilites/thickAxesHelper.js";
 
 import { TouchesController } from "./touchesController.js";
 

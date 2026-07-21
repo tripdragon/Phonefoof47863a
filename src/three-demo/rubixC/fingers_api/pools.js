@@ -15,7 +15,7 @@ export class Pools{
 	cube = null;
 	plane = null;
 
-	constructor({fingersAPI, cubePointsMax = 20, planePointsMax = 20}={}){
+	constructor({fingersAPI, cubePointsMax = 40, planePointsMax = 40}={}){
 		this.ff = fingersAPI;
 		this.cube = new MeshPool({fingersAPI:this.ff, max:cubePointsMax, color:0xffff22, autoBuild:true});
 		this.plane = new MeshPool({fingersAPI:this.ff, max:planePointsMax, color:0x0000ff, autoBuild:true});
@@ -61,7 +61,7 @@ class MeshPool{
 		this.meshes = new SlightlyPriceyPool({rootObject3D:this.holder3D});
 
 
-		const markerGeo = new SphereGeometry(0.03, 8, 8);
+		const markerGeo = new SphereGeometry(0.09, 8, 8);
 		const markerMat = new MeshBasicMaterial({ color:  this.color });
 
 		for (let i = 0; i < this.max; i++) {

@@ -1,5 +1,5 @@
 
-import { ThickArrowHelper, ThickAxesHelper } from "../thickAxesHelper.js";
+import { ThickArrowHelper } from "../utilites/thickArrowHelper.js";
 
 import { 
 	Matrix3, Vector2, Vector3
@@ -19,7 +19,7 @@ export class DirectionArrow{
 		},
 		absolute : {
 			visual: null,
-			dirV : new Vector3(),
+			dirV : new Vector3(), // main artice, will make a getter
 			originV : new Vector3(),
 			movingAverageV : new Vector3(),
 			units : [new Vector3(), new Vector3(), new Vector3(), new Vector3()],
@@ -31,6 +31,9 @@ export class DirectionArrow{
 			dirV : new Vector3(),
 			originV : new Vector3(),
 			length : 2,
+
+			// this mess is from AI, need to prune
+			// if anything just move to "workV" section
 			normalLocalV : new Vector3(),
 			normalWorldV : new Vector3(),
 			absoluteLocalV : new Vector3(),
@@ -57,6 +60,10 @@ export class DirectionArrow{
 	// wicked bug, arrow and thus dir can be into space when slow or flick fast
 	waitLimToUpdateAveDir = 3;
 
+	getAbsoluteDirection(){
+		return this.arrows.absolute.dirV;
+	}
+
 	constructor({fingersAPI}={}){
 		this.ff = fingersAPI;
 		this.build();
@@ -66,18 +73,46 @@ export class DirectionArrow{
 	build(){
 		const aa = this.arrows.average;
 		// this.arrowDirHelper = new ThickArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xffffff, 0.18, 0.1);
-		aa.visual = new ThickArrowHelper(aa.dirV, aa.originV, 4.1, 0xffffff, 0.18, 0.1);
+		// aa.visual = new ThickArrowHelper(aa.dirV, aa.originV, 4.1, 0xffffff, 0.18, 0.1);
+		aa.visual = new ThickArrowHelper({
+	      dir : aa.dirV, 
+	      origin : aa.originV, 
+	      length : 4.1, 
+	      colorHex : 0xffffff, 
+	      headLength : 0.18, 
+	      headWidth : 0.1, 
+	      shaftRadius : 0.035
+	    });
+		
 		//this.arrowDirHelper.visible = false;
 		this.ff.visualsObject3D.add(aa.visual);
 
 		const a2 = this.arrows.absolute;
 		// this.arrowDirHelper = new ThickArrowHelper(this.arrowDirV, this.arrowDirOriginV, 5.1, 0xffffff, 0.18, 0.1);
-		a2.visual = new ThickArrowHelper(a2.dirV, a2.originV, 1.1, 0xffc702, 0.18, 0.1);
+		// a2.visual = new ThickArrowHelper(a2.dirV, a2.originV, 1.1, 0xffc702, 0.18, 0.1);
+		a2.visual = new ThickArrowHelper({
+	      dir : a2.dirV, 
+	      origin : a2.originV, 
+	      length : 1.1, 
+	      colorHex : 0xffc702, 
+	      headLength : 0.18, 
+	      headWidth : 0.1, 
+	      shaftRadius : 0.035
+	    });
 		//this.arrowDirHelper.visible = false;
 		this.ff.visualsObject3D.add(a2.visual);
 
 		const cp = this.arrows.crossProduct;
-		cp.visual = new ThickArrowHelper(cp.dirV, cp.originV, cp.length, 0xff33cc, 0.32, 0.18);
+		// cp.visual = new ThickArrowHelper(cp.dirV, cp.originV, cp.length, 0xff33cc, 0.32, 0.18);
+		cp.visual = new ThickArrowHelper({
+	      dir : cp.dirV, 
+	      origin : cp.originV, 
+	      length : cp.length, 
+	      colorHex : 0xff33cc, 
+	      headLength : 0.32, 
+	      headWidth : 0.18, 
+	      shaftRadius : 0.035
+	    });
 		cp.visual.visible = false;
 		this.ff.visualsObject3D.add(cp.visual);
 
@@ -253,7 +288,10 @@ export class DirectionArrow{
 
 	}
 
-
+	/*
+	Ai built, needs pruning
+	its doing tooo much
+	*/
 	updateCrossProductDebugger(){
 		const hit = this.ff?.touchesController?.hitDown;
 		const cp = this.arrows.crossProduct;
@@ -295,7 +333,8 @@ export class DirectionArrow{
 		cp.dirV.copy(cp.worldPointV).sub(cp.worldOriginV).normalize();
 		cp.visual.position.copy(cp.originV);
 		cp.visual.setDirection(cp.dirV);
-		cp.visual.setLength(cp.length, 0.32, 0.18);
+		// cp.visual.setLength(cp.length, 0.32, 0.18);
+		cp.visual.setLength({length:cp.length, headLength : 0.32, headWidth : 0.18});
 		cp.visual.visible = true;
 	}
 

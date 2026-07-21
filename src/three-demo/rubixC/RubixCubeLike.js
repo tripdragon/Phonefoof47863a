@@ -11,7 +11,7 @@ import { colors } from "./constants.js";
 import { CheapPool } from "superneatlib";
 import { PiecesGroup } from "./PiecesGroup.js";
 // import { AxisHelperWithLetters } from "superneatlib";
-import { ThickAxesHelper } from "./thickAxesHelper.js";
+import { ThickAxesHelper } from "./utilites/thickAxesHelper.js";
 // import { torqueGroup, measureTorqueOnPiece } from "./math.js";
 
 
@@ -188,6 +188,7 @@ export class RubixCubeLike extends Group {
         console.log("i",x.whichType);
       }
     });
+    this.tGS.ringHorizontal.assignCenter(this.core);
   }
 
   // middle depth slice where z is effectively 0
@@ -199,6 +200,7 @@ export class RubixCubeLike extends Group {
         this.tGS.ringVertical.add(x);
       }
     });
+    this.tGS.ringVertical.assignCenter(this.core);
   }
 
   // center ring where y is effectively 0
@@ -210,6 +212,7 @@ export class RubixCubeLike extends Group {
         this.tGS.ringBow.add(x);
       }
     });
+    this.tGS.ringBow.assignCenter(this.core);
   }
 
   buildTopLevel() {
@@ -488,45 +491,46 @@ export class RubixCubeLike extends Group {
   /*
     =================
     Transforms on groups like Torque
-
+    Obsolute maybe
+    group has a .axis now
   */
-  axis = new Vector3(0,0,0);
+  // axis = new Vector3(0,0,0);
 
-  getAxisFromName(name){
-    // switch(name){
-    //   name :"left" 
-    //   break;
-    // }
+  // getAxisFromName(name){
+  //   // switch(name){
+  //   //   name :"left" 
+  //   //   break;
+  //   // }
 
-    if(name === "left"){
-      this.axis.set(-1,0,0);
-    }
-    else if(name === "right"){
-      this.axis.set(1,0,0);
-    }
-    else if(name === "top"){
-      this.axis.set(0,1,0);
-    }
-    else if(name === "bottom"){
-      this.axis.set(0,-1,0);
-    }
-    else if(name === "front"){
-      this.axis.set(0,0,-1);
-    }
-    else if(name === "back"){
-      this.axis.set(0,0,1);
-    }
-    else if(name === "ringHorizontal"){
-      this.axis.set(0,1,0);
-    }
-    else if(name === "ringVertical"){
-      this.axis.set(1,0,0);
-    }
-    else if(name === "ringBow"){
-      this.axis.set(0,0,1);
-    }
-    return this.axis;
-  }
+  //   if(name === "left"){
+  //     this.axis.set(-1,0,0);
+  //   }
+  //   else if(name === "right"){
+  //     this.axis.set(1,0,0);
+  //   }
+  //   else if(name === "top"){
+  //     this.axis.set(0,1,0);
+  //   }
+  //   else if(name === "bottom"){
+  //     this.axis.set(0,-1,0);
+  //   }
+  //   else if(name === "front"){
+  //     this.axis.set(0,0,-1);
+  //   }
+  //   else if(name === "back"){
+  //     this.axis.set(0,0,1);
+  //   }
+  //   else if(name === "ringHorizontal"){
+  //     this.axis.set(0,1,0);
+  //   }
+  //   else if(name === "ringVertical"){
+  //     this.axis.set(1,0,0);
+  //   }
+  //   else if(name === "ringBow"){
+  //     this.axis.set(0,0,1);
+  //   }
+  //   return this.axis;
+  // }
 
 
   m = new Matrix4();
@@ -550,11 +554,13 @@ export class RubixCubeLike extends Group {
     // has no magnet, so handle that outside as well
 
 
+
     const m = this.m;
     const t = this.t;
     const q = this.q;
     const s = this.s;
-    const axis = this.getAxisFromName(name);
+    // const axis = this.getAxisFromName(name);
+    
 
 
     // pivot would actually be found within the group center
@@ -566,6 +572,8 @@ export class RubixCubeLike extends Group {
     // const angle = Math.PI / 2;
 
     const yy = this.getPiecesGroup(name);
+    const axis = yy.axis;
+
     const pivot = yy.center.position;
     // is this "poping" in place, and who can you send a smooth?
     // q.identity()
@@ -596,7 +604,11 @@ export class RubixCubeLike extends Group {
     setInterval(jhhv,100)
 
   */
-  torqueGroup({name,leverV,forceV}){
+  torqueGroupByName({name,leverV,forceV}){
+    const yy = this.getPiecesGroup(name);
+    this.torqueGroup({group:yy,leverV,forceV})
+  }
+  torqueGroup({group,leverV,forceV}){
     // turns a group from the force of a torque and a lever
     // does not respect the groups axis by design since the lever is its
     // own special vector
@@ -610,8 +622,12 @@ export class RubixCubeLike extends Group {
     const s = this.s;
     const m = this.m;
 
-    const yy = this.getPiecesGroup(name);
-    const pivot = yy.center.position;
+    // const yy = this.getPiecesGroup(name);
+
+    
+    // does this work for rings?
+    const pivot = group.center.position;
+
 
     tq.crossVectors(forceV,leverV);
 
@@ -625,38 +641,46 @@ export class RubixCubeLike extends Group {
 
     m.compose(t, q, s);
 
-    yy.forEach(x=>{
+    group.forEach(x=>{
       x.applyMatrix4(m);
     });
   }
 
-  measureTorqueOnPiece({name,leverV,forceV}){
-    /*
-      this does not visually turn anything, its role is to give back a
-      vector and an angle dot product to know if an axis should have been locked to
-      an axis spin
-    */
+  // axisV = new Vector3();
+  // measureTorqueOnPiece({name,leverV,forceV}){
+  //   /*
+  //     this does not visually turn anything, its role is to give back a
+  //     vector and an angle dot product to know if an axis should have been locked to
+  //     an axis spin
+  //   */
 
-    // all the same as torqueGroup
-    const t = this.t;
-    const tq = this.torqueV;
-    const q = this.q;
-    const s = this.s;
-    const m = this.m;
-    const yy = this.getPiecesGroup(name);
-    const pivot = yy.center.position;
+  //   // all the same as torqueGroup
+  //   const t = this.t;
+  //   const tq = this.torqueV;
+  //   const q = this.q;
+  //   const s = this.s;
+  //   const m = this.m;
+  //   const yy = this.getPiecesGroup(name);
+  //   const axisW = this.axisV;
 
-    tq.crossVectors(forceV,leverV);
-    const deltaAngle = tq.length();
-    q.setFromAxisAngle(tq.normalize(), deltaAngle);
-    t.copy(pivot).applyQuaternion(q).sub(pivot).negate();
-    m.compose(t, q, s);
+  //   axisW.copy(yy.axis);
 
-    // except here we do new stuff
-    const axis = this.getAxisFromName(name);
+  //   // might need to ABS the lever and axis here
+  //   // just to get a reading not a heading
+  //   // also where is lever length???
+  //   // this does not read as proper torque yet
+
+  //   tq.crossVectors(forceV,leverV);
+  //   const deltaAngle = tq.length();
+  //   q.setFromAxisAngle(tq.normalize(), deltaAngle);
+  //   axisW.applyQuaternion(q);
+
+  //   // need dot product
+  //   const dot = yy.axis.dot(axisW);
     
+
     
-  }
+  // }
 
 
   

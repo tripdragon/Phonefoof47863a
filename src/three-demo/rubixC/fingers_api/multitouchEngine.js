@@ -14,6 +14,10 @@ export class MultitouchEngine {
   skipTouchUp = false;
 
   pointerDown(ev) {
+    /*
+      only start computing stuff after two points are down
+      even if they are really near each
+    */
     this.activePointers.set(ev.pointerId, ev);
 
     if (this.activePointers.size > 1) {
@@ -35,7 +39,8 @@ export class MultitouchEngine {
     if (this.isMultitouch || this.activePointers.size > 1) {
       return { shouldDraw: false, shouldAbortDrawing: !this.isMultitouch };
     }
-
+    // flooding objects
+    // maybe return a cached object with no intent to edit
     return { shouldDraw: ev.pointerId === this.drawingPointerId, shouldAbortDrawing: false };
   }
 

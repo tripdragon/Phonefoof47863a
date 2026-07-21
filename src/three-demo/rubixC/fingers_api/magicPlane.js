@@ -3,7 +3,8 @@ import {
 	Matrix4, MeshBasicMaterial, Mesh, Box3
 } from "three";
 
-import { ThickArrowHelper, ThickAxesHelper } from "../thickAxesHelper.js";
+// import { ThickArrowHelper, ThickAxesHelper } from "../utilites/thickAxesHelper.js";
+import { ThickArrowHelper } from "../utilites/thickArrowHelper.js";
 
 
 export class MagicPlane{
@@ -25,6 +26,8 @@ export class MagicPlane{
 	arrowDirectionV = new Vector3();
 	arrowOriginV = new Vector3();
 	box1 = new Box3();
+
+	// points = [];
 
 	constructor({fingersAPI}={}){
 		this.ff = fingersAPI;
@@ -64,7 +67,16 @@ export class MagicPlane{
 
 	buildVisuals(){
 
-	    this.faceArrow = new ThickArrowHelper(this.arrowDirectionV, this.arrowOriginV, 1.1, 0x2d7fff, 0.18, 0.1);
+	    // this.faceArrow = new ThickArrowHelper(this.arrowDirectionV, this.arrowOriginV, 1.1, 0x2d7fff, 0.18, 0.1);
+	    this.faceArrow = new ThickArrowHelper({
+	      dir : this.arrowDirectionV, 
+	      origin : this.arrowOriginV, 
+	      length : 1.1, 
+	      colorHex : 0x2d7fff, 
+	      headLength : 0.18, 
+	      headWidth : 0.1, 
+	      shaftRadius : 0.035
+	    });
 	    this.faceArrow.visible = false;
 	    this.ff.visualsObject3D.add(this.faceArrow);
 
@@ -72,6 +84,8 @@ export class MagicPlane{
 
 
 	refresh(hitDown){
+
+		// this.points.push(hitDown);
 
 		this.refreshPieceFaceNormal(hitDown);
 

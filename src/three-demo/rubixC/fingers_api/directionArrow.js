@@ -26,6 +26,12 @@ export class DirectionArrow{
 			nearest: [],
 			workV: new Vector3()
 		},
+		distance : {
+			visual: null,
+			dirV : new Vector3(),
+			originV : new Vector3(),
+			distance : 0
+		},
 		crossProduct : {
 			visual: null,
 			dirV : new Vector3(),
@@ -102,6 +108,24 @@ export class DirectionArrow{
 		//this.arrowDirHelper.visible = false;
 		this.ff.visualsObject3D.add(a2.visual);
 
+		const distance = this.arrows.distance;
+		distance.visual = new ThickArrowHelper({
+	      dir : distance.dirV,
+	      origin : distance.originV,
+	      length : this.EPSILONish,
+	      colorHex : 0x22ddff,
+	      headLength : 0.18,
+	      headWidth : 0.1,
+	      shaftRadius : 0.035
+	    });
+		distance.visual.name = "drag-distance-arrow";
+		distance.visual.visible = false;
+		if(this.ff.printDebugger){
+			this.ff.printDebugger.add(distance.visual);
+		}else{
+			this.ff.visualsObject3D.add(distance.visual);
+		}
+
 		const cp = this.arrows.crossProduct;
 		// cp.visual = new ThickArrowHelper(cp.dirV, cp.originV, cp.length, 0xff33cc, 0.32, 0.18);
 		cp.visual = new ThickArrowHelper({
@@ -125,6 +149,13 @@ export class DirectionArrow{
 		aa.movingAverageV.set(0,0,0);
 		aa.originV.set(0,0,0);
 		aa.dirV.set(0,0,0);
+
+		const distance = this.arrows.distance;
+		distance.distance = 0;
+		this.currentDragDistance = 0;
+		distance.dirV.set(0,0,0);
+		distance.originV.set(0,0,0);
+		if(distance.visual) distance.visual.visible = false;
 	}
 
 	refresh(){
@@ -134,6 +165,7 @@ export class DirectionArrow{
 
 		// this.arrowDirOriginV.copy(this.pointsPlane[0].point);
 		const planePoints = this.ff.getPlanePoints();
+		this.updateDistanceArrow(planePoints);
 		// const cubePoints = this.ff.getCubePoints();
 		
 		if(planePoints.length > this.waitLimToUpdateAveDir){
@@ -164,6 +196,35 @@ export class DirectionArrow{
 
 			this.updateDirectionCheck();
 		}
+	}
+
+	updateDistanceArrow(planePoints = []){
+		const distance = this.arrows.distance;
+		const start = this.ff.getPointDown();
+		const cursor = planePoints.at(-1)?.point;
+
+		if(!distance.visual || !start || !cursor){
+			distance.distance = 0;
+			this.currentDragDistance = 0;
+			if(distance.visual) distance.visual.visible = false;
+			return;
+		}
+
+		distance.originV.copy(start);
+		distance.dirV.copy(cursor).sub(start);
+		distance.distance = distance.dirV.length();
+		this.currentDragDistance = distance.distance;
+
+		if(distance.distance <= this.EPSILONish){
+			distance.visual.visible = false;
+			return;
+		}
+
+		distance.dirV.multiplyScalar(1 / distance.distance);
+		distance.visual.position.copy(distance.originV);
+		distance.visual.setDirection(distance.dirV);
+		distance.visual.setLength({length: distance.distance});
+		distance.visual.visible = true;
 	}
 
 
@@ -417,5 +478,3 @@ export class DirectionArrow{
 
 
 }
-
-	

@@ -220,8 +220,8 @@ export class TouchesController {
     if(plucked?.group){
       // Scale the release turn to the actual drag represented by the distance
       // arrow instead of applying the same arbitrary rotation to every drag.
-      const dragDistance = this.engines.directionArrow.getDragDistance();
-      const force = plucked.force.setLength(dragDistance).negate();
+      const dragRotation = -this.engines.directionArrow.getDragDistance();
+      const force = plucked.force.setLength(dragRotation);
       this.ff.cube.torqueGroup({group:plucked.group,leverV:plucked.leverV,forceV:force});
       
     }

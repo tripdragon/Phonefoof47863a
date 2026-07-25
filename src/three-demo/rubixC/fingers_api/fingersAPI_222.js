@@ -53,7 +53,7 @@ export class FingersAPI {
   touchesController;
   visualsObject3D;
 
-  constructor({ camera, domElement, scene, controls, cube, planeHitsMax = 42, triggerDistance = 0.35 } = {}) {
+  constructor({ camera, domElement, scene, controls, cube, printDebugger, planeHitsMax = 42, triggerDistance = 0.35 } = {}) {
 
     this.scene = scene;
     this.camera = camera;
@@ -62,9 +62,10 @@ export class FingersAPI {
     this.cube = cube;
     this.planeHitsMax = planeHitsMax;
     this.triggerDistance = triggerDistance;
+    this.printDebugger = printDebugger;
     // this.planeHitsMax = 4;
 
-    this.visualsObject3D = new Group();
+    this.visualsObject3D = printDebugger?.visuals ?? new Group();
     
     // dont know why, but visual balls pool does not work when nested to .cube for now
     // they are, but something is flipped
@@ -72,7 +73,7 @@ export class FingersAPI {
     // lets try to break it
     this.cube.rotation.set(0,0,0);
     // this.cube.add(this.visualsObject3D);
-    this.scene.add(this.visualsObject3D);
+    if (!printDebugger) this.scene.add(this.visualsObject3D);
 
     this.touchesController = new TouchesController({
       fingersAPI:this
@@ -103,6 +104,11 @@ export class FingersAPI {
 
   getSelectedPiece(){
     return this.touchesController?.selectedPiece ?? null;
+  }
+
+  dispose() {
+    this.touchesController?.dispose?.();
+    if (!this.printDebugger) this.visualsObject3D.removeFromParent();
   }
 
 }

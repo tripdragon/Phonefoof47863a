@@ -55,7 +55,7 @@ export class MagicPlane{
 	    
 	  const material = new MeshBasicMaterial( { color: 0xff22ff, opacity:0.2, transparent : true} );
 	  const plane = new Mesh( geometry, material );
-	  this.ff.scene.add( plane );
+	  this.ff.visualsObject3D.add( plane );
 	  this.hitZonePlane = plane;
 	  
 	  // const axesHelper = new ThickAxesHelper({ length: 5, radius: 0.035 });

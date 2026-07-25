@@ -1033,6 +1033,41 @@ code {
   outline-offset: 2px;
 }
 
+.rubixc-print-debugger {
+  position: absolute;
+  top: max(0.75rem, env(safe-area-inset-top));
+  left: max(0.75rem, env(safe-area-inset-left));
+  z-index: 5;
+  display: grid;
+  gap: 0.08rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #7cff72;
+  cursor: pointer;
+  font-family: "Courier New", monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: left;
+  text-shadow: 1px 1px 0 #000, 0 0 3px #000;
+  letter-spacing: 0.025em;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rubixc-print-debugger span:last-child {
+  color: #fff76a;
+}
+
+.rubixc-print-debugger[data-enabled="false"] {
+  opacity: 0.65;
+}
+
+.rubixc-print-debugger:focus-visible {
+  outline: 2px solid #fff76a;
+  outline-offset: 0.3rem;
+}
+
 @media (max-width: 640px) {
   .rubixc-canvas-wrap {
     height: calc(100svh - 8rem);

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { Vector3 } from "three";
 
 import { TouchesController } from "../src/three-demo/rubixC/fingers_api/touchesController.js";
 
@@ -23,6 +24,7 @@ function makeController(touchState) {
         },
       },
       plucker: { plucked: { group: null }, reset() { this.wasReset = true; } },
+      directionArrow: { getDragDistance: () => 0 },
     },
     ff: { controls: { enabled: false } },
     releasePools() {},
@@ -83,4 +85,28 @@ test("the final multitouch release also flushes stores", () => {
   Object.values(sessionPoints).forEach(points => assert.equal(points.length, 0));
   assert.equal(controller.hitDown, null);
   assert.equal(controller.currentDragDistance, 0);
+});
+
+test("a drag release scales the cube turn force to the direction arrow distance", () => {
+  const { controller } = makeController({
+    hasActivePointers: false,
+    shouldSkipTouchUp: false,
+  });
+  const group = {};
+  const leverV = new Vector3(0, 0, 1);
+  const force = new Vector3(1, 0, 0);
+  let torqueArgs;
+
+  controller.engines.plucker.plucked = { group, leverV, force };
+  controller.engines.directionArrow.getDragDistance = () => 1.75;
+  controller.ff.cube = {
+    torqueGroup(args) { torqueArgs = args; },
+  };
+
+  controller.onPointerUp({ pointerId: 1 });
+
+  assert.equal(torqueArgs.group, group);
+  assert.equal(torqueArgs.leverV, leverV);
+  assert.ok(Math.abs(torqueArgs.forceV.length() - 1.75) < 1e-12);
+  assert.ok(torqueArgs.forceV.distanceTo(new Vector3(-1.75, 0, 0)) < 1e-12);
 });

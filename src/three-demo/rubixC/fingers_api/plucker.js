@@ -84,6 +84,15 @@ export class Plucker{
 
 	}
 
+	reset(){
+		this.plucked.group = null;
+		this.plucked.index = -1;
+		this.plucked.leverV.set(0, 0, 0);
+		this.plucked.force.set(0, 0, 0);
+		this.tally.length = 0;
+		this.groups = [];
+	}
+
 	onUp(){
 		
 	}

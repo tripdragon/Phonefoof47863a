@@ -24,7 +24,7 @@ export class NormalsDebugger {
 		this.color = color;
 
 		this.group.name = "NormalsDebugger";
-		this.ff?.scene?.add(this.group);
+		this.ff?.visualsObject3D?.add(this.group);
 
 		this.build();
 	}
@@ -62,4 +62,3 @@ export class NormalsDebugger {
 		});
 	}
 }
-

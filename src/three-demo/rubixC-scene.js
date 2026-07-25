@@ -6,6 +6,7 @@ import { RubixCubeLike } from "./rubixC/RubixCubeLike.js";
 import { PiecesGroup } from "./rubixC/PiecesGroup.js";
 import { smoothstep, remapPiToPI2 } from "./rubixC/math.js";
 import { FingersAPI } from "./rubixC/fingers_api/fingersAPI_222.js";
+import { PrintDebugger } from "./rubixC/PrintDebugger.js";
 
 export function renderRubixCRoute(container) {
 
@@ -34,6 +35,9 @@ gugireh6932
   window.scene = scene;
   scene.background = new THREE.Color("#e2e8f0");
 
+  const printDebugger = new PrintDebugger({ host: canvasWrap });
+  scene.add(printDebugger.visuals);
+
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
   // camera.position.set(-3, 2.5, -3.5);
   // camera.position.set(0, 2.5, 3.5);
@@ -57,7 +61,7 @@ gugireh6932
  // scene.add(cube);
 
   const axesHelper = new THREE.AxesHelper( 5 );
-  scene.add( axesHelper );
+  printDebugger.add(axesHelper);
    
  //  const i1 = new THREE.Group();
  //  //scene.add(i1);
@@ -565,7 +569,8 @@ requestAnimationFrame(spinGroup);
     domElement: renderer.domElement,
     scene,
     controls,
-    cube: magicCube
+    cube: magicCube,
+    printDebugger
   });
   // fingersAPI.beginPointerEvents();
 
@@ -672,6 +677,7 @@ requestAnimationFrame(spinGroup);
       setFullscreenFallback(false);
     }
     fingersAPI.dispose();
+    printDebugger.dispose();
     controls.dispose();
     renderer.dispose();
     canvasWrap.innerHTML = "";

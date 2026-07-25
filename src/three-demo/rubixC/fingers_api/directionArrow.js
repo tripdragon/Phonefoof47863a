@@ -70,6 +70,10 @@ export class DirectionArrow{
 		return this.arrows.absolute.dirV;
 	}
 
+	getDragDistance(){
+		return this.arrows.distance.distance;
+	}
+
 	constructor({fingersAPI}={}){
 		this.ff = fingersAPI;
 		this.build();

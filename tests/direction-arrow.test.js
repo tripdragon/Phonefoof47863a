@@ -37,6 +37,7 @@ test("distance arrow spans from pointer start to the latest cursor point", () =>
   ]);
 
   assert.equal(arrow.arrows.distance.distance, 5);
+  assert.equal(arrow.getDragDistance(), 5);
   assert.equal(arrow.currentDragDistance, 5);
   assert.deepEqual(visual.position.toArray(), [1, 2, 3]);
   assert.ok(calls.direction.distanceTo(new Vector3(0.6, 0.8, 0)) < 1e-12);

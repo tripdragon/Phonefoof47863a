@@ -216,15 +216,12 @@ export class TouchesController {
       return;
     }
 
-    // testing plucked
-    let plucked = this.engines?.plucker?.plucked;
+    const plucked = this.engines?.plucker?.plucked;
     if(plucked?.group){
-      // plucked.group
-      // plucked.leverV
-      // debugger
-      // WORKS!!! holds rotations for now
-      // its backward so for now we negate to figure it out later
-      const force = plucked.force.setLength(0.2).negate();
+      // Scale the release turn to the actual drag represented by the distance
+      // arrow instead of applying the same arbitrary rotation to every drag.
+      const dragDistance = this.engines.directionArrow.getDragDistance();
+      const force = plucked.force.setLength(dragDistance).negate();
       this.ff.cube.torqueGroup({group:plucked.group,leverV:plucked.leverV,forceV:force});
       
     }

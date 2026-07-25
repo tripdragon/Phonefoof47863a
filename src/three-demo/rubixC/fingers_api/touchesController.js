@@ -212,15 +212,13 @@ export class TouchesController {
 
     if (touchState.hasActivePointers) return;
     if (touchState.shouldSkipTouchUp) {
-      this.releasePools();
+      this.resetInteractionState();
       return;
     }
 
-    this.resetInteractionState();
-
     // testing plucked
     let plucked = this.engines?.plucker?.plucked;
-    if(plucked){
+    if(plucked?.group){
       // plucked.group
       // plucked.leverV
       // debugger
@@ -231,6 +229,10 @@ export class TouchesController {
       
     }
 
+    // Keep the completed drag available until its release action has run, then
+    // flush every store so the next touch cannot reuse stale session data.
+    this.resetInteractionState();
+
   }
 
 
@@ -240,15 +242,17 @@ export class TouchesController {
 
   resetInteractionState() {
     this.releasePools();
+    this.engines.session.reset();
+    this.engines.plucker?.reset();
     this.state = states.idle;
     this.isOnCube = false;
     this.ff.controls.enabled = true;
     this.IS_DOWN = false;
-    // once selectedPiece goes to null m_selectedPiece does as well...
-    // this.m_selectedPiece = this.selectedPiece;
-    // this.selectedPiece = null;
-    // this.selectedPiece = 4;
+    this.hitDown = null;
+    this.selectedPiece = null;
+    this.m_selectedPiece = null;
     this.lockGridDown = false;
+    this.currentDragDistance = 0;
     this.lastTriggeredDistance = 0;
 					    
 					    // these feel like they belong in some other order thing
@@ -273,7 +277,6 @@ export class TouchesController {
   quitDrawingForMultitouch(ev){
     this.releaseActivePointerCaptures();
     this.resetInteractionState();
-    this.engines.session.reset();
   }
 
 

@@ -55,3 +55,29 @@ test("distance arrow hides when there is no cursor distance", () => {
   assert.equal(arrow.arrows.distance.distance, 0);
   assert.equal(visual.visible, false);
 });
+
+test("direction values are printed to the on-screen debugger", () => {
+  let printCalls = 0;
+  const arrow = Object.create(DirectionArrow.prototype);
+  arrow.ff = {
+    printDebugger: {
+      printToScreen: [],
+      print() { printCalls += 1; },
+    },
+  };
+  arrow.arrows = {
+    average: { dirV: new Vector3(1, 2, 2), length: 3 },
+    absolute: { dirV: new Vector3(0, -1, 0) },
+    distance: { distance: 4.25 },
+  };
+
+  arrow.printValues();
+
+  assert.deepEqual(arrow.ff.printDebugger.printToScreen, [
+    "Average dir: 1.000, 2.000, 2.000",
+    "Average dir length: 3.000",
+    "Absolute dir: 0.000, -1.000, 0.000",
+    "Distance length: 4.250",
+  ]);
+  assert.equal(printCalls, 1);
+});

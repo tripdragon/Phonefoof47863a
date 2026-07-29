@@ -15,7 +15,8 @@ export class DirectionArrow{
 			visual: null,
 			dirV : new Vector3(),
 			originV : new Vector3(),
-			movingAverageV : new Vector3()
+			movingAverageV : new Vector3(),
+			length : 0
 		},
 		absolute : {
 			visual: null,
@@ -153,6 +154,7 @@ export class DirectionArrow{
 		aa.movingAverageV.set(0,0,0);
 		aa.originV.set(0,0,0);
 		aa.dirV.set(0,0,0);
+		aa.length = 0;
 
 		const distance = this.arrows.distance;
 		distance.distance = 0;
@@ -160,6 +162,7 @@ export class DirectionArrow{
 		distance.dirV.set(0,0,0);
 		distance.originV.set(0,0,0);
 		if(distance.visual) distance.visual.visible = false;
+		this.printValues();
 	}
 
 	refresh(){
@@ -200,6 +203,25 @@ export class DirectionArrow{
 
 			this.updateDirectionCheck();
 		}
+		this.printValues();
+	}
+
+	printValues(){
+		const printDebugger = this.ff?.printDebugger;
+		if(!printDebugger) return;
+
+		const average = this.arrows.average.dirV;
+		const absolute = this.arrows.absolute.dirV;
+		const distanceLength = this.arrows.distance.distance;
+		const formatVector = (vector) => vector.toArray().map((value) => value.toFixed(3)).join(", ");
+
+		printDebugger.printToScreen = [
+			`Average dir: ${formatVector(average)}`,
+			`Average dir length: ${this.arrows.average.length.toFixed(3)}`,
+			`Absolute dir: ${formatVector(absolute)}`,
+			`Distance length: ${distanceLength.toFixed(3)}`
+		];
+		printDebugger.print();
 	}
 
 	updateDistanceArrow(planePoints = []){
@@ -297,6 +319,7 @@ export class DirectionArrow{
 		// aa.dirV.copy(aa.movingAverageV).sub(aa.originV);
 		aa.dirV.copy(aa.movingAverageV);
 		const dirLen = aa.dirV.length();
+		aa.length = dirLen;
 		if (dirLen > this.EPSILONish) {
 		  aa.dirV.multiplyScalar(1 / dirLen);
 		  aa.visual.position.copy(aa.originV);

@@ -4,6 +4,8 @@ import { Group } from "three";
  * One switch for RubixC's development visuals and its small, in-scene status readout.
  */
 export class PrintDebugger {
+  printToScreen = [];
+
   constructor({ host, enabled = true } = {}) {
     this.enabled = enabled;
     this.visuals = new Group();
@@ -39,7 +41,13 @@ export class PrintDebugger {
     const state = this.enabled ? "ON" : "OFF";
     this.element.dataset.enabled = String(this.enabled);
     this.element.setAttribute("aria-pressed", String(this.enabled));
-    this.element.innerHTML = `<span>${message}</span><span>${state} // CLICK TO TOGGLE</span>`;
+    this.element.replaceChildren(
+      ...[message, ...this.printToScreen, `${state} // CLICK TO TOGGLE`].map((line) => {
+        const span = document.createElement("span");
+        span.textContent = String(line);
+        return span;
+      }),
+    );
   }
 
   dispose() {

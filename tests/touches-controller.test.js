@@ -87,7 +87,7 @@ test("the final multitouch release also flushes stores", () => {
   assert.equal(controller.currentDragDistance, 0);
 });
 
-test("a drag release uses the inverse direction-arrow distance for the cube turn", () => {
+test("a drag release remaps and flips the direction-arrow distance for the cube turn", () => {
   const { controller } = makeController({
     hasActivePointers: false,
     shouldSkipTouchUp: false,
@@ -114,7 +114,35 @@ test("a drag release uses the inverse direction-arrow distance for the cube turn
 
   assert.equal(torqueArgs.group, group);
   assert.equal(torqueArgs.leverV, leverV);
-  assert.equal(rotationValue, -1.75);
-  assert.ok(Math.abs(torqueArgs.forceV.length() - 1.75) < 1e-12);
-  assert.ok(torqueArgs.forceV.distanceTo(new Vector3(-1.75, 0, 0)) < 1e-12);
+  const expectedAngle = -(1.75 / 3) * (Math.PI / 2);
+  assert.ok(Math.abs(rotationValue - expectedAngle) < 1e-12);
+  assert.ok(Math.abs(torqueArgs.forceV.length() - Math.abs(expectedAngle)) < 1e-12);
+  assert.ok(torqueArgs.forceV.distanceTo(new Vector3(expectedAngle, 0, 0)) < 1e-12);
+});
+
+test("a drag release preserves a negative distance sign before flipping the angle", () => {
+  const { controller } = makeController({
+    hasActivePointers: false,
+    shouldSkipTouchUp: false,
+  });
+  const force = new Vector3(1, 0, 0);
+  let rotationValue;
+  const originalSetLength = force.setLength;
+
+  force.setLength = function setLength(length) {
+    rotationValue = length;
+    return originalSetLength.call(this, length);
+  };
+
+  controller.engines.plucker.plucked = {
+    group: {},
+    leverV: new Vector3(0, 0, 1),
+    force,
+  };
+  controller.engines.directionArrow.getDragDistance = () => -3;
+  controller.ff.cube = { torqueGroup() {} };
+
+  controller.onPointerUp({ pointerId: 1 });
+
+  assert.equal(rotationValue, Math.PI / 2);
 });

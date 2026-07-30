@@ -17,6 +17,9 @@ const magicPlaneEvents = {
   thresholdReached: "magicplane:threshold-reached",
 };
 
+const remap = (value, oldMin, oldMax, newMin, newMax) =>
+  ((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin) + newMin;
+
 const states = {
   idle : "idle",
   onCube : "onCube",
@@ -218,10 +221,13 @@ export class TouchesController {
 
     const plucked = this.engines?.plucker?.plucked;
     if(plucked?.group){
-      // Scale the release turn to the actual drag represented by the distance
-      // arrow instead of applying the same arbitrary rotation to every drag.
-      const dragRotation = -this.engines.directionArrow.getDragDistance();
-      const force = plucked.force.setLength(dragRotation);
+      let tumbledelta = this.engines.directionArrow.getDragDistance();
+      const tumbleSign = Math.sign(tumbledelta);
+      tumbledelta = remap(Math.abs(tumbledelta), 0, 3, 0, Math.PI / 2);
+      tumbledelta *= tumbleSign;
+      tumbledelta *= -1;
+
+      const force = plucked.force.setLength(tumbledelta);
       this.ff.cube.torqueGroup({group:plucked.group,leverV:plucked.leverV,forceV:force});
       
     }

@@ -24,7 +24,10 @@ function makeController(touchState) {
         },
       },
       plucker: { plucked: { group: null }, reset() { this.wasReset = true; } },
-      directionArrow: { getDragDistance: () => 0 },
+      directionArrow: {
+        getDragDistance: () => 0,
+        getAbsoluteDirection: () => new Vector3(1, 0, 0),
+      },
     },
     ff: { controls: { enabled: false } },
     releasePools() {},
@@ -36,6 +39,7 @@ function makeController(touchState) {
     m_selectedPiece: {},
     currentDragDistance: 2,
     lastTriggeredDistance: 1,
+    lastTumbleDelta: 0,
   });
 
   return { controller, sessionPoints };
@@ -87,7 +91,7 @@ test("the final multitouch release also flushes stores", () => {
   assert.equal(controller.currentDragDistance, 0);
 });
 
-test("a drag release remaps and flips the direction-arrow distance for the cube turn", () => {
+test("active tumbling remaps and flips the direction-arrow distance while dragging", () => {
   const { controller } = makeController({
     hasActivePointers: false,
     shouldSkipTouchUp: false,
@@ -110,7 +114,9 @@ test("a drag release remaps and flips the direction-arrow distance for the cube 
     torqueGroup(args) { torqueArgs = args; },
   };
 
-  controller.onPointerUp({ pointerId: 1 });
+  controller.selectedPiece = { piece: {} };
+  controller.engines.plucker.pluck = () => controller.engines.plucker.plucked;
+  controller.updateActiveTumble();
 
   assert.equal(torqueArgs.group, group);
   assert.equal(torqueArgs.leverV, leverV);
@@ -120,7 +126,7 @@ test("a drag release remaps and flips the direction-arrow distance for the cube 
   assert.ok(torqueArgs.forceV.distanceTo(new Vector3(expectedAngle, 0, 0)) < 1e-12);
 });
 
-test("a drag release preserves a negative distance sign before flipping the angle", () => {
+test("active tumbling applies only the change in drag distance", () => {
   const { controller } = makeController({
     hasActivePointers: false,
     shouldSkipTouchUp: false,
@@ -139,10 +145,34 @@ test("a drag release preserves a negative distance sign before flipping the angl
     leverV: new Vector3(0, 0, 1),
     force,
   };
-  controller.engines.directionArrow.getDragDistance = () => -3;
-  controller.ff.cube = { torqueGroup() {} };
+  let dragDistance = -3;
+  const rotations = [];
+  controller.engines.directionArrow.getDragDistance = () => dragDistance;
+  controller.engines.directionArrow.getAbsoluteDirection = () => new Vector3(1, 0, 0);
+  controller.engines.plucker.pluck = () => controller.engines.plucker.plucked;
+  controller.selectedPiece = { piece: {} };
+  controller.ff.cube = { torqueGroup() { rotations.push(rotationValue); } };
 
-  controller.onPointerUp({ pointerId: 1 });
+  controller.updateActiveTumble();
+  dragDistance = -1.5;
+  controller.updateActiveTumble();
 
-  assert.equal(rotationValue, Math.PI / 2);
+  assert.deepEqual(rotations, [Math.PI / 2, -Math.PI / 4]);
+});
+
+test("more than two plane points activate tumbling during a drag", () => {
+  const { controller, sessionPoints } = makeController({});
+  let updates = 0;
+  controller.state = "seeking";
+  sessionPoints.plane.push({}, {}, {});
+  controller.seekOnCube = () => {};
+  controller.seekingOnHitZonePlane = () => {};
+  controller.checkMagicPlaneDistanceThreshold = () => {};
+  controller.engines.directionArrow.refresh = () => {};
+  controller.updateActiveTumble = () => { updates += 1; };
+
+  controller.seeking({});
+
+  assert.equal(controller.state, "activeTumbling");
+  assert.equal(updates, 1);
 });

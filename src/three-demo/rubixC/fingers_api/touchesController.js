@@ -10,7 +10,6 @@ import { Plucker } from './plucker.js';
 import { DirectionArrow } from './directionArrow.js';
 import { MultitouchEngine } from './multitouchEngine.js';
 import { SelectedPiece } from './selectedPiece.js';
-import { NormalsDebugger } from './normalsDebugger.js';
 
 
 const magicPlaneEvents = {
@@ -26,7 +25,8 @@ const states = {
   seeking : "seeking",
   found : "found",
   following : "following",
-  rolling : "rolling"
+  rolling : "rolling",
+  activeTumbling : "activeTumbling"
 }
 
 export class TouchesController {
@@ -51,7 +51,7 @@ export class TouchesController {
 		plucker: null,
 		directionArrow: null,
 		pools: null,
-		normalsDebugger: null // not an engine, sillyt ai
+		normalsDebugger: null
 	}
 
 
@@ -67,6 +67,7 @@ export class TouchesController {
 
 	currentDragDistance = 0;
 	lastTriggeredDistance = 0;
+	lastTumbleDelta = 0;
 
 	raycaster = new Raycaster();
 	screenCoordsV = new Vector2();
@@ -81,9 +82,8 @@ export class TouchesController {
   debugger toggles
   */
   visuals = {
-  	// showCubePoints : false
-  	showCubePoints : true,
-  	showPlanePoints : true
+		showCubePoints : false,
+		showPlanePoints : false
   }
 
   /*
@@ -118,7 +118,6 @@ export class TouchesController {
 		this.onPointerDown = this.onPointerDown.bind(this);
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.onPointerUp = this.onPointerUp.bind(this);
-		this.onMagicPlaneThresholdReached = this.onMagicPlaneThresholdReached.bind(this);
 
 		this.beginPointerEvents();
 
@@ -135,12 +134,6 @@ export class TouchesController {
     // this.buildVisualHelpers();
 
 		this.engines.pools = new Pools({fingersAPI:this.ff, cubePointsMax:22});
-
-		this.engines.normalsDebugger = new NormalsDebugger({fingersAPI:this.ff});
-
-		this.addEventListener(magicPlaneEvents.thresholdReached, this.onMagicPlaneThresholdReached);
-
-		//this.debugColorAllFaces(0x0000ff);
 
 	}
 
@@ -219,17 +212,9 @@ export class TouchesController {
       return;
     }
 
-    const plucked = this.engines?.plucker?.plucked;
-    if(plucked?.group){
-      let tumbledelta = this.engines.directionArrow.getDragDistance();
-      const tumbleSign = Math.sign(tumbledelta);
-      tumbledelta = remap(Math.abs(tumbledelta), 0, 3, 0, Math.PI / 2);
-      tumbledelta *= tumbleSign;
-      tumbledelta *= -1;
-
-      const force = plucked.force.setLength(tumbledelta);
-      this.ff.cube.torqueGroup({group:plucked.group,leverV:plucked.leverV,forceV:force});
-      
+    if(this.didFlick()){
+      // Flick completion will be handled separately. For now it intentionally
+      // falls through to the same cleanup as every other release.
     }
 
     // Keep the completed drag available until its release action has run, then
@@ -257,6 +242,7 @@ export class TouchesController {
     this.lockGridDown = false;
     this.currentDragDistance = 0;
     this.lastTriggeredDistance = 0;
+		this.lastTumbleDelta = 0;
 					    
 					    // these feel like they belong in some other order thing
 					    // move this // this.updateDistanceHud(0);
@@ -407,18 +393,12 @@ export class TouchesController {
     this.checkMagicPlaneDistanceThreshold();
 
     this.engines.directionArrow.refresh();
-    // looks like Plucker will be doing the maths
-    // hrrrrmmmm nesty
 
-
-    const piece = this.selectedPiece?.piece;
-    if(piece){
-      const dir = this.engines.directionArrow.getAbsoluteDirection();
-      const group = this.engines.plucker.pluck(this.hitDown, piece, dir);
-      
-      // console.log("plucked group", group);
-
+    if(this.engines.session.points.plane.length > 2){
+      this.state = states.activeTumbling;
     }
+
+    if(this.state === states.activeTumbling) this.updateActiveTumble();
 
   }
 
@@ -431,7 +411,7 @@ export class TouchesController {
     }
 
 
-    if (this.state !== states.seeking) return;
+    if (this.state !== states.seeking && this.state !== states.activeTumbling) return;
     this.getHitsOnCube(ev);
     
     
@@ -512,8 +492,34 @@ export class TouchesController {
   }
 
 
-  onMagicPlaneThresholdReached(){
-    this.ff.cube.colorAllPiecesRandom();
+  getTumbleDelta(){
+    let tumbleDelta = this.engines.directionArrow.getDragDistance();
+    const tumbleSign = Math.sign(tumbleDelta);
+    tumbleDelta = remap(Math.abs(tumbleDelta), 0, 3, 0, Math.PI / 2);
+    return tumbleDelta * tumbleSign * -1;
+  }
+
+
+  updateActiveTumble(){
+    const piece = this.selectedPiece?.piece;
+    if(!piece) return;
+
+    const direction = this.engines.directionArrow.getAbsoluteDirection();
+    const plucked = this.engines.plucker.pluck(this.hitDown, piece, direction);
+    if(!plucked?.group) return;
+
+    const tumbleDelta = this.getTumbleDelta();
+    const frameDelta = tumbleDelta - this.lastTumbleDelta;
+    this.lastTumbleDelta = tumbleDelta;
+    if(frameDelta === 0) return;
+
+    const force = plucked.force.setLength(frameDelta);
+    this.ff.cube.torqueGroup({group:plucked.group, leverV:plucked.leverV, forceV:force});
+  }
+
+
+  didFlick(){
+    return false;
   }
 
 

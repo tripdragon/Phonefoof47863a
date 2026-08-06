@@ -1,6 +1,6 @@
 import { 
 	Vector2, Vector3, Raycaster, Group, PlaneGeometry,
-	Matrix4, Matrix3, MeshBasicMaterial, Mesh, ArrowHelper
+	Matrix4, Matrix3, MeshBasicMaterial, Mesh, ArrowHelper, Quaternion
 } from "three";
 import { SlightlyPriceyPool } from '../slightlyPriceyPool.js';
 import { Session } from './session.js';
@@ -19,6 +19,32 @@ const magicPlaneEvents = {
 const remap = (value, oldMin, oldMax, newMin, newMax) =>
   ((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin) + newMin;
 
+const wrapAngle = angle => {
+  const wrapped = ((angle + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+  return wrapped === -Math.PI ? Math.PI : wrapped;
+};
+
+function getReleaseTargetAngle(currentAngle){
+  let bestDelta = Infinity;
+  let bestAngle = 0;
+
+  for(let i = 0; i < 4; i++){
+    let angle = i * Math.PI / 2;
+    const directionDot = Math.cos(currentAngle) * Math.cos(angle)
+      + Math.sin(currentAngle) * Math.sin(angle);
+
+    if(directionDot < 0) angle += Math.PI;
+
+    const delta = wrapAngle(angle - currentAngle);
+    if(Math.abs(delta) < Math.abs(bestDelta)){
+      bestDelta = delta;
+      bestAngle = angle;
+    }
+  }
+
+  return bestAngle;
+}
+
 const states = {
   idle : "idle",
   onCube : "onCube",
@@ -26,7 +52,8 @@ const states = {
   found : "found",
   following : "following",
   rolling : "rolling",
-  activeTumbling : "activeTumbling"
+  activeTumbling : "activeTumbling",
+  snapping : "snapping"
 }
 
 export class TouchesController {
@@ -68,6 +95,7 @@ export class TouchesController {
 	currentDragDistance = 0;
 	lastTriggeredDistance = 0;
 	lastTumbleDelta = 0;
+	snapAnimationFrame = null;
 
 	raycaster = new Raycaster();
 	screenCoordsV = new Vector2();
@@ -212,6 +240,10 @@ export class TouchesController {
       return;
     }
 
+    if(this.state === states.activeTumbling && this.beginReleaseSnap()){
+      return;
+    }
+
     if(this.didFlick()){
       // Flick completion will be handled separately. For now it intentionally
       // falls through to the same cleanup as every other release.
@@ -221,6 +253,55 @@ export class TouchesController {
     // flush every store so the next touch cannot reuse stale session data.
     this.resetInteractionState();
 
+  }
+
+
+  beginReleaseSnap(){
+    const group = this.engines.plucker?.plucked?.group;
+    const cube = this.ff.cube;
+    const direction = Math.sign(this.lastTumbleDelta);
+    if(!group || !group.axis || !direction || !cube?.spinGroup) return false;
+
+    const targetAngle = getReleaseTargetAngle(this.lastTumbleDelta);
+    const remainingAngle = wrapAngle(targetAngle - this.lastTumbleDelta);
+
+    this.state = states.snapping;
+    const duration = this.ff.snapDuration ?? 250;
+    const requestFrame = globalThis.requestAnimationFrame
+      ?? (callback => setTimeout(() => callback(performance.now()), 16));
+    const startQuaternion = new Quaternion();
+    const targetQuaternion = new Quaternion().setFromAxisAngle(group.axis, remainingAngle);
+    const frameQuaternion = new Quaternion();
+    let previousAngle = 0;
+    let startTime = null;
+
+    const finish = () => {
+      cube.refishGroups?.();
+      this.snapAnimationFrame = null;
+      this.resetInteractionState();
+    };
+
+    const animate = now => {
+      if(startTime === null) startTime = now;
+      const progress = duration <= 0 ? 1 : Math.min((now - startTime) / duration, 1);
+      const easedProgress = progress * progress * (3 - 2 * progress);
+      frameQuaternion.slerpQuaternions(startQuaternion, targetQuaternion, easedProgress);
+      const currentAngle = remainingAngle === 0
+        ? 0
+        : Math.sign(remainingAngle) * 2 * Math.acos(Math.min(1, Math.abs(frameQuaternion.w)));
+      const deltaAngle = currentAngle - previousAngle;
+      previousAngle = currentAngle;
+
+      if(deltaAngle !== 0) cube.spinGroup({group, deltaAngle});
+      if(progress < 1){
+        this.snapAnimationFrame = requestFrame(animate);
+      } else {
+        finish();
+      }
+    };
+
+    this.snapAnimationFrame = requestFrame(animate);
+    return true;
   }
 
 

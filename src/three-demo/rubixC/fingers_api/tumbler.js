@@ -72,6 +72,7 @@ export class Tumbler{
 	    const finish = () => {
 	      cube.refishGroups?.();
 	      this.snapAnimationFrame = null;
+			// no wrong this should just be an emit event
 	      this.tc.resetInteractionState();
 	    };
 

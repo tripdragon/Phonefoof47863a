@@ -237,7 +237,7 @@ const DELTA_SPEED = 0.02;
       
       
 
-      magicCube.spinGroup({name:"left", 
+      magicCube.spinGroupByName({name:"left", 
         // axis : new THREE.Vector3(0, 1, 0), 
         // pivot : new THREE.Vector3(0,0,0),
         // angle: 0.2
@@ -259,7 +259,7 @@ const DELTA_SPEED = 0.02;
 
   // ?????
 function StartSpin_3({selected,direction="counter"}={}){
-
+// return
   // replaced??
   magicCube.refishGroups();
 
@@ -308,7 +308,7 @@ function StartSpin_3({selected,direction="counter"}={}){
 
 
       // cube.refishGroups()
-magicCube.spinGroup({name:"top", 
+magicCube.spinGroupByName({name:"top", 
   // axis : new THREE.Vector3(0, 1, 0), 
   // pivot : new THREE.Vector3(0,0,0),
   // angle: 0.2

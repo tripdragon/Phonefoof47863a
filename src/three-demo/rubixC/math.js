@@ -21,6 +21,18 @@ export function remapPiToPI2(v) {
   return y;
 }
 
+// there has one of these
+export function remap (value, oldMin, oldMax, newMin, newMax) {
+  return ((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin) + newMin;
+}
+
+// need to vet this ai func
+export function wrapAngle(angle) {
+  const wrapped = ((angle + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+  return wrapped === -Math.PI ? Math.PI : wrapped;
+};
+
+
 
 /*
 Object3D.localToworld(vector)

@@ -10,40 +10,13 @@ import { Plucker } from './plucker.js';
 import { DirectionArrow } from './directionArrow.js';
 import { MultitouchEngine } from './multitouchEngine.js';
 import { SelectedPiece } from './selectedPiece.js';
+import { Tumbler } from './tumbler.js';
 
 
 const magicPlaneEvents = {
   thresholdReached: "magicplane:threshold-reached",
 };
 
-const remap = (value, oldMin, oldMax, newMin, newMax) =>
-  ((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin) + newMin;
-
-const wrapAngle = angle => {
-  const wrapped = ((angle + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
-  return wrapped === -Math.PI ? Math.PI : wrapped;
-};
-
-function getReleaseTargetAngle(currentAngle){
-  let bestDelta = Infinity;
-  let bestAngle = 0;
-
-  for(let i = 0; i < 4; i++){
-    let angle = i * Math.PI / 2;
-    const directionDot = Math.cos(currentAngle) * Math.cos(angle)
-      + Math.sin(currentAngle) * Math.sin(angle);
-
-    if(directionDot < 0) angle += Math.PI;
-
-    const delta = wrapAngle(angle - currentAngle);
-    if(Math.abs(delta) < Math.abs(bestDelta)){
-      bestDelta = delta;
-      bestAngle = angle;
-    }
-  }
-
-  return bestAngle;
-}
 
 const states = {
   idle : "idle",
@@ -78,7 +51,8 @@ export class TouchesController {
 		plucker: null,
 		directionArrow: null,
 		pools: null,
-		normalsDebugger: null
+		normalsDebugger: null,
+    tumbler: null
 	}
 
 
@@ -94,7 +68,7 @@ export class TouchesController {
 
 	currentDragDistance = 0;
 	lastTriggeredDistance = 0;
-	lastTumbleDelta = 0;
+	// lastTumbleDelta = 0;
 	snapAnimationFrame = null;
 
 	raycaster = new Raycaster();
@@ -162,6 +136,10 @@ export class TouchesController {
     // this.buildVisualHelpers();
 
 		this.engines.pools = new Pools({fingersAPI:this.ff, cubePointsMax:22});
+
+    this.engines.tumbler = new Tumbler({
+      fingersAPI:this.ff, touchesController:this, plucker:this.engines.plucker
+    });
 
 	}
 
@@ -257,51 +235,7 @@ export class TouchesController {
 
 
   beginReleaseSnap(){
-    const group = this.engines.plucker?.plucked?.group;
-    const cube = this.ff.cube;
-    const direction = Math.sign(this.lastTumbleDelta);
-    if(!group || !group.axis || !direction || !cube?.spinGroup) return false;
-
-    const targetAngle = getReleaseTargetAngle(this.lastTumbleDelta);
-    const remainingAngle = wrapAngle(targetAngle - this.lastTumbleDelta);
-
-    this.state = states.snapping;
-    const duration = this.ff.snapDuration ?? 250;
-    const requestFrame = globalThis.requestAnimationFrame
-      ?? (callback => setTimeout(() => callback(performance.now()), 16));
-    const startQuaternion = new Quaternion();
-    const targetQuaternion = new Quaternion().setFromAxisAngle(group.axis, remainingAngle);
-    const frameQuaternion = new Quaternion();
-    let previousAngle = 0;
-    let startTime = null;
-
-    const finish = () => {
-      cube.refishGroups?.();
-      this.snapAnimationFrame = null;
-      this.resetInteractionState();
-    };
-
-    const animate = now => {
-      if(startTime === null) startTime = now;
-      const progress = duration <= 0 ? 1 : Math.min((now - startTime) / duration, 1);
-      const easedProgress = progress * progress * (3 - 2 * progress);
-      frameQuaternion.slerpQuaternions(startQuaternion, targetQuaternion, easedProgress);
-      const currentAngle = remainingAngle === 0
-        ? 0
-        : Math.sign(remainingAngle) * 2 * Math.acos(Math.min(1, Math.abs(frameQuaternion.w)));
-      const deltaAngle = currentAngle - previousAngle;
-      previousAngle = currentAngle;
-
-      if(deltaAngle !== 0) cube.spinGroup({group, deltaAngle});
-      if(progress < 1){
-        this.snapAnimationFrame = requestFrame(animate);
-      } else {
-        finish();
-      }
-    };
-
-    this.snapAnimationFrame = requestFrame(animate);
-    return true;
+    // this.engines.tumbler.begin();
   }
 
 
@@ -323,7 +257,8 @@ export class TouchesController {
     this.lockGridDown = false;
     this.currentDragDistance = 0;
     this.lastTriggeredDistance = 0;
-		this.lastTumbleDelta = 0;
+		// this.lastTumbleDelta = 0;
+    this.engines.tumbler.reset();
 					    
 					    // these feel like they belong in some other order thing
 					    // move this // this.updateDistanceHud(0);
@@ -479,7 +414,7 @@ export class TouchesController {
       this.state = states.activeTumbling;
     }
 
-    if(this.state === states.activeTumbling) this.updateActiveTumble();
+    if(this.state === states.activeTumbling) this.engines.tumbler.updateActiveTumble();
 
   }
 
@@ -573,32 +508,6 @@ export class TouchesController {
   }
 
 
-  getTumbleDelta(){
-    let tumbleDelta = this.engines.directionArrow.getDragDistance();
-    const tumbleSign = Math.sign(tumbleDelta);
-    tumbleDelta = remap(Math.abs(tumbleDelta), 0, 3, 0, Math.PI / 2);
-    return tumbleDelta * tumbleSign * -1;
-  }
-
-
-  updateActiveTumble(){
-    const piece = this.selectedPiece?.piece;
-    if(!piece) return;
-
-    const direction = this.engines.directionArrow.getAbsoluteDirection();
-    const plucked = this.engines.plucker.pluck(this.hitDown, piece, direction);
-    if(!plucked?.group) return;
-
-    const tumbleDelta = this.getTumbleDelta();
-    const frameDelta = tumbleDelta - this.lastTumbleDelta;
-    this.lastTumbleDelta = tumbleDelta;
-    if(frameDelta === 0) return;
-
-    const force = plucked.force.setLength(frameDelta);
-    this.ff.cube.torqueGroup({group:plucked.group, leverV:plucked.leverV, forceV:force});
-  }
-
-
   didFlick(){
     return false;
   }
@@ -614,6 +523,7 @@ export class TouchesController {
   /*
 		utilites
   */
+  // belongs in Math???
 
   getScreenCoords(ev){
   	// returns pointer to Vector2

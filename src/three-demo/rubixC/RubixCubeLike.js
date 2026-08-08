@@ -72,6 +72,32 @@ export class RubixCubeLike extends Group {
     this.buildBottomLevel();
     this.buildCore();
     this.refishGroups();
+    this.initialPieceTransforms = this.pieces.map((piece) => ({
+      position: piece.position.clone(),
+      quaternion: piece.quaternion.clone(),
+      scale: piece.scale.clone()
+    }));
+  }
+
+  reset() {
+    // A turn can temporarily parent cubies to a face center or the core. Move
+    // everything back to the cube before restoring the solved local transforms.
+    this.detachAll();
+    this.core.position.set(0, 0, 0);
+    this.core.quaternion.identity();
+    this.core.scale.set(1, 1, 1);
+
+    this.pieces.forEach((piece, index) => {
+      const initial = this.initialPieceTransforms[index];
+      piece.position.copy(initial.position);
+      piece.quaternion.copy(initial.quaternion);
+      piece.scale.copy(initial.scale);
+      piece.updateMatrix();
+      piece.revertColor?.();
+    });
+
+    this.updateMatrixWorld(true);
+    this.refishGroups();
   }
 
   nearZero(n, eps = RubixCubeLike.EPSILON) {

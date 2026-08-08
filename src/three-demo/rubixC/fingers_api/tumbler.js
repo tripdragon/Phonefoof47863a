@@ -144,6 +144,10 @@ export class Tumbler{
   }
 
   reset(){
+	if(this.snapAnimationFrame !== null){
+		globalThis.cancelAnimationFrame?.(this.snapAnimationFrame);
+		this.snapAnimationFrame = null;
+	}
   	this.lastTumbleDelta = 0;
 	this.tumbleAngle = 0;
   }

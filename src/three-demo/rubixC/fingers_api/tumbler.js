@@ -7,14 +7,10 @@
 */
 
 
-import { 
-	Vector2, Vector3, Matrix4, Quaternion
-} from "three";
+import { Quaternion } from "three";
 
   
-import { worldNormalFromLocal } from "../math.js";
-import { ThickArrowHelper } from "../utilites/thickArrowHelper.js";
-import { remap, wrapAngle } from "../math.js";
+import { remap } from "../math.js";
 
 /*
 	
@@ -39,6 +35,7 @@ export class Tumbler{
 	plucker;
 
 	lastTumbleDelta = 0;
+	snapAnimationFrame = null;
 
 	constructor({fingersAPI, touchesController, plucker}={}){
 		this.ff = fingersAPI;
@@ -52,8 +49,9 @@ export class Tumbler{
 	    const direction = Math.sign(this.lastTumbleDelta);
 	    if(!group || !group.axis || !direction || !cube?.spinGroup) return false;
 
-	    const targetAngle = getReleaseTargetAngle(this.lastTumbleDelta);
-	    const remainingAngle = wrapAngle(targetAngle - this.lastTumbleDelta);
+	    // Keep moving in the drag direction and land on an exact quarter turn.
+	    const targetAngle = Math.sign(this.lastTumbleDelta) * Math.PI / 2;
+	    const remainingAngle = targetAngle - this.lastTumbleDelta;
 
 	    // this.state = states.snapping;
 
@@ -72,7 +70,7 @@ export class Tumbler{
 	    const finish = () => {
 	      cube.refishGroups?.();
 	      this.snapAnimationFrame = null;
-	      this.resetInteractionState();
+	      this.tc.resetInteractionState();
 	    };
 
 	    // niffty inline animation starter
@@ -82,7 +80,9 @@ export class Tumbler{
 	      const progress = duration <= 0 ? 1 : Math.min((now - startTime) / duration, 1);
 	      const easedProgress = progress * progress * (3 - 2 * progress);
 	      frameQuaternion.slerpQuaternions(startQuaternion, targetQuaternion, easedProgress);
-	      const currentAngle = remainingAngle === 0
+	      const currentAngle = progress === 1
+	        ? remainingAngle
+	        : remainingAngle === 0
 	        ? 0
 	        : Math.sign(remainingAngle) * 2 * Math.acos(Math.min(1, Math.abs(frameQuaternion.w)));
 	      const deltaAngle = currentAngle - previousAngle;
@@ -137,31 +137,3 @@ export class Tumbler{
   }
 
 }
-
-
-/*
-
-
-*/
-function getReleaseTargetAngle(currentAngle){
-  let bestDelta = Infinity;
-  let bestAngle = 0;
-
-  for(let i = 0; i < 4; i++){
-    let angle = i * Math.PI / 2;
-    const directionDot = Math.cos(currentAngle) * Math.cos(angle)
-      + Math.sin(currentAngle) * Math.sin(angle);
-
-    if(directionDot < 0) angle += Math.PI;
-
-    const delta = wrapAngle(angle - currentAngle);
-    if(Math.abs(delta) < Math.abs(bestDelta)){
-      bestDelta = delta;
-      bestAngle = angle;
-    }
-  }
-
-  return bestAngle;
-}
-
-

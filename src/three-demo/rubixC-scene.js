@@ -22,11 +22,13 @@ gugireh6932
     <p class="hero-subtitle">For every one face turn, you affect 4 others. But not its reflection side.</p>
     <p class="hero-subtitle">Corner pieces are in 3 groups. Center and edge pieces are in 2 groups. </p>
     <div class="three-demo-canvas-wrap rubixc-canvas-wrap" id="rubixc-canvas-wrap" aria-label="RubixC cube demo">
+      <button class="rubixc-reset-button" type="button" id="rubixc-reset-button" aria-label="Reset RubixC cube to its starting position">Reset cube</button>
       <button class="rubixc-fullscreen-button" type="button" id="rubixc-fullscreen-button" aria-label="Make RubixC scene full screen" aria-pressed="false">Full screen</button>
     </div>
   `;
 
   const canvasWrap = container.querySelector("#rubixc-canvas-wrap");
+  const resetButton = container.querySelector("#rubixc-reset-button");
   const fullscreenButton = container.querySelector("#rubixc-fullscreen-button");
 
   window.THREE = THREE;
@@ -572,6 +574,12 @@ requestAnimationFrame(spinGroup);
     cube: magicCube,
     printDebugger
   });
+
+  function resetCube() {
+    fingersAPI.reset();
+    magicCube.reset();
+    controls.enabled = true;
+  }
   // fingersAPI.beginPointerEvents();
 
 
@@ -657,6 +665,7 @@ requestAnimationFrame(spinGroup);
   const resizeObserver = new ResizeObserver(resizeRenderer);
   resizeObserver.observe(canvasWrap);
   fullscreenButton.addEventListener("click", toggleFullscreen);
+  resetButton.addEventListener("click", resetCube);
   document.addEventListener("fullscreenchange", updateFullscreenButton);
   document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
   window.addEventListener("resize", resizeRenderer);
@@ -672,6 +681,7 @@ requestAnimationFrame(spinGroup);
     document.removeEventListener("fullscreenchange", updateFullscreenButton);
     document.removeEventListener("webkitfullscreenchange", updateFullscreenButton);
     fullscreenButton.removeEventListener("click", toggleFullscreen);
+    resetButton.removeEventListener("click", resetCube);
     resizeObserver.disconnect();
     if (isFullscreenFallback) {
       setFullscreenFallback(false);

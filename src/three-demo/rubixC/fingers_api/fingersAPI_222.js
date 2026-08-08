@@ -106,6 +106,11 @@ export class FingersAPI {
     return this.touchesController?.selectedPiece ?? null;
   }
 
+  reset() {
+    this.touchesController?.releaseActivePointerCaptures?.();
+    this.touchesController?.resetInteractionState?.();
+  }
+
   dispose() {
     this.touchesController?.dispose?.();
     if (!this.printDebugger) this.visualsObject3D.removeFromParent();

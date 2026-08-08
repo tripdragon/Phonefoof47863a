@@ -7,7 +7,7 @@
 */
 
 
-import { Quaternion } from "three";
+import { Quaternion, Vector3 } from "three";
 
   
 import { remap } from "../math.js";
@@ -35,7 +35,9 @@ export class Tumbler{
 	plucker;
 
 	lastTumbleDelta = 0;
+	tumbleAngle = 0;
 	snapAnimationFrame = null;
+	torque = new Vector3();
 
 	constructor({fingersAPI, touchesController, plucker}={}){
 		this.ff = fingersAPI;
@@ -46,12 +48,12 @@ export class Tumbler{
 	begin(){
 		const group = this.plucker?.plucked?.group;
 	    const cube = this.ff.cube;
-	    const direction = Math.sign(this.lastTumbleDelta);
+	    const direction = Math.sign(this.tumbleAngle);
 	    if(!group || !group.axis || !direction || !cube?.spinGroup) return false;
 
 	    // Keep moving in the drag direction and land on an exact quarter turn.
-	    const targetAngle = Math.sign(this.lastTumbleDelta) * Math.PI / 2;
-	    const remainingAngle = targetAngle - this.lastTumbleDelta;
+	    const targetAngle = direction * Math.PI / 2;
+	    const remainingAngle = targetAngle - this.tumbleAngle;
 
 	    // this.state = states.snapping;
 
@@ -129,11 +131,20 @@ export class Tumbler{
     if(frameDelta === 0) return;
 
     const force = plucked.force.setLength(frameDelta);
+
+	// Record the signed angle that torqueGroup is about to apply. The lever can
+	// scale the requested force, so the drag distance is not necessarily the
+	// angle through which the group actually turned.
+	this.torque.crossVectors(force, plucked.leverV);
+	const deltaAngle = this.torque.length() * Math.sign(this.torque.dot(plucked.group.axis));
+	if(Number.isFinite(deltaAngle)) this.tumbleAngle += deltaAngle;
+
     this.ff.cube.torqueGroup({group:plucked.group, leverV:plucked.leverV, forceV:force});
   }
 
   reset(){
   	this.lastTumbleDelta = 0;
+	this.tumbleAngle = 0;
   }
 
 }

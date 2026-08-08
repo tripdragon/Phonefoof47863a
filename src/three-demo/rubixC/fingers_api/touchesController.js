@@ -235,7 +235,7 @@ export class TouchesController {
 
 
   beginReleaseSnap(){
-    // this.engines.tumbler.begin();
+    return this.engines.tumbler.begin();
   }
 
 

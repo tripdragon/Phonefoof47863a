@@ -129,6 +129,8 @@ export class RubixCubeLike extends Group {
     // computations for anything to work
     this.clearAllFish();
 
+    this.updateMatrixWorld(true);
+
     this.fishTop();
     this.fishBottom();
 

@@ -3,3 +3,4 @@ dist/
 public/sqlite/*.sqlite
 public/sqlite/*.wasm
 .DS_Store
+**/.DS_Store

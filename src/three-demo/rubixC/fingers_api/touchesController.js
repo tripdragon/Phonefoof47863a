@@ -175,18 +175,20 @@ export class TouchesController {
 
 
   onPointerDown(ev){
-    const touchState = this.multitouch.pointerDown(ev);
 
-    if (touchState.shouldAbortDrawing) {
-      this.quitDrawingForMultitouch(ev);
-      return;
-    }
+    // REMOVING multitouch checks for now
+    // const touchState = this.multitouch.pointerDown(ev);
+
+    // if (touchState.shouldAbortDrawing) {
+    //   this.quitDrawingForMultitouch(ev);
+    //   return;
+    // }
+
 
     this.IS_DOWN = true;
     this.currentDragDistance = 0;
     this.lastTriggeredDistance = 0;
 		
-		window.ff = this.ff;
 		this.engines.session.reset();
 
     
@@ -200,26 +202,33 @@ export class TouchesController {
 
 
   onPointerMove(ev){
-    const touchState = this.multitouch.pointerMove(ev);
-    if (touchState.shouldAbortDrawing) this.quitDrawingForMultitouch(ev);
-    if (!touchState.shouldDraw) return;
+    // const touchState = this.multitouch.pointerMove(ev);
 
+    // if (touchState.shouldAbortDrawing) this.quitDrawingForMultitouch(ev);
+    // if (!touchState.shouldDraw) return;
+
+    if(!this.IS_DOWN) return;
     if (!this.isOnCube) return;
     
     this.seeking(ev);
   }
   
   onPointerUp(ev){
-    const touchState = this.multitouch.pointerUp(ev);
+    // const touchState = this.multitouch.pointerUp(ev);
 
-    if (touchState.hasActivePointers) return;
-    if (touchState.shouldSkipTouchUp) {
-      this.resetInteractionState();
-      return;
-    }
+    // if (touchState.hasActivePointers) return;
+    // if (touchState.shouldSkipTouchUp) {
+    //   this.resetInteractionState();
+    //   return;
+    // }
 
-    if(this.state === states.activeTumbling && this.beginReleaseSnap()){
-      return;
+    // if(this.state === states.activeTumbling && this.beginReleaseSnap()){
+    //   return;
+    // }
+
+    if(this.state === states.activeTumbling){
+      this.beginReleaseSnap();
+      
     }
 
     if(this.didFlick()){
@@ -229,7 +238,7 @@ export class TouchesController {
 
     // Keep the completed drag available until its release action has run, then
     // flush every store so the next touch cannot reuse stale session data.
-    this.resetInteractionState();
+    // this.resetInteractionState();
 
   }
 

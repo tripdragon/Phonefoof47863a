@@ -575,6 +575,8 @@ requestAnimationFrame(spinGroup);
     printDebugger
   });
 
+  window.fff = fingersAPI;
+
   function resetCube() {
     fingersAPI.reset();
     magicCube.reset();

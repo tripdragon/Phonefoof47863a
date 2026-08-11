@@ -2,6 +2,12 @@
 /*
 all ai built
 deals with two fingers on cube to zooom again, does not work yet
+does stuff dont know, so toss it
+
+its mainly trying to help two fingers zoom but it might be allowing double draw
+its pretty short so it cant be that much a mess
+
+
 */
 const pointerTypes = {
   touch: "touch",

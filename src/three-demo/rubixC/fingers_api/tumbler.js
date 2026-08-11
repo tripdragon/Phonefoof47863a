@@ -47,60 +47,61 @@ export class Tumbler{
 
 	begin(){
 		const group = this.plucker?.plucked?.group;
-	    const cube = this.ff.cube;
-	    const direction = Math.sign(this.tumbleAngle);
-	    if(!group || !group.axis || !direction || !cube?.spinGroup) return false;
+    const cube = this.ff.cube;
+    const direction = Math.sign(this.tumbleAngle);
+    
+    if(!group || !group.axis || !direction || !cube?.spinGroup) return false;
 
-	    // Keep moving in the drag direction and land on an exact quarter turn.
-	    const targetAngle = direction * Math.PI / 2;
-	    const remainingAngle = targetAngle - this.tumbleAngle;
+    // Keep moving in the drag direction and land on an exact quarter turn.
+    const targetAngle = direction * Math.PI / 2;
+    const remainingAngle = targetAngle - this.tumbleAngle;
 
-	    // this.state = states.snapping;
+    // this.state = states.snapping;
 
-	    const duration = this.ff.snapDuration ?? 250;
-	    const requestFrame = globalThis.requestAnimationFrame
-	      ?? (callback => setTimeout(() => callback(performance.now()), 16));
+    const duration = this.ff.snapDuration ?? 250;
+    const requestFrame = globalThis.requestAnimationFrame
+      ?? (callback => setTimeout(() => callback(performance.now()), 16));
 
-	    // blegh ai not using cacheing
-	    const startQuaternion = new Quaternion();
-	    const targetQuaternion = new Quaternion().setFromAxisAngle(group.axis, remainingAngle);
-	    const frameQuaternion = new Quaternion();
-	    
-	    let previousAngle = 0;
-	    let startTime = null;
+    // blegh ai not using cacheing
+    const startQuaternion = new Quaternion();
+    const targetQuaternion = new Quaternion().setFromAxisAngle(group.axis, remainingAngle);
+    const frameQuaternion = new Quaternion();
+    
+    let previousAngle = 0;
+    let startTime = null;
 
-	    const finish = () => {
-	      cube.refishGroups?.();
-	      this.snapAnimationFrame = null;
-			// no wrong this should just be an emit event
-	      this.tc.resetInteractionState();
-	    };
+    const finish = () => {
+      cube.refishGroups?.();
+      this.snapAnimationFrame = null;
+		// no wrong this should just be an emit event
+      this.tc.resetInteractionState();
+    };
 
-	    // niffty inline animation starter
+    // niffty inline animation starter
 
-	    const animate = now => {
-	      if(startTime === null) startTime = now;
-	      const progress = duration <= 0 ? 1 : Math.min((now - startTime) / duration, 1);
-	      const easedProgress = progress * progress * (3 - 2 * progress);
-	      frameQuaternion.slerpQuaternions(startQuaternion, targetQuaternion, easedProgress);
-	      const currentAngle = progress === 1
-	        ? remainingAngle
-	        : remainingAngle === 0
-	        ? 0
-	        : Math.sign(remainingAngle) * 2 * Math.acos(Math.min(1, Math.abs(frameQuaternion.w)));
-	      const deltaAngle = currentAngle - previousAngle;
-	      previousAngle = currentAngle;
+    const animate = now => {
+      if(startTime === null) startTime = now;
+      const progress = duration <= 0 ? 1 : Math.min((now - startTime) / duration, 1);
+      const easedProgress = progress * progress * (3 - 2 * progress);
+      frameQuaternion.slerpQuaternions(startQuaternion, targetQuaternion, easedProgress);
+      const currentAngle = progress === 1
+        ? remainingAngle
+        : remainingAngle === 0
+        ? 0
+        : Math.sign(remainingAngle) * 2 * Math.acos(Math.min(1, Math.abs(frameQuaternion.w)));
+      const deltaAngle = currentAngle - previousAngle;
+      previousAngle = currentAngle;
 
-	      if(deltaAngle !== 0) cube.spinGroup({group, deltaAngle});
-	      if(progress < 1){
-	        this.snapAnimationFrame = requestFrame(animate);
-	      } else {
-	        finish();
-	      }
-	    };
+      if(deltaAngle !== 0) cube.spinGroup({group, deltaAngle});
+      if(progress < 1){
+        this.snapAnimationFrame = requestFrame(animate);
+      } else {
+        finish();
+      }
+    };
 
-	    this.snapAnimationFrame = requestFrame(animate);
-	    return true;
+    this.snapAnimationFrame = requestFrame(animate);
+    return true;
 	}
 
 

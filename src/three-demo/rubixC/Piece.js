@@ -114,6 +114,8 @@ export class Piece extends THREE.Object3D {
         uMainColor: { value: new THREE.Color(color) },
         uBorderColor: { value: new THREE.Color(this.borderColor) },
         uBorderWidth: { value: this.borderWidth },
+        uAlpha: { value: 1.0 },
+
       },
       vertexShader: `
         varying vec2 vUv;
@@ -123,27 +125,19 @@ export class Piece extends THREE.Object3D {
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
-      fragmentShader: `
-        uniform vec3 uMainColor;
-        uniform vec3 uBorderColor;
-        uniform float uBorderWidth;
-
-        varying vec2 vUv;
-
-        void main() {
-          float d = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
-          float borderMask = step(d, uBorderWidth);
-
-          vec3 color = mix(uMainColor, uBorderColor, borderMask);
-          gl_FragColor = vec4(color, 1.0);
-        }
-      `,
+      // fragmentShader: flatShader,
+      fragmentShader: alphaFlatShader,
+      transparent: false
     });
 
     const geometry = new THREE.PlaneGeometry(1.0, 1.0);
     const plane = new THREE.Mesh(geometry, mat);
     return plane;
   }
+
+  // replaceMatWithAlpha(){
+
+  // }
 
   highlight({ amp = 0.2 }={}) {
     this.planes.forEach((p) => {
@@ -187,7 +181,7 @@ export class Piece extends THREE.Object3D {
     }
   }
 
-  setOpacity(val,onOutlines = false){
+  setOpacity(val){
     /*
       needs shader rework, blend mode etc blegh
     */
@@ -196,6 +190,22 @@ export class Piece extends THREE.Object3D {
     if(val<1){
       this.transparent = true;
       this.opacity = val;
+
+      if (!this.planes?.length) return;
+      this.planes.forEach((entry) => {
+
+        const mat = entry?.plane?.material;
+        if(mat){
+          mat.transparent = true;
+          if(val===1.0){
+            mat.transparent = false;
+          }
+          else if (mat?.uniforms?.uAlpha?.value) {
+            
+            mat.uniforms.uAlpha.value = val;
+          }
+        }
+      });
     }
 
 
@@ -235,3 +245,37 @@ export class Piece extends THREE.Object3D {
     
     
 }
+
+
+const flatShader = `
+  uniform vec3 uMainColor;
+  uniform vec3 uBorderColor;
+  uniform float uBorderWidth;
+
+  varying vec2 vUv;
+
+  void main() {
+    float d = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
+    float borderMask = step(d, uBorderWidth);
+
+    vec3 color = mix(uMainColor, uBorderColor, borderMask);
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+const alphaFlatShader = `
+  uniform vec3 uMainColor;
+  uniform vec3 uBorderColor;
+  uniform float uBorderWidth;
+  uniform float uAlpha;
+
+  varying vec2 vUv;
+
+  void main() {
+    float d = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
+    float borderMask = step(d, uBorderWidth);
+
+    vec3 color = mix(uMainColor, uBorderColor, borderMask);
+    gl_FragColor = vec4(color, uAlpha);
+  }
+`;

@@ -362,8 +362,6 @@ export class RubixCubeLike extends Group {
     this.pieces.push(p7);
     p7.rotation.z = Math.PI * 2 * 0.75;
     p7.position.x = 0.5;
-    window.spindebug = p7;
-    window.posdebug = p7;
 
     const p8 = new Piece({ colors: [colors.r, colors.b], debug: true });
     this.add(p8);
@@ -382,7 +380,6 @@ export class RubixCubeLike extends Group {
     this.pieces.push(p0);
     p0.position.y = -0.5;
     p0.rotation.z = Math.PI;
-    window.spindebug = p0;
 
     const p1 = new Piece({ colors: [colors.y, colors.b] });
     this.add(p1);
@@ -456,9 +453,6 @@ export class RubixCubeLike extends Group {
     p8.rotation.x = 0;
     p8.rotation.y = 0;
     p8.rotation.z = Math.PI;
-
-    window.spindebug = p8;
-    window.posdebug = p8;
   }
 
   buildCore(){
@@ -507,6 +501,13 @@ export class RubixCubeLike extends Group {
     });
   }
 
+  opacityAllPieces(val = 1){
+    // fff.cube.opacityAllPieces(0.2)
+    if (!this.pieces?.length) return;
+    this.pieces.forEach((x) => {
+      x.setOpacity(val);
+    });
+  }
 
 
   getSelectedPieceGroups(piece){

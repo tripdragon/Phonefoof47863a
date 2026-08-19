@@ -991,8 +991,8 @@ code {
 .rubixwai-page {
   overflow: hidden;
   border-radius: 0 0 20px 20px;
-  background: #090d18;
-  color: #f8fafc;
+  background: linear-gradient(180deg, #f8fdff 0%, #e0f2fe 100%);
+  color: #0f3b5d;
 }
 
 .rubixwai-header {
@@ -1018,7 +1018,7 @@ code {
 .rubixwai-header p:last-child {
   max-width: 52ch;
   margin: 1rem auto 0;
-  color: #94a3b8;
+  color: #52738c;
 }
 
 .rubixwai-stage {

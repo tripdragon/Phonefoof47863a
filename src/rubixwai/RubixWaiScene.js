@@ -6,7 +6,7 @@ export class RubixWaiScene {
   constructor(canvasHost) {
     this.canvasHost = canvasHost;
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x090d18);
+    this.scene.background = new THREE.Color(0xe0f2fe);
 
     this.camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
     this.camera.position.set(4.8, 3.8, 5.8);

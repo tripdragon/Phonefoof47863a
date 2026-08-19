@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as THREE from "three";
-import { FACE_COLORS, RubixMega } from "../src/rubixwai/RubixMega.js";
+import { FACE_COLORS, RUBIX_THEMES, RubixMega } from "../src/rubixwai/RubixMega.js";
 import { HIDDEN_FACE_COLOR, Piece, PIECE_TYPES } from "../src/rubixwai/Piece.js";
 
 test("RubixMega owns one core Piece", () => {
@@ -13,6 +13,8 @@ test("RubixMega owns one core Piece", () => {
   assert.equal(cube.piece.pieceType, PIECE_TYPES.CORE);
   assert.equal(cube.piece.parent, cube);
   assert.equal(cube.children.length, 1);
+  assert.equal(cube.theme, RUBIX_THEMES["a bit nicer"]);
+  assert.equal(cube.core.theme, cube.theme);
   assert.deepEqual(
     Object.fromEntries(
       Object.entries(cube.core.faces).map(([name, face]) => [
@@ -26,6 +28,23 @@ test("RubixMega owns one core Piece", () => {
     Object.values(cube.core.faces).every(
       (face) => face.material.uniforms.borderColor.value.getHex() === 0x000000,
     ),
+  );
+
+  cube.dispose();
+});
+
+test("RubixMega applies a selected theme to its core", () => {
+  const cube = new RubixMega({ theme: RUBIX_THEMES.classic });
+
+  assert.equal(cube.core.theme, RUBIX_THEMES.classic);
+  assert.deepEqual(
+    Object.fromEntries(
+      Object.entries(cube.core.faces).map(([name, face]) => [
+        name,
+        face.material.uniforms.faceColor.value.getHex(),
+      ]),
+    ),
+    RUBIX_THEMES.classic,
   );
 
   cube.dispose();

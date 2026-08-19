@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { DEFAULT_RUBIX_THEME } from "./themes.js";
 
 export const PIECE_TYPES = Object.freeze({
   CORE: "core",
@@ -47,7 +48,8 @@ export class Piece extends THREE.Object3D {
     size = 2.4,
     type = PIECE_TYPES.CORE,
     location = { x: 0, y: 0, z: 0 },
-    faceColors,
+    theme = DEFAULT_RUBIX_THEME,
+    faceColors = theme,
     borderColor = DEFAULT_BORDER_COLOR,
     hiddenFaceColor = HIDDEN_FACE_COLOR,
   } = {}) {
@@ -55,12 +57,13 @@ export class Piece extends THREE.Object3D {
     if (!Object.values(PIECE_TYPES).includes(type)) {
       throw new TypeError(`Unknown piece type: ${type}`);
     }
-    if (!faceColors) throw new TypeError("Piece requires a faceColors map");
+    if (!faceColors) throw new TypeError("Piece requires a theme or faceColors map");
 
     this.name = `RubixPiece-${type}`;
     this.type = type;
     this.pieceType = type;
     this.location = new THREE.Vector3(location.x, location.y, location.z);
+    this.theme = theme;
     this.geometry = new THREE.PlaneGeometry(size, size);
     this.materials = [];
     this.faces = {};

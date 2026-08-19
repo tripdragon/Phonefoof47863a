@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { Piece, PIECE_TYPES } from "./Piece.js";
 
 const FACE_COLORS = Object.freeze({
   right: 0xb71234,
@@ -9,24 +10,24 @@ const FACE_COLORS = Object.freeze({
   back: 0x0046ad,
 });
 
-/** A display cube whose material order follows the six BoxGeometry faces. */
+/** The Rubik's-cube model and owner of its pieces. */
 export class RubixMega extends THREE.Object3D {
   constructor({ size = 2.4 } = {}) {
     super();
     this.name = "RubixMega";
 
-    this.geometry = new THREE.BoxGeometry(size, size, size);
-    this.materials = Object.values(FACE_COLORS).map(
-      (color) => new THREE.MeshStandardMaterial({ color, roughness: 0.42, metalness: 0.02 }),
-    );
-    this.cube = new THREE.Mesh(this.geometry, this.materials);
-    this.cube.name = "RubixMegaCube";
-    this.add(this.cube);
+    this.core = new Piece({
+      size,
+      type: PIECE_TYPES.CORE,
+      location: { x: 0, y: 0, z: 0 },
+      faceColors: FACE_COLORS,
+    });
+    this.piece = this.core;
+    this.add(this.piece);
   }
 
   dispose() {
-    this.geometry.dispose();
-    this.materials.forEach((material) => material.dispose());
+    this.piece.dispose();
   }
 }
 

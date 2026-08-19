@@ -26,13 +26,17 @@ export class RubixWaiScene {
     this.rubixMega.rotation.set(-0.18, 0.5, 0.08);
     this.scene.add(this.rubixMega);
 
-    this.scene.add(new THREE.HemisphereLight(0xcfe3ff, 0x20202b, 1.7));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
-    keyLight.position.set(5, 7, 6);
-    this.scene.add(keyLight);
-    const rimLight = new THREE.DirectionalLight(0x648cff, 2.1);
-    rimLight.position.set(-5, 2, -4);
-    this.scene.add(rimLight);
+    this.faceLights = [
+      [6, 0, 0], [-6, 0, 0],
+      [0, 6, 0], [0, -6, 0],
+      [0, 0, 6], [0, 0, -6],
+    ].map((position, index) => {
+      const light = new THREE.PointLight(0xffffff, 18, 18, 2);
+      light.name = `FaceLight-${index + 1}`;
+      light.position.set(...position);
+      this.scene.add(light);
+      return light;
+    });
 
     this.animationFrameId = null;
     this.resizeObserver = new ResizeObserver(() => this.resize());

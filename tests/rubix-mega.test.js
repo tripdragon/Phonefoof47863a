@@ -3,6 +3,7 @@ import test from "node:test";
 import * as THREE from "three";
 import { FACE_COLORS, RUBIX_THEMES, RubixMega } from "../src/rubixwai/RubixMega.js";
 import { HIDDEN_FACE_COLOR, Piece, PIECE_TYPES } from "../src/rubixwai/Piece.js";
+import { PieceNormalsDebugger } from "../src/rubixwai/PieceNormalsDebugger.js";
 
 test("RubixMega owns one core Piece", () => {
   const cube = new RubixMega();
@@ -65,5 +66,24 @@ test("Piece uses six shader planes and greys faces hidden by its location", () =
   assert.equal(piece.faces.left.material.uniforms.faceColor.value.getHex(), HIDDEN_FACE_COLOR);
   assert.equal(piece.faces.left.material.uniforms.borderColor.value.getHex(), HIDDEN_FACE_COLOR);
 
+  piece.dispose();
+});
+
+test("PieceNormalsDebugger starts hidden and draws one outward arrow per face", () => {
+  const piece = new Piece();
+  const debuggerOverlay = new PieceNormalsDebugger(piece);
+
+  assert.equal(debuggerOverlay.visible, false);
+  assert.equal(debuggerOverlay.parent, piece);
+  assert.equal(debuggerOverlay.arrows.length, 6);
+  assert.deepEqual(
+    debuggerOverlay.arrows.map((arrow) => arrow.userData.face),
+    ["right", "left", "top", "bottom", "front", "back"],
+  );
+  assert.deepEqual(debuggerOverlay.arrows[0].position.toArray(), [1.236, 0, 0]);
+  assert.equal(debuggerOverlay.arrows[0].line.material.color.getHex(), 0x0ea5e9);
+
+  debuggerOverlay.dispose();
+  assert.equal(debuggerOverlay.parent, null);
   piece.dispose();
 });

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RubixMega } from "./RubixMega.js";
+import { PieceNormalsDebugger } from "./PieceNormalsDebugger.js";
 
 export class RubixWaiScene {
   constructor(canvasHost) {
@@ -25,6 +26,7 @@ export class RubixWaiScene {
     this.rubixMega = new RubixMega();
     this.rubixMega.rotation.set(-0.18, 0.5, 0.08);
     this.scene.add(this.rubixMega);
+    this.normalsDebugger = new PieceNormalsDebugger(this.rubixMega.piece);
 
     this.animationFrameId = null;
     this.resizeObserver = new ResizeObserver(() => this.resize());
@@ -48,10 +50,15 @@ export class RubixWaiScene {
     this.renderer.render(this.scene, this.camera);
   }
 
+  setNormalsVisible(visible) {
+    this.normalsDebugger.visible = Boolean(visible);
+  }
+
   dispose() {
     window.cancelAnimationFrame(this.animationFrameId);
     this.resizeObserver.disconnect();
     this.controls.dispose();
+    this.normalsDebugger.dispose();
     this.rubixMega.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();

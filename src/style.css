@@ -1022,10 +1022,52 @@ code {
 }
 
 .rubixwai-stage {
+  position: relative;
   width: 100%;
   height: min(62vh, 600px);
   min-height: 380px;
   cursor: grab;
+}
+
+.rubixwai-debug-shelf {
+  position: absolute;
+  z-index: 1;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem;
+  border: 1px solid rgb(148 163 184 / 45%);
+  border-radius: 0.65rem;
+  background: rgb(248 250 252 / 88%);
+  box-shadow: 0 2px 8px rgb(15 23 42 / 10%);
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+
+.rubixwai-normals-toggle {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.55rem;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.rubixwai-normals-toggle:hover { border-color: #38bdf8; }
+.rubixwai-normals-toggle:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }
+.rubixwai-normals-toggle[aria-pressed="true"] {
+  border-color: #0284c7;
+  background: #0284c7;
+  color: #fff;
 }
 
 .rubixwai-stage:active { cursor: grabbing; }

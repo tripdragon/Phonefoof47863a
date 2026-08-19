@@ -5,6 +5,7 @@ import { createShowsStore } from "./shows/store";
 import { renderThreeDemoRoute } from "./three-demo/scene";
 import { renderSuperneatDemoRoute } from "./three-demo/superneat-scene";
 import { renderRubixCRoute } from "./three-demo/rubixC-scene";
+import { renderRubixWaiRoute } from "./rubixwai/RubixWaiPage.js";
 import { renderSentenceStructureAnalysis } from "./sentence-structure";
 import { renderBotanyInteractive, renderBotanyLatex } from "./interactives/botany";
 import { renderCameraInteractive } from "./interactives/camera";
@@ -58,6 +59,7 @@ document.querySelector("#app").innerHTML = `
 
 <li><a class="menu-link" data-route="/rubix1" href="#/rubix1">rubix1b</a></li>
           <li><a class="menu-link" data-route="/rubixC" href="#/rubixC">rubixC</a></li>
+          <li><a class="menu-link" data-route="/rubixwai" href="#/rubixwai">rubixwai</a></li>
 
           
         </ul>
@@ -1721,6 +1723,10 @@ function renderRubixCPageRoute() {
   return renderRubixCRoute(routeContent);
 }
 
+function renderRubixWaiPageRoute() {
+  return renderRubixWaiRoute(routeContent);
+}
+
 function renderCrossProductRoute() {
   return renderCrossProductVisualizerRoute(routeContent);
 }
@@ -2432,6 +2438,7 @@ const routes = {
   "/rubix-cube": renderRubixCubeRoute,
   "/ani1": renderAni1PageRoute,
   "/rubixC": renderRubixCPageRoute,
+  "/rubixwai": renderRubixWaiPageRoute,
 };
 
 function renderRoute() {

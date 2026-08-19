@@ -988,6 +988,59 @@ code {
   display: block;
 }
 
+.rubixwai-page {
+  overflow: hidden;
+  border-radius: 0 0 20px 20px;
+  background: #090d18;
+  color: #f8fafc;
+}
+
+.rubixwai-header {
+  padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1.25rem, 6vw, 4rem) 1.5rem;
+  text-align: center;
+}
+
+.rubixwai-kicker {
+  margin: 0 0 0.5rem;
+  color: #60a5fa;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.rubixwai-header h1 {
+  margin: 0;
+  font-size: clamp(2.6rem, 10vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.rubixwai-header p:last-child {
+  max-width: 52ch;
+  margin: 1rem auto 0;
+  color: #94a3b8;
+}
+
+.rubixwai-stage {
+  width: 100%;
+  height: min(62vh, 600px);
+  min-height: 380px;
+  cursor: grab;
+}
+
+.rubixwai-stage:active { cursor: grabbing; }
+.rubixwai-stage canvas { display: block; width: 100%; height: 100%; }
+
+.rubixwai-hint {
+  margin: 0;
+  padding: 1rem;
+  color: #64748b;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.rubixwai-hint span { color: #60a5fa; }
+
 .rubixc-canvas-wrap {
   height: min(82svh, 760px);
   min-height: 520px;

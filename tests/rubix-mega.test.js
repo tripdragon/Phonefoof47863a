@@ -13,6 +13,20 @@ test("RubixMega owns one core Piece", () => {
   assert.equal(cube.piece.pieceType, PIECE_TYPES.CORE);
   assert.equal(cube.piece.parent, cube);
   assert.equal(cube.children.length, 1);
+  assert.deepEqual(
+    Object.fromEntries(
+      Object.entries(cube.core.faces).map(([name, face]) => [
+        name,
+        face.material.uniforms.faceColor.value.getHex(),
+      ]),
+    ),
+    FACE_COLORS,
+  );
+  assert.ok(
+    Object.values(cube.core.faces).every(
+      (face) => face.material.uniforms.borderColor.value.getHex() === 0x000000,
+    ),
+  );
 
   cube.dispose();
 });

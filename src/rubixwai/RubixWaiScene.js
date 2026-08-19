@@ -26,18 +26,6 @@ export class RubixWaiScene {
     this.rubixMega.rotation.set(-0.18, 0.5, 0.08);
     this.scene.add(this.rubixMega);
 
-    this.faceLights = [
-      [6, 0, 0], [-6, 0, 0],
-      [0, 6, 0], [0, -6, 0],
-      [0, 0, 6], [0, 0, -6],
-    ].map((position, index) => {
-      const light = new THREE.PointLight(0xffffff, 18, 18, 2);
-      light.name = `FaceLight-${index + 1}`;
-      light.position.set(...position);
-      this.scene.add(light);
-      return light;
-    });
-
     this.animationFrameId = null;
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(this.canvasHost);

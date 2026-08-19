@@ -66,7 +66,10 @@ export class Piece extends THREE.Object3D {
     this.faces = {};
 
     for (const face of FACE_LAYOUT) {
-      const hidden = this.location[face.axis] !== face.sign;
+      // The single core is currently the visible cube model, so all six of its
+      // faces need stickers. Positional visibility only applies to cubies that
+      // will eventually surround it.
+      const hidden = type !== PIECE_TYPES.CORE && this.location[face.axis] !== face.sign;
       const material = this.createFaceMaterial(
         hidden ? hiddenFaceColor : faceColors[face.name],
         hidden ? hiddenFaceColor : borderColor,

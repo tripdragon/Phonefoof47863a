@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { FACE_LAYOUT } from "./Piece.js";
 
 const NORMAL_COLOR = 0x0ea5e9;
 
@@ -7,7 +6,7 @@ const NORMAL_COLOR = 0x0ea5e9;
 export class PieceNormalsDebugger extends THREE.Object3D {
   constructor(piece, { color = NORMAL_COLOR, length } = {}) {
     super();
-    if (!piece?.geometry?.parameters) {
+    if (!piece?.isGroup || !piece?.faces) {
       throw new TypeError("PieceNormalsDebugger requires a Piece");
     }
 
@@ -15,12 +14,12 @@ export class PieceNormalsDebugger extends THREE.Object3D {
     this.visible = false;
     this.arrows = [];
 
-    const size = piece.geometry.parameters.width;
+    const size = piece.size;
     const arrowLength = length ?? size * 0.28;
     const headLength = Math.min(arrowLength * 0.35, size * 0.12);
     const headWidth = headLength * 0.55;
 
-    for (const face of FACE_LAYOUT) {
+    for (const face of Object.values(piece.faces)) {
       const normal = new THREE.Vector3();
       normal[face.axis] = face.sign;
       const origin = normal.clone().multiplyScalar(size / 2 + size * 0.015);
@@ -32,8 +31,8 @@ export class PieceNormalsDebugger extends THREE.Object3D {
         headLength,
         headWidth,
       );
-      arrow.name = `${face.name}-normal`;
-      arrow.userData.face = face.name;
+      arrow.name = `${face.faceName}-normal`;
+      arrow.userData.face = face.faceName;
       this.arrows.push(arrow);
       this.add(arrow);
     }

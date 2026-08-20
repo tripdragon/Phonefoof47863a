@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { DEFAULT_RUBIX_THEME } from "./themes.js";
+import { Face } from "./Face.js";
 
 export const PIECE_TYPES = Object.freeze({
   CORE: "core",
@@ -8,31 +9,7 @@ export const PIECE_TYPES = Object.freeze({
   CORNER: "corner",
 });
 
-export const HIDDEN_FACE_COLOR = 0x666666;
 export const DEFAULT_BORDER_COLOR = 0x000000;
-export const PIVOT_VISUAL_RENDER_ORDER = 10_000;
-
-const VERTEX_SHADER = `
-  varying vec2 vUv;
-
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const FRAGMENT_SHADER = `
-  uniform vec3 faceColor;
-  uniform vec3 borderColor;
-  uniform float borderWidth;
-  varying vec2 vUv;
-
-  void main() {
-    float edgeDistance = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
-    float inside = smoothstep(borderWidth, borderWidth + fwidth(edgeDistance), edgeDistance);
-    gl_FragColor = vec4(mix(borderColor, faceColor, inside), 1.0);
-  }
-`;
 
 const FACE_LAYOUT = Object.freeze([
   { name: "right", axis: "x", sign: 1, rotation: [0, Math.PI / 2, 0] },
@@ -43,8 +20,15 @@ const FACE_LAYOUT = Object.freeze([
   { name: "back", axis: "z", sign: -1, rotation: [0, Math.PI, 0] },
 ]);
 
-/** One physical Rubik's-cube piece, assembled from six individually shaded planes. */
-export class Piece extends THREE.Object3D {
+const TYPE_FACES = Object.freeze({
+  [PIECE_TYPES.CORE]: FACE_LAYOUT,
+  [PIECE_TYPES.CENTER]: [FACE_LAYOUT[4]],
+  [PIECE_TYPES.EDGE]: [FACE_LAYOUT[2], FACE_LAYOUT[4]],
+  [PIECE_TYPES.CORNER]: [FACE_LAYOUT[0], FACE_LAYOUT[2], FACE_LAYOUT[4]],
+});
+
+/** A transform-only Rubik's-cube piece that groups its Face meshes. */
+export class Piece extends THREE.Group {
   constructor({
     size = 2.4,
     type = PIECE_TYPES.CORE,
@@ -52,8 +36,6 @@ export class Piece extends THREE.Object3D {
     theme = DEFAULT_RUBIX_THEME,
     faceColors = theme,
     borderColor = DEFAULT_BORDER_COLOR,
-    hiddenFaceColor = HIDDEN_FACE_COLOR,
-    outwardOffset = 0,
   } = {}) {
     super();
     if (!Object.values(PIECE_TYPES).includes(type)) {
@@ -65,77 +47,26 @@ export class Piece extends THREE.Object3D {
     this.type = type;
     this.pieceType = type;
     this.location = new THREE.Vector3(location.x, location.y, location.z);
-    this.position.copy(this.location).multiplyScalar(size + outwardOffset);
     this.theme = theme;
-    this.geometry = new THREE.PlaneGeometry(size, size);
-    // Offset the plane by half of its local width and height. Its mesh origin
-    // is then the corner at (0, 0), while its vertices extend in the negative
-    // local x/y directions.
-    this.geometry.translate(-size / 2, -size / 2, 0);
+    this.size = size;
     this.materials = [];
     this.faces = {};
 
-    this.visuals = new THREE.Mesh(
-      new THREE.SphereGeometry(Math.max(size * 0.045, 0.025), 16, 12),
-      new THREE.MeshBasicMaterial({
-        color: 0xffff00,
-        depthTest: false,
-        depthWrite: false,
-        transparent: true,
-      }),
-    );
-    this.visuals.name = "pivot-center-visual";
-    // Keep the pivot in Three's transparent pass and draw it after every face.
-    // Disabling depth alone is insufficient when another opaque shader is
-    // submitted later in the frame, because that shader can still cover it.
-    this.visuals.renderOrder = PIVOT_VISUAL_RENDER_ORDER;
-    this.visuals.userData.debugVisual = "pivot-center";
-    this.add(this.visuals);
-
-    for (const face of FACE_LAYOUT) {
-      // The single core is currently the visible cube model, so all six of its
-      // faces need stickers. Positional visibility only applies to cubies that
-      // will eventually surround it.
-      const hidden = type !== PIECE_TYPES.CORE && this.location[face.axis] !== face.sign;
-      const material = this.createFaceMaterial(
-        hidden ? hiddenFaceColor : faceColors[face.name],
-        hidden ? hiddenFaceColor : borderColor,
-      );
-      const plane = new THREE.Mesh(this.geometry, material);
-      plane.name = `${face.name}-face`;
-      plane.rotation.set(...face.rotation);
-      // Put the origin on the appropriate cube corner while retaining the
-      // face's original center on its cube boundary.
-      const centerFromPivot = new THREE.Vector3(-size / 2, -size / 2, 0)
-        .applyEuler(plane.rotation);
-      plane.position[face.axis] = face.sign * size / 2;
-      plane.position.sub(centerFromPivot);
-      plane.userData.face = face.name;
-      plane.userData.hidden = hidden;
-      this.materials.push(material);
-      this.faces[face.name] = plane;
-      this.add(plane);
+    for (const layout of TYPE_FACES[type]) {
+      const face = new Face({
+        ...layout,
+        size,
+        color: faceColors[layout.name],
+        borderColor,
+      });
+      this.materials.push(face.material);
+      this.faces[layout.name] = face;
+      this.add(face);
     }
   }
 
-  createFaceMaterial(faceColor, borderColor) {
-    return new THREE.ShaderMaterial({
-      uniforms: {
-        faceColor: { value: new THREE.Color(faceColor) },
-        borderColor: { value: new THREE.Color(borderColor) },
-        borderWidth: { value: 0.075 },
-      },
-      vertexShader: VERTEX_SHADER,
-      fragmentShader: FRAGMENT_SHADER,
-      side: THREE.FrontSide,
-    });
-  }
-
   dispose() {
-    this.geometry.dispose();
-    this.materials.forEach((material) => material.dispose());
-    this.visuals.geometry.dispose();
-    this.visuals.material.dispose();
+    Object.values(this.faces).forEach((face) => face.dispose());
   }
 }
 

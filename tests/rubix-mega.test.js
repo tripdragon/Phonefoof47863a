@@ -90,6 +90,52 @@ test("Piece uses six shader planes and greys faces hidden by its location", () =
   piece.dispose();
 });
 
+test("Piece planes use a negative local half-size offset from their corner pivots", () => {
+  const size = 2.4;
+  const piece = new Piece({ size });
+  piece.geometry.computeBoundingBox();
+
+  assert.ok(piece.geometry.boundingBox.min.distanceTo(new THREE.Vector3(-size, -size, 0)) < 1e-6);
+  assert.ok(piece.geometry.boundingBox.max.distanceTo(new THREE.Vector3(0, 0, 0)) < 1e-6);
+
+  const halfSize = size / 2;
+  const expectedPivots = {
+    right: [halfSize, halfSize, -halfSize],
+    left: [-halfSize, halfSize, halfSize],
+    top: [halfSize, halfSize, -halfSize],
+    bottom: [halfSize, -halfSize, halfSize],
+    front: [halfSize, halfSize, halfSize],
+    back: [-halfSize, halfSize, -halfSize],
+  };
+  for (const [name, face] of Object.entries(piece.faces)) {
+    assert.ok(
+      face.position.distanceTo(new THREE.Vector3(...expectedPivots[name])) < 1e-12,
+      `${name} pivot is not on its expected cube corner`,
+    );
+  }
+
+  const expectedCenters = {
+    right: [size / 2, 0, 0],
+    left: [-size / 2, 0, 0],
+    top: [0, size / 2, 0],
+    bottom: [0, -size / 2, 0],
+    front: [0, 0, size / 2],
+    back: [0, 0, -size / 2],
+  };
+  const localCenter = new THREE.Vector3(-size / 2, -size / 2, 0);
+  piece.updateMatrixWorld(true);
+
+  for (const [name, face] of Object.entries(piece.faces)) {
+    const center = localCenter.clone().applyMatrix4(face.matrixWorld);
+    assert.ok(
+      center.distanceTo(new THREE.Vector3(...expectedCenters[name])) < 1e-12,
+      `${name} face moved away from its cube boundary`,
+    );
+  }
+
+  piece.dispose();
+});
+
 test("Piece exposes a small yellow pivot-center debugger through visuals", () => {
   const piece = new Piece();
 

@@ -16,11 +16,28 @@ export class RubixMega extends THREE.Object3D {
       theme: this.theme,
     });
     this.piece = this.core;
-    this.add(this.piece);
+    this.corners = [];
+
+    for (const x of [-1, 1]) {
+      for (const y of [-1, 1]) {
+        for (const z of [-1, 1]) {
+          this.corners.push(new Piece({
+            size,
+            type: PIECE_TYPES.CORNER,
+            location: { x, y, z },
+            theme: this.theme,
+            outwardOffset: 1,
+          }));
+        }
+      }
+    }
+
+    this.pieces = [this.core, ...this.corners];
+    this.add(...this.pieces);
   }
 
   dispose() {
-    this.piece.dispose();
+    this.pieces.forEach((piece) => piece.dispose());
   }
 }
 

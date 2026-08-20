@@ -52,6 +52,7 @@ export class Piece extends THREE.Object3D {
     faceColors = theme,
     borderColor = DEFAULT_BORDER_COLOR,
     hiddenFaceColor = HIDDEN_FACE_COLOR,
+    outwardOffset = 0,
   } = {}) {
     super();
     if (!Object.values(PIECE_TYPES).includes(type)) {
@@ -63,10 +64,20 @@ export class Piece extends THREE.Object3D {
     this.type = type;
     this.pieceType = type;
     this.location = new THREE.Vector3(location.x, location.y, location.z);
+    this.position.copy(this.location).multiplyScalar(size + outwardOffset);
     this.theme = theme;
     this.geometry = new THREE.PlaneGeometry(size, size);
     this.materials = [];
     this.faces = {};
+
+    this.visuals = new THREE.Mesh(
+      new THREE.SphereGeometry(Math.max(size * 0.045, 0.025), 16, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffff00, depthTest: false, depthWrite: false }),
+    );
+    this.visuals.name = "pivot-center-visual";
+    this.visuals.renderOrder = 1;
+    this.visuals.userData.debugVisual = "pivot-center";
+    this.add(this.visuals);
 
     for (const face of FACE_LAYOUT) {
       // The single core is currently the visible cube model, so all six of its
@@ -105,6 +116,8 @@ export class Piece extends THREE.Object3D {
   dispose() {
     this.geometry.dispose();
     this.materials.forEach((material) => material.dispose());
+    this.visuals.geometry.dispose();
+    this.visuals.material.dispose();
   }
 }
 

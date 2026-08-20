@@ -68,6 +68,10 @@ export class Piece extends THREE.Object3D {
     this.position.copy(this.location).multiplyScalar(size + outwardOffset);
     this.theme = theme;
     this.geometry = new THREE.PlaneGeometry(size, size);
+    // Offset the plane by half of its local width and height. Its mesh origin
+    // is then the corner at (0, 0), while its vertices extend in the negative
+    // local x/y directions.
+    this.geometry.translate(-size / 2, -size / 2, 0);
     this.materials = [];
     this.faces = {};
 
@@ -99,8 +103,13 @@ export class Piece extends THREE.Object3D {
       );
       const plane = new THREE.Mesh(this.geometry, material);
       plane.name = `${face.name}-face`;
-      plane.position[face.axis] = face.sign * size / 2;
       plane.rotation.set(...face.rotation);
+      // Put the origin on the appropriate cube corner while retaining the
+      // face's original center on its cube boundary.
+      const centerFromPivot = new THREE.Vector3(-size / 2, -size / 2, 0)
+        .applyEuler(plane.rotation);
+      plane.position[face.axis] = face.sign * size / 2;
+      plane.position.sub(centerFromPivot);
       plane.userData.face = face.name;
       plane.userData.hidden = hidden;
       this.materials.push(material);

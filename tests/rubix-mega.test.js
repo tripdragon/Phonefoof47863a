@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import * as THREE from "three";
 import { FACE_COLORS, RUBIX_THEMES, RubixMega } from "../src/rubixwai/RubixMega.js";
-import { HIDDEN_FACE_COLOR, Piece, PIECE_TYPES } from "../src/rubixwai/Piece.js";
+import {
+  HIDDEN_FACE_COLOR,
+  Piece,
+  PIECE_TYPES,
+  PIVOT_VISUAL_RENDER_ORDER,
+} from "../src/rubixwai/Piece.js";
 import { PieceNormalsDebugger } from "../src/rubixwai/PieceNormalsDebugger.js";
 
 test("RubixMega owns one core Piece and eight outward-offset corners", () => {
@@ -92,6 +97,10 @@ test("Piece exposes a small yellow pivot-center debugger through visuals", () =>
   assert.equal(piece.visuals.parent, piece);
   assert.equal(piece.visuals.geometry.type, "SphereGeometry");
   assert.equal(piece.visuals.material.color.getHex(), 0xffff00);
+  assert.equal(piece.visuals.material.depthTest, false);
+  assert.equal(piece.visuals.material.depthWrite, false);
+  assert.equal(piece.visuals.material.transparent, true);
+  assert.equal(piece.visuals.renderOrder, PIVOT_VISUAL_RENDER_ORDER);
   assert.deepEqual(piece.visuals.position.toArray(), [0, 0, 0]);
 
   piece.dispose();

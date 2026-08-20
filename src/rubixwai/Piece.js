@@ -10,6 +10,7 @@ export const PIECE_TYPES = Object.freeze({
 
 export const HIDDEN_FACE_COLOR = 0x666666;
 export const DEFAULT_BORDER_COLOR = 0x000000;
+export const PIVOT_VISUAL_RENDER_ORDER = 10_000;
 
 const VERTEX_SHADER = `
   varying vec2 vUv;
@@ -72,10 +73,18 @@ export class Piece extends THREE.Object3D {
 
     this.visuals = new THREE.Mesh(
       new THREE.SphereGeometry(Math.max(size * 0.045, 0.025), 16, 12),
-      new THREE.MeshBasicMaterial({ color: 0xffff00, depthTest: false, depthWrite: false }),
+      new THREE.MeshBasicMaterial({
+        color: 0xffff00,
+        depthTest: false,
+        depthWrite: false,
+        transparent: true,
+      }),
     );
     this.visuals.name = "pivot-center-visual";
-    this.visuals.renderOrder = 1;
+    // Keep the pivot in Three's transparent pass and draw it after every face.
+    // Disabling depth alone is insufficient when another opaque shader is
+    // submitted later in the frame, because that shader can still cover it.
+    this.visuals.renderOrder = PIVOT_VISUAL_RENDER_ORDER;
     this.visuals.userData.debugVisual = "pivot-center";
     this.add(this.visuals);
 

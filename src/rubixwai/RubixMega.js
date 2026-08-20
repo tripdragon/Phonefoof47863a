@@ -2,6 +2,47 @@ import * as THREE from "three";
 import { Piece, PIECE_TYPES } from "./Piece.js";
 import { DEFAULT_RUBIX_THEME, RUBIX_THEMES } from "./themes.js";
 
+export const COLOR_INDEXES = Object.freeze({
+  RIGHT: 0,
+  LEFT: 1,
+  TOP: 2,
+  BOTTOM: 3,
+  FRONT: 4,
+  BACK: 5,
+});
+
+const { RIGHT, LEFT, TOP, BOTTOM, FRONT, BACK } = COLOR_INDEXES;
+
+/** Solved-cube locations and the outward colors carried by every visible piece. */
+export const PIECE_LOOKUP = Object.freeze({
+  right: { type: PIECE_TYPES.CENTER, location: [1, 0, 0], colorIndexes: [RIGHT] },
+  left: { type: PIECE_TYPES.CENTER, location: [-1, 0, 0], colorIndexes: [LEFT] },
+  top: { type: PIECE_TYPES.CENTER, location: [0, 1, 0], colorIndexes: [TOP] },
+  bottom: { type: PIECE_TYPES.CENTER, location: [0, -1, 0], colorIndexes: [BOTTOM] },
+  front: { type: PIECE_TYPES.CENTER, location: [0, 0, 1], colorIndexes: [FRONT] },
+  back: { type: PIECE_TYPES.CENTER, location: [0, 0, -1], colorIndexes: [BACK] },
+  "right-top": { type: PIECE_TYPES.EDGE, location: [1, 1, 0], colorIndexes: [RIGHT, TOP] },
+  "right-bottom": { type: PIECE_TYPES.EDGE, location: [1, -1, 0], colorIndexes: [RIGHT, BOTTOM] },
+  "right-front": { type: PIECE_TYPES.EDGE, location: [1, 0, 1], colorIndexes: [RIGHT, FRONT] },
+  "right-back": { type: PIECE_TYPES.EDGE, location: [1, 0, -1], colorIndexes: [RIGHT, BACK] },
+  "left-top": { type: PIECE_TYPES.EDGE, location: [-1, 1, 0], colorIndexes: [LEFT, TOP] },
+  "left-bottom": { type: PIECE_TYPES.EDGE, location: [-1, -1, 0], colorIndexes: [LEFT, BOTTOM] },
+  "left-front": { type: PIECE_TYPES.EDGE, location: [-1, 0, 1], colorIndexes: [LEFT, FRONT] },
+  "left-back": { type: PIECE_TYPES.EDGE, location: [-1, 0, -1], colorIndexes: [LEFT, BACK] },
+  "top-front": { type: PIECE_TYPES.EDGE, location: [0, 1, 1], colorIndexes: [TOP, FRONT] },
+  "top-back": { type: PIECE_TYPES.EDGE, location: [0, 1, -1], colorIndexes: [TOP, BACK] },
+  "bottom-front": { type: PIECE_TYPES.EDGE, location: [0, -1, 1], colorIndexes: [BOTTOM, FRONT] },
+  "bottom-back": { type: PIECE_TYPES.EDGE, location: [0, -1, -1], colorIndexes: [BOTTOM, BACK] },
+  "right-top-front": { type: PIECE_TYPES.CORNER, location: [1, 1, 1], colorIndexes: [RIGHT, TOP, FRONT] },
+  "right-top-back": { type: PIECE_TYPES.CORNER, location: [1, 1, -1], colorIndexes: [RIGHT, TOP, BACK] },
+  "right-bottom-front": { type: PIECE_TYPES.CORNER, location: [1, -1, 1], colorIndexes: [RIGHT, BOTTOM, FRONT] },
+  "right-bottom-back": { type: PIECE_TYPES.CORNER, location: [1, -1, -1], colorIndexes: [RIGHT, BOTTOM, BACK] },
+  "left-top-front": { type: PIECE_TYPES.CORNER, location: [-1, 1, 1], colorIndexes: [LEFT, TOP, FRONT] },
+  "left-top-back": { type: PIECE_TYPES.CORNER, location: [-1, 1, -1], colorIndexes: [LEFT, TOP, BACK] },
+  "left-bottom-front": { type: PIECE_TYPES.CORNER, location: [-1, -1, 1], colorIndexes: [LEFT, BOTTOM, FRONT] },
+  "left-bottom-back": { type: PIECE_TYPES.CORNER, location: [-1, -1, -1], colorIndexes: [LEFT, BOTTOM, BACK] },
+});
+
 /** The Rubik's-cube model and owner of its pieces. */
 export class RubixMega extends THREE.Object3D {
   constructor({ size = 2.4, spacing = 1, theme = DEFAULT_RUBIX_THEME } = {}) {
@@ -16,39 +57,26 @@ export class RubixMega extends THREE.Object3D {
       theme: this.theme,
     });
     this.piece = this.core;
+    this.centers = [];
+    this.edges = [];
     this.corners = [];
 
-    for (const x of [-1, 1]) {
-      for (const y of [-1, 1]) {
-        for (const z of [-1, 1]) {
-          this.corners.push(new Piece({
-            size,
-            type: PIECE_TYPES.CORNER,
-            location: { x, y, z },
-            theme: this.theme,
-          }));
-          const corner = this.corners.at(-1);
-          corner.position.set(x, y, z).multiplyScalar(size + spacing);
-          this.orientCorner(corner, x, y, z);
-        }
-      }
+    for (const [pieceName, definition] of Object.entries(PIECE_LOOKUP)) {
+      const [x, y, z] = definition.location;
+      const piece = new Piece({
+        size,
+        type: definition.type,
+        location: { x, y, z },
+        theme: this.theme,
+        colorIndexes: definition.colorIndexes,
+      });
+      piece.name = `RubixPiece-${pieceName}`;
+      piece.position.set(x, y, z).multiplyScalar(size + spacing);
+      this[`${definition.type}s`].push(piece);
     }
 
-    this.pieces = [this.core, ...this.corners];
+    this.pieces = [this.core, ...this.centers, ...this.edges, ...this.corners];
     this.add(...this.pieces);
-  }
-
-  orientCorner(corner, x, y, z) {
-    // A proper rotation (never a mirrored scale) can point the canonical +X,
-    // +Y and +Z faces at every corner. Odd-sign corners need an odd axis
-    // permutation to keep the resulting basis right-handed.
-    const targets = [
-      new THREE.Vector3(x, 0, 0),
-      new THREE.Vector3(0, y, 0),
-      new THREE.Vector3(0, 0, z),
-    ];
-    if (x * y * z < 0) [targets[0], targets[1]] = [targets[1], targets[0]];
-    corner.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(...targets));
   }
 
   dispose() {

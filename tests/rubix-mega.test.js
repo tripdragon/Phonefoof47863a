@@ -5,6 +5,8 @@ import { FACE_COLORS, RUBIX_THEMES, RubixMega } from "../src/rubixwai/RubixMega.
 import {
   Piece,
   PIECE_TYPES,
+  PLACEHOLDER_BORDER_COLOR,
+  PLACEHOLDER_FACE_COLOR,
 } from "../src/rubixwai/Piece.js";
 import { Face } from "../src/rubixwai/Face.js";
 import { PieceNormalsDebugger } from "../src/rubixwai/PieceNormalsDebugger.js";
@@ -71,7 +73,7 @@ test("RubixMega applies a selected theme to its core", () => {
   cube.dispose();
 });
 
-test("Piece is a transform-only group which owns Face meshes", () => {
+test("Piece is a transform-only group which owns colored and placeholder Face meshes", () => {
   const piece = new Piece({
     type: PIECE_TYPES.CENTER,
     location: { x: 1, y: 0, z: 0 },
@@ -81,19 +83,38 @@ test("Piece is a transform-only group which owns Face meshes", () => {
   assert.ok(piece instanceof THREE.Group);
   assert.equal(piece.geometry, undefined);
   assert.equal(piece.visuals, undefined);
-  assert.deepEqual(Object.keys(piece.faces), ["front"]);
+  assert.deepEqual(
+    Object.keys(piece.faces),
+    ["right", "left", "top", "bottom", "front", "back"],
+  );
   assert.ok(Object.values(piece.faces).every((face) => face instanceof Face));
   assert.ok(piece.materials.every((material) => material instanceof THREE.ShaderMaterial));
   assert.equal(piece.faces.front.material.uniforms.faceColor.value.getHex(), FACE_COLORS.front);
+  assert.equal(piece.faces.front.userData.isPlaceholder, false);
+  assert.equal(piece.faces.right.userData.isPlaceholder, true);
+  assert.equal(
+    piece.faces.right.material.uniforms.faceColor.value.getHex(),
+    PLACEHOLDER_FACE_COLOR,
+  );
+  assert.equal(
+    piece.faces.right.material.uniforms.borderColor.value.getHex(),
+    PLACEHOLDER_BORDER_COLOR,
+  );
 
   piece.dispose();
 });
 
-test("Piece type determines which faces are offset from its center pivot", () => {
+test("Piece type determines which faces are colored and which reserve its cube space", () => {
   const size = 2.4;
   const piece = new Piece({ size, type: PIECE_TYPES.CORNER });
   const halfSize = size / 2;
-  assert.deepEqual(Object.keys(piece.faces), ["right", "top", "front"]);
+  assert.deepEqual(
+    Object.entries(piece.faces)
+      .filter(([, face]) => !face.userData.isPlaceholder)
+      .map(([name]) => name),
+    ["right", "top", "front"],
+  );
+  assert.equal(piece.faces.left.userData.isPlaceholder, true);
   assert.deepEqual(piece.faces.right.position.toArray(), [halfSize, 0, 0]);
   assert.deepEqual(piece.faces.top.position.toArray(), [0, halfSize, 0]);
   assert.deepEqual(piece.faces.front.position.toArray(), [0, 0, halfSize]);

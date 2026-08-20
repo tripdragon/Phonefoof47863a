@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { DEFAULT_RUBIX_THEME } from "./themes.js";
 import { Face } from "./Face.js";
+import { PieceVisualCenter } from "./PieceVisualCenter.js";
 
 export const PIECE_TYPES = Object.freeze({
   CORE: "core",
@@ -86,6 +87,11 @@ export class Piece extends THREE.Group {
     this.faces = {};
     this.colorIndexes = Object.freeze([...colorIndexes]);
 
+    this.visuals = {
+      center: new PieceVisualCenter(),
+    };
+    this.add(this.visuals.center);
+
     const coloredFaceNames = new Set(this.colorIndexes.map((index) => FACE_LAYOUT[index].name));
 
     for (const layout of FACE_LAYOUT) {
@@ -105,6 +111,7 @@ export class Piece extends THREE.Group {
 
   dispose() {
     Object.values(this.faces).forEach((face) => face.dispose());
+    this.visuals.center.dispose();
   }
 }
 

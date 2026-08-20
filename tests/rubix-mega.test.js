@@ -16,6 +16,10 @@ import {
 } from "../src/rubixwai/Piece.js";
 import { Face } from "../src/rubixwai/Face.js";
 import { PieceNormalsDebugger } from "../src/rubixwai/PieceNormalsDebugger.js";
+import {
+  PieceVisualCenter,
+  VISUAL_CENTER_COLOR,
+} from "../src/rubixwai/PieceVisualCenter.js";
 
 test("RubixMega builds all 26 visible pieces from its solved-cube lookup", () => {
   const cube = new RubixMega();
@@ -114,7 +118,7 @@ test("Piece is a transform-only group which owns colored and placeholder Face me
 
   assert.ok(piece instanceof THREE.Group);
   assert.equal(piece.geometry, undefined);
-  assert.equal(piece.visuals, undefined);
+  assert.ok(piece.visuals.center instanceof PieceVisualCenter);
   assert.deepEqual(
     Object.keys(piece.faces),
     ["right", "left", "top", "bottom", "front", "back"],
@@ -152,6 +156,25 @@ test("Piece type determines which faces are colored and which reserve its cube s
   assert.deepEqual(piece.faces.front.position.toArray(), [0, 0, halfSize]);
 
   piece.dispose();
+});
+
+test("every Piece displays a small flat yellow sphere at its visual center", () => {
+  const cube = new RubixMega();
+
+  for (const piece of cube.pieces) {
+    const center = piece.visuals.center;
+    assert.ok(center instanceof PieceVisualCenter);
+    assert.equal(center.parent, piece);
+    assert.deepEqual(center.position.toArray(), [0, 0, 0]);
+    assert.ok(center.geometry instanceof THREE.SphereGeometry);
+    assert.equal(center.geometry.parameters.radius, 0.2);
+    assert.equal(center.geometry.parameters.widthSegments, 8);
+    assert.equal(center.geometry.parameters.heightSegments, 8);
+    assert.ok(center.material instanceof THREE.MeshBasicMaterial);
+    assert.equal(center.material.color.getHex(), VISUAL_CENTER_COLOR);
+  }
+
+  cube.dispose();
 });
 
 test("PieceNormalsDebugger starts hidden and draws one outward arrow per face", () => {

@@ -20,7 +20,7 @@ export class RubixWaiScene {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.minDistance = 4;
-    this.controls.maxDistance = 12;
+    this.controls.maxDistance = 24;
     this.controls.target.set(0, 0, 0);
 
     this.rubixMega = new RubixMega();

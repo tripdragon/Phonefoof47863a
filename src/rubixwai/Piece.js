@@ -10,6 +10,8 @@ export const PIECE_TYPES = Object.freeze({
 });
 
 export const DEFAULT_BORDER_COLOR = 0x000000;
+export const PLACEHOLDER_FACE_COLOR = 0x9ca3af;
+export const PLACEHOLDER_BORDER_COLOR = 0x4b5563;
 
 const FACE_LAYOUT = Object.freeze([
   { name: "right", axis: "x", sign: 1, rotation: [0, Math.PI / 2, 0] },
@@ -52,13 +54,17 @@ export class Piece extends THREE.Group {
     this.materials = [];
     this.faces = {};
 
-    for (const layout of TYPE_FACES[type]) {
+    const coloredFaceNames = new Set(TYPE_FACES[type].map(({ name }) => name));
+
+    for (const layout of FACE_LAYOUT) {
+      const isPlaceholder = type !== PIECE_TYPES.CORE && !coloredFaceNames.has(layout.name);
       const face = new Face({
         ...layout,
         size,
-        color: faceColors[layout.name],
-        borderColor,
+        color: isPlaceholder ? PLACEHOLDER_FACE_COLOR : faceColors[layout.name],
+        borderColor: isPlaceholder ? PLACEHOLDER_BORDER_COLOR : borderColor,
       });
+      face.userData.isPlaceholder = isPlaceholder;
       this.materials.push(face.material);
       this.faces[layout.name] = face;
       this.add(face);

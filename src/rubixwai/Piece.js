@@ -29,6 +29,22 @@ const TYPE_FACES = Object.freeze({
   [PIECE_TYPES.CORNER]: [FACE_LAYOUT[0], FACE_LAYOUT[2], FACE_LAYOUT[4]],
 });
 
+const DEFAULT_COLOR_INDEXES = Object.freeze(
+  Object.fromEntries(
+    Object.entries(TYPE_FACES).map(([type, faces]) => [
+      type,
+      Object.freeze(faces.map((face) => FACE_LAYOUT.indexOf(face))),
+    ]),
+  ),
+);
+
+const COLOR_COUNT_BY_TYPE = Object.freeze({
+  [PIECE_TYPES.CORE]: 6,
+  [PIECE_TYPES.CENTER]: 1,
+  [PIECE_TYPES.EDGE]: 2,
+  [PIECE_TYPES.CORNER]: 3,
+});
+
 /** A transform-only Rubik's-cube piece that groups its Face meshes. */
 export class Piece extends THREE.Group {
   constructor({
@@ -37,6 +53,7 @@ export class Piece extends THREE.Group {
     location = { x: 0, y: 0, z: 0 },
     theme = DEFAULT_RUBIX_THEME,
     faceColors = theme,
+    colorIndexes = DEFAULT_COLOR_INDEXES[type],
     borderColor = DEFAULT_BORDER_COLOR,
   } = {}) {
     super();
@@ -44,6 +61,20 @@ export class Piece extends THREE.Group {
       throw new TypeError(`Unknown piece type: ${type}`);
     }
     if (!faceColors) throw new TypeError("Piece requires a theme or faceColors map");
+    if (!Array.isArray(colorIndexes)) {
+      throw new TypeError("Piece requires an array of color indexes");
+    }
+    if (colorIndexes.some((index) => !Number.isInteger(index) || !FACE_LAYOUT[index])) {
+      throw new RangeError("Piece color indexes must refer to cube faces 0 through 5");
+    }
+    if (
+      colorIndexes.length !== COLOR_COUNT_BY_TYPE[type]
+      || new Set(colorIndexes).size !== colorIndexes.length
+    ) {
+      throw new RangeError(
+        `${type} pieces require ${COLOR_COUNT_BY_TYPE[type]} unique color indexes`,
+      );
+    }
 
     this.name = `RubixPiece-${type}`;
     this.type = type;
@@ -53,8 +84,9 @@ export class Piece extends THREE.Group {
     this.size = size;
     this.materials = [];
     this.faces = {};
+    this.colorIndexes = Object.freeze([...colorIndexes]);
 
-    const coloredFaceNames = new Set(TYPE_FACES[type].map(({ name }) => name));
+    const coloredFaceNames = new Set(this.colorIndexes.map((index) => FACE_LAYOUT[index].name));
 
     for (const layout of FACE_LAYOUT) {
       const isPlaceholder = type !== PIECE_TYPES.CORE && !coloredFaceNames.has(layout.name);

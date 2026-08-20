@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as THREE from "three";
-import { FACE_COLORS, RUBIX_THEMES, RubixMega } from "../src/rubixwai/RubixMega.js";
+import {
+  COLOR_INDEXES,
+  FACE_COLORS,
+  PIECE_LOOKUP,
+  RUBIX_THEMES,
+  RubixMega,
+} from "../src/rubixwai/RubixMega.js";
 import {
   Piece,
   PIECE_TYPES,
@@ -11,7 +17,7 @@ import {
 import { Face } from "../src/rubixwai/Face.js";
 import { PieceNormalsDebugger } from "../src/rubixwai/PieceNormalsDebugger.js";
 
-test("RubixMega owns one core Piece and eight outward-offset corners", () => {
+test("RubixMega builds all 26 visible pieces from its solved-cube lookup", () => {
   const cube = new RubixMega();
 
   assert.ok(cube instanceof THREE.Object3D);
@@ -19,21 +25,25 @@ test("RubixMega owns one core Piece and eight outward-offset corners", () => {
   assert.equal(cube.piece, cube.core);
   assert.equal(cube.piece.pieceType, PIECE_TYPES.CORE);
   assert.equal(cube.piece.parent, cube);
-  assert.equal(cube.children.length, 9);
+  assert.equal(cube.children.length, 27);
+  assert.equal(cube.centers.length, 6);
+  assert.equal(cube.edges.length, 12);
   assert.equal(cube.corners.length, 8);
-  assert.deepEqual(cube.pieces, [cube.core, ...cube.corners]);
+  assert.deepEqual(cube.pieces, [cube.core, ...cube.centers, ...cube.edges, ...cube.corners]);
+  assert.ok(cube.centers.every((piece) => piece.colorIndexes.length === 1));
+  assert.ok(cube.edges.every((piece) => piece.colorIndexes.length === 2));
   assert.ok(cube.corners.every((corner) => corner.pieceType === PIECE_TYPES.CORNER));
   assert.deepEqual(
     cube.corners.map((corner) => corner.position.toArray()),
     [
-      [-3.4, -3.4, -3.4],
-      [-3.4, -3.4, 3.4],
-      [-3.4, 3.4, -3.4],
-      [-3.4, 3.4, 3.4],
-      [3.4, -3.4, -3.4],
-      [3.4, -3.4, 3.4],
-      [3.4, 3.4, -3.4],
       [3.4, 3.4, 3.4],
+      [3.4, 3.4, -3.4],
+      [3.4, -3.4, 3.4],
+      [3.4, -3.4, -3.4],
+      [-3.4, 3.4, 3.4],
+      [-3.4, 3.4, -3.4],
+      [-3.4, -3.4, 3.4],
+      [-3.4, -3.4, -3.4],
     ],
   );
   assert.equal(cube.theme, RUBIX_THEMES["a bit nicer"]);
@@ -53,6 +63,28 @@ test("RubixMega owns one core Piece and eight outward-offset corners", () => {
     ),
   );
 
+  cube.dispose();
+});
+
+test("piece lookup assigns the traditional fixed face colors to corners", () => {
+  assert.equal(Object.keys(PIECE_LOOKUP).length, 26);
+  assert.deepEqual(
+    PIECE_LOOKUP["left-bottom-back"].colorIndexes,
+    [COLOR_INDEXES.LEFT, COLOR_INDEXES.BOTTOM, COLOR_INDEXES.BACK],
+  );
+
+  const cube = new RubixMega({ theme: RUBIX_THEMES.classic });
+  const corner = cube.corners.find((piece) => piece.name === "RubixPiece-left-bottom-back");
+  const coloredFaces = Object.entries(corner.faces)
+    .filter(([, face]) => !face.userData.isPlaceholder)
+    .map(([name, face]) => [name, face.material.uniforms.faceColor.value.getHex()]);
+
+  assert.deepEqual(coloredFaces, [
+    ["left", RUBIX_THEMES.classic.left],
+    ["bottom", RUBIX_THEMES.classic.bottom],
+    ["back", RUBIX_THEMES.classic.back],
+  ]);
+  assert.deepEqual(corner.quaternion.toArray(), [0, 0, 0, 1]);
   cube.dispose();
 });
 

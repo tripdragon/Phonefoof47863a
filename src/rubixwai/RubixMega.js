@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Piece, PIECE_TYPES } from "./Piece.js";
+import { FACTORY_FACE_LAYOUT, Piece, PIECE_TYPES } from "./Piece.js";
 import { DEFAULT_RUBIX_THEME, RUBIX_THEMES } from "./themes.js";
 
 export const COLOR_INDEXES = Object.freeze({
@@ -34,14 +34,51 @@ export const PIECE_LOOKUP = Object.freeze({
   "bottom-front": { type: PIECE_TYPES.EDGE, location: [0, -1, 1], colorIndexes: [BOTTOM, FRONT] },
   "bottom-back": { type: PIECE_TYPES.EDGE, location: [0, -1, -1], colorIndexes: [BOTTOM, BACK] },
   "right-top-front": { type: PIECE_TYPES.CORNER, location: [1, 1, 1], colorIndexes: [RIGHT, TOP, FRONT] },
-  "right-top-back": { type: PIECE_TYPES.CORNER, location: [1, 1, -1], colorIndexes: [RIGHT, TOP, BACK] },
-  "right-bottom-front": { type: PIECE_TYPES.CORNER, location: [1, -1, 1], colorIndexes: [RIGHT, BOTTOM, FRONT] },
+  "right-top-back": { type: PIECE_TYPES.CORNER, location: [1, 1, -1], colorIndexes: [RIGHT, BACK, TOP] },
+  "right-bottom-front": { type: PIECE_TYPES.CORNER, location: [1, -1, 1], colorIndexes: [RIGHT, FRONT, BOTTOM] },
   "right-bottom-back": { type: PIECE_TYPES.CORNER, location: [1, -1, -1], colorIndexes: [RIGHT, BOTTOM, BACK] },
-  "left-top-front": { type: PIECE_TYPES.CORNER, location: [-1, 1, 1], colorIndexes: [LEFT, TOP, FRONT] },
+  "left-top-front": { type: PIECE_TYPES.CORNER, location: [-1, 1, 1], colorIndexes: [LEFT, FRONT, TOP] },
   "left-top-back": { type: PIECE_TYPES.CORNER, location: [-1, 1, -1], colorIndexes: [LEFT, TOP, BACK] },
   "left-bottom-front": { type: PIECE_TYPES.CORNER, location: [-1, -1, 1], colorIndexes: [LEFT, BOTTOM, FRONT] },
-  "left-bottom-back": { type: PIECE_TYPES.CORNER, location: [-1, -1, -1], colorIndexes: [LEFT, BOTTOM, BACK] },
+  "left-bottom-back": { type: PIECE_TYPES.CORNER, location: [-1, -1, -1], colorIndexes: [LEFT, BACK, BOTTOM] },
 });
+
+const INDEX_NORMALS = FACE_LAYOUT_NORMALS();
+
+function FACE_LAYOUT_NORMALS() {
+  return [
+    new THREE.Vector3(1, 0, 0), new THREE.Vector3(-1, 0, 0),
+    new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1, 0),
+    new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1),
+  ];
+}
+
+/** Rotate a factory-built piece so each numbered face points at its paint side. */
+export function orientPiece(piece) {
+  const factoryNormals = FACTORY_FACE_LAYOUT[piece.pieceType].map(
+    ({ axis, sign }) => new THREE.Vector3()[axis === "x" ? "setX" : axis === "y" ? "setY" : "setZ"](sign),
+  );
+
+  for (let x = 0; x < 4; x += 1) {
+    for (let y = 0; y < 4; y += 1) {
+      for (let z = 0; z < 4; z += 1) {
+        const quaternion = new THREE.Quaternion().setFromEuler(
+          new THREE.Euler(x * Math.PI / 2, y * Math.PI / 2, z * Math.PI / 2),
+        );
+        const matches = factoryNormals.every((normal, index) => (
+          normal.clone().applyQuaternion(quaternion).distanceTo(
+            INDEX_NORMALS[piece.colorIndexes[index]],
+          ) < 1e-7
+        ));
+        if (matches) {
+          piece.quaternion.copy(quaternion);
+          return piece;
+        }
+      }
+    }
+  }
+  throw new Error(`No cube orientation exists for ${piece.name}`);
+}
 
 /** The Rubik's-cube model and owner of its pieces. */
 export class RubixMega extends THREE.Object3D {
@@ -71,6 +108,7 @@ export class RubixMega extends THREE.Object3D {
         colorIndexes: definition.colorIndexes,
       });
       piece.name = `RubixPiece-${pieceName}`;
+      orientPiece(piece);
       piece.position.set(x, y, z).multiplyScalar(size + spacing);
       this[`${definition.type}s`].push(piece);
     }

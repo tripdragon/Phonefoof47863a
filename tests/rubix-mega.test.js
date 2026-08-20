@@ -7,12 +7,12 @@ import {
   PIECE_LOOKUP,
   RUBIX_THEMES,
   RubixMega,
+  orientPiece,
 } from "../src/rubixwai/RubixMega.js";
 import {
+  FACTORY_FACE_LAYOUT,
   Piece,
   PIECE_TYPES,
-  PLACEHOLDER_BORDER_COLOR,
-  PLACEHOLDER_FACE_COLOR,
 } from "../src/rubixwai/Piece.js";
 import { Face } from "../src/rubixwai/Face.js";
 import { PieceNormalsDebugger } from "../src/rubixwai/PieceNormalsDebugger.js";
@@ -72,23 +72,20 @@ test("RubixMega builds all 26 visible pieces from its solved-cube lookup", () =>
 
 test("piece lookup assigns the traditional fixed face colors to corners", () => {
   assert.equal(Object.keys(PIECE_LOOKUP).length, 26);
-  assert.deepEqual(
-    PIECE_LOOKUP["left-bottom-back"].colorIndexes,
-    [COLOR_INDEXES.LEFT, COLOR_INDEXES.BOTTOM, COLOR_INDEXES.BACK],
-  );
+  assert.deepEqual([...PIECE_LOOKUP["left-bottom-back"].colorIndexes].sort(),
+    [COLOR_INDEXES.LEFT, COLOR_INDEXES.BOTTOM, COLOR_INDEXES.BACK].sort());
 
   const cube = new RubixMega({ theme: RUBIX_THEMES.classic });
   const corner = cube.corners.find((piece) => piece.name === "RubixPiece-left-bottom-back");
-  const coloredFaces = Object.entries(corner.faces)
-    .filter(([, face]) => !face.userData.isPlaceholder)
-    .map(([name, face]) => [name, face.material.uniforms.faceColor.value.getHex()]);
+  const coloredFaces = Object.values(corner.faces)
+    .map((face) => face.material.uniforms.faceColor.value.getHex());
 
-  assert.deepEqual(coloredFaces, [
-    ["left", RUBIX_THEMES.classic.left],
-    ["bottom", RUBIX_THEMES.classic.bottom],
-    ["back", RUBIX_THEMES.classic.back],
-  ]);
-  assert.deepEqual(corner.quaternion.toArray(), [0, 0, 0, 1]);
+  assert.deepEqual(new Set(coloredFaces), new Set([
+    RUBIX_THEMES.classic.left,
+    RUBIX_THEMES.classic.bottom,
+    RUBIX_THEMES.classic.back,
+  ]));
+  assert.notDeepEqual(corner.quaternion.toArray(), [0, 0, 0, 1]);
   cube.dispose();
 });
 
@@ -109,7 +106,7 @@ test("RubixMega applies a selected theme to its core", () => {
   cube.dispose();
 });
 
-test("Piece is a transform-only group which owns colored and placeholder Face meshes", () => {
+test("Piece is a transform-only group built in its factory orientation", () => {
   const piece = new Piece({
     type: PIECE_TYPES.CENTER,
     location: { x: 1, y: 0, z: 0 },
@@ -119,43 +116,56 @@ test("Piece is a transform-only group which owns colored and placeholder Face me
   assert.ok(piece instanceof THREE.Group);
   assert.equal(piece.geometry, undefined);
   assert.ok(piece.visuals.center instanceof PieceVisualCenter);
-  assert.deepEqual(
-    Object.keys(piece.faces),
-    ["right", "left", "top", "bottom", "front", "back"],
-  );
+  assert.deepEqual(Object.keys(piece.faces), ["front"]);
   assert.ok(Object.values(piece.faces).every((face) => face instanceof Face));
   assert.ok(piece.materials.every((material) => material instanceof THREE.ShaderMaterial));
   assert.equal(piece.faces.front.material.uniforms.faceColor.value.getHex(), FACE_COLORS.front);
-  assert.equal(piece.faces.front.userData.isPlaceholder, false);
-  assert.equal(piece.faces.right.userData.isPlaceholder, true);
-  assert.equal(
-    piece.faces.right.material.uniforms.faceColor.value.getHex(),
-    PLACEHOLDER_FACE_COLOR,
-  );
-  assert.equal(
-    piece.faces.right.material.uniforms.borderColor.value.getHex(),
-    PLACEHOLDER_BORDER_COLOR,
-  );
+  assert.equal(piece.faces.front.userData.partNumber, 0);
+  assert.equal(piece.faces.front.userData.paintIndex, COLOR_INDEXES.FRONT);
 
   piece.dispose();
 });
 
-test("Piece type determines which faces are colored and which reserve its cube space", () => {
+test("piece types have ordered factory faces offset around their notch pivot", () => {
   const size = 2.4;
   const piece = new Piece({ size, type: PIECE_TYPES.CORNER });
   const halfSize = size / 2;
   assert.deepEqual(
-    Object.entries(piece.faces)
-      .filter(([, face]) => !face.userData.isPlaceholder)
-      .map(([name]) => name),
+    Object.keys(piece.faces),
     ["right", "top", "front"],
   );
-  assert.equal(piece.faces.left.userData.isPlaceholder, true);
-  assert.deepEqual(piece.faces.right.position.toArray(), [halfSize, 0, 0]);
-  assert.deepEqual(piece.faces.top.position.toArray(), [0, halfSize, 0]);
-  assert.deepEqual(piece.faces.front.position.toArray(), [0, 0, halfSize]);
+  assert.deepEqual(FACTORY_FACE_LAYOUT.corner.map(({ name }) => name), ["right", "top", "front"]);
+  assert.ok(piece.faces.right.position.distanceTo(
+    new THREE.Vector3(halfSize, halfSize, -halfSize),
+  ) < 1e-10);
+  assert.ok(piece.faces.top.position.distanceTo(
+    new THREE.Vector3(halfSize, halfSize, -halfSize),
+  ) < 1e-10);
+  assert.ok(piece.faces.front.position.distanceTo(
+    new THREE.Vector3(halfSize, halfSize, halfSize),
+  ) < 1e-10);
 
   piece.dispose();
+});
+
+test("RubixMega orients factory faces toward their solved paint sides", () => {
+  const cube = new RubixMega();
+  const expectedNormals = [
+    new THREE.Vector3(1, 0, 0), new THREE.Vector3(-1, 0, 0),
+    new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1, 0),
+    new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1),
+  ];
+
+  for (const piece of [...cube.centers, ...cube.edges, ...cube.corners]) {
+    FACTORY_FACE_LAYOUT[piece.pieceType].forEach(({ axis, sign }, partNumber) => {
+      const localNormal = new THREE.Vector3();
+      localNormal[axis] = sign;
+      assert.ok(localNormal.applyQuaternion(piece.quaternion)
+        .distanceTo(expectedNormals[piece.colorIndexes[partNumber]]) < 1e-7);
+    });
+  }
+  assert.equal(orientPiece(cube.centers[0]), cube.centers[0]);
+  cube.dispose();
 });
 
 test("every Piece displays a small flat yellow sphere at its visual center", () => {

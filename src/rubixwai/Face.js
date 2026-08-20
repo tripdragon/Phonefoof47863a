@@ -24,8 +24,18 @@ const FRAGMENT_SHADER = `
 
 /** A single independently shaded sticker mesh owned by a Piece. */
 export class Face extends THREE.Mesh {
-  constructor({ name, size, color, borderColor, axis, sign = 1, rotation = [0, 0, 0] }) {
+  constructor({
+    name,
+    size,
+    color,
+    borderColor,
+    axis,
+    sign = 1,
+    rotation = [0, 0, 0],
+    pivotAtCorner = false,
+  }) {
     const geometry = new THREE.PlaneGeometry(size, size);
+    if (pivotAtCorner) geometry.translate(-size / 2, -size / 2, 0);
     const material = new THREE.ShaderMaterial({
       uniforms: {
         faceColor: { value: new THREE.Color(color) },
@@ -44,6 +54,13 @@ export class Face extends THREE.Mesh {
     this.sign = sign;
     this.rotation.set(...rotation);
     this.position[axis] = sign * size / 2;
+    if (pivotAtCorner) {
+      // Keep the plane on the same cube wall after moving its local origin to
+      // a corner. The exposed piece origin represents the toy's future notch.
+      const centerFromPivot = new THREE.Vector3(-size / 2, -size / 2, 0)
+        .applyEuler(this.rotation);
+      this.position.sub(centerFromPivot);
+    }
     this.userData.face = name;
   }
 

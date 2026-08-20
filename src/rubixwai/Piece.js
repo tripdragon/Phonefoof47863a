@@ -11,9 +11,6 @@ export const PIECE_TYPES = Object.freeze({
 });
 
 export const DEFAULT_BORDER_COLOR = 0x000000;
-export const PLACEHOLDER_FACE_COLOR = 0x9ca3af;
-export const PLACEHOLDER_BORDER_COLOR = 0x4b5563;
-
 const FACE_LAYOUT = Object.freeze([
   { name: "right", axis: "x", sign: 1, rotation: [0, Math.PI / 2, 0] },
   { name: "left", axis: "x", sign: -1, rotation: [0, -Math.PI / 2, 0] },
@@ -23,7 +20,7 @@ const FACE_LAYOUT = Object.freeze([
   { name: "back", axis: "z", sign: -1, rotation: [0, Math.PI, 0] },
 ]);
 
-const TYPE_FACES = Object.freeze({
+export const FACTORY_FACE_LAYOUT = Object.freeze({
   [PIECE_TYPES.CORE]: FACE_LAYOUT,
   [PIECE_TYPES.CENTER]: [FACE_LAYOUT[4]],
   [PIECE_TYPES.EDGE]: [FACE_LAYOUT[2], FACE_LAYOUT[4]],
@@ -32,7 +29,7 @@ const TYPE_FACES = Object.freeze({
 
 const DEFAULT_COLOR_INDEXES = Object.freeze(
   Object.fromEntries(
-    Object.entries(TYPE_FACES).map(([type, faces]) => [
+    Object.entries(FACTORY_FACE_LAYOUT).map(([type, faces]) => [
       type,
       Object.freeze(faces.map((face) => FACE_LAYOUT.indexOf(face))),
     ]),
@@ -92,17 +89,19 @@ export class Piece extends THREE.Group {
     };
     this.add(this.visuals.center);
 
-    const coloredFaceNames = new Set(this.colorIndexes.map((index) => FACE_LAYOUT[index].name));
-
-    for (const layout of FACE_LAYOUT) {
-      const isPlaceholder = type !== PIECE_TYPES.CORE && !coloredFaceNames.has(layout.name);
+    const factoryFaces = FACTORY_FACE_LAYOUT[type];
+    for (const [partNumber, layout] of factoryFaces.entries()) {
+      const paintIndex = this.colorIndexes[partNumber];
       const face = new Face({
         ...layout,
         size,
-        color: isPlaceholder ? PLACEHOLDER_FACE_COLOR : faceColors[layout.name],
-        borderColor: isPlaceholder ? PLACEHOLDER_BORDER_COLOR : borderColor,
+        color: faceColors[FACE_LAYOUT[paintIndex].name],
+        borderColor,
+        pivotAtCorner: type !== PIECE_TYPES.CORE,
       });
-      face.userData.isPlaceholder = isPlaceholder;
+      face.userData.partNumber = partNumber;
+      face.userData.paintIndex = paintIndex;
+      face.userData.isPlaceholder = false;
       this.materials.push(face.material);
       this.faces[layout.name] = face;
       this.add(face);

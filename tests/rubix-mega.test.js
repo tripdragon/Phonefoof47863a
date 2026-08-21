@@ -11,6 +11,7 @@ import {
 } from "../src/rubixwai/RubixMega.js";
 import {
   FACTORY_FACE_LAYOUT,
+  DEFAULT_PLACEHOLDER_COLOR,
   Piece,
   PIECE_TYPES,
 } from "../src/rubixwai/Piece.js";
@@ -78,6 +79,7 @@ test("piece lookup assigns the traditional fixed face colors to corners", () => 
   const cube = new RubixMega({ theme: RUBIX_THEMES.classic });
   const corner = cube.corners.find((piece) => piece.name === "RubixPiece-left-bottom-back");
   const coloredFaces = Object.values(corner.faces)
+    .filter((face) => !face.userData.isPlaceholder)
     .map((face) => face.material.uniforms.faceColor.value.getHex());
 
   assert.deepEqual(new Set(coloredFaces), new Set([
@@ -116,7 +118,7 @@ test("Piece is a transform-only group built in its factory orientation", () => {
   assert.ok(piece instanceof THREE.Group);
   assert.equal(piece.geometry, undefined);
   assert.ok(piece.visuals.center instanceof PieceVisualCenter);
-  assert.deepEqual(Object.keys(piece.faces), ["front"]);
+  assert.deepEqual(Object.keys(piece.faces), ["right", "left", "top", "bottom", "front", "back"]);
   assert.ok(Object.values(piece.faces).every((face) => face instanceof Face));
   assert.ok(piece.materials.every((material) => material instanceof THREE.ShaderMaterial));
   assert.equal(piece.faces.front.material.uniforms.faceColor.value.getHex(), FACE_COLORS.front);
@@ -132,18 +134,29 @@ test("piece types have ordered factory faces offset around their notch pivot", (
   const halfSize = size / 2;
   assert.deepEqual(
     Object.keys(piece.faces),
-    ["right", "top", "front"],
+    ["right", "left", "top", "bottom", "front", "back"],
   );
   assert.deepEqual(FACTORY_FACE_LAYOUT.corner.map(({ name }) => name), ["right", "top", "front"]);
   assert.ok(piece.faces.right.position.distanceTo(
-    new THREE.Vector3(halfSize, halfSize, -halfSize),
+    new THREE.Vector3(halfSize * 2, halfSize, halfSize),
   ) < 1e-10);
   assert.ok(piece.faces.top.position.distanceTo(
-    new THREE.Vector3(halfSize, halfSize, -halfSize),
+    new THREE.Vector3(halfSize, halfSize * 2, halfSize),
   ) < 1e-10);
   assert.ok(piece.faces.front.position.distanceTo(
-    new THREE.Vector3(halfSize, halfSize, halfSize),
+    new THREE.Vector3(halfSize, halfSize, halfSize * 2),
   ) < 1e-10);
+
+  for (const name of ["left", "bottom", "back"]) {
+    const face = piece.faces[name];
+    assert.equal(face.userData.isPlaceholder, true);
+    assert.equal(face.userData.partNumber, null);
+    assert.equal(face.userData.paintIndex, null);
+    assert.equal(face.material.uniforms.faceColor.value.getHex(), DEFAULT_PLACEHOLDER_COLOR);
+  }
+  for (const name of ["right", "top", "front"]) {
+    assert.equal(piece.faces[name].userData.isPlaceholder, false);
+  }
 
   piece.dispose();
 });

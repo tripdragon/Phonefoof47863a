@@ -108,11 +108,16 @@ export class Piece extends THREE.Group {
       this.add(face);
     }
     //adding cause ai just cant seem to get this correct
-    this.faces.forEach(x=>{
-      if(type===PIECE_TYPES.CORNER){
-        x.position.x = 0.5; x.position.y= 0.5; x.position.z = 0.5;
-      }
-    });
+
+Object.values(this.faces).forEach(x => {
+  if (type === PIECE_TYPES.CORNER) {
+    x.position.x += 0.5;
+    x.position.y += 0.5;
+    x.position.z += 0.5;
+  }
+});
+
+    
   }
 
   dispose() {

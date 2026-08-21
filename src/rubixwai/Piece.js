@@ -75,7 +75,8 @@ export class Piece extends THREE.Group {
     }
 
     this.name = `RubixPiece-${type}`;
-    this.type = type;
+    //this.type = type;
+    this.isPiece = true;
     this.pieceType = type;
     this.location = new THREE.Vector3(location.x, location.y, location.z);
     this.theme = theme;
@@ -106,6 +107,12 @@ export class Piece extends THREE.Group {
       this.faces[layout.name] = face;
       this.add(face);
     }
+    //adding cause ai just cant seem to get this correct
+    this.faces.forEach(x=>{
+      if(type===PIECE_TYPES.CORNER){
+        x.position.x = 0.5; x.position.y= 0.5; x.position.z = 0.5;
+      }
+    });
   }
 
   dispose() {

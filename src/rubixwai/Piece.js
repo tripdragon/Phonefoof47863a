@@ -115,6 +115,16 @@ Object.values(this.faces).forEach(x => {
     x.position.y += 0.5;
     x.position.z += 0.5;
   }
+  else if (type === PIECE_TYPES.EDGE) {
+   // x.position.x += 0.5;
+    x.position.y += 0.5;
+    x.position.z += -0.5;
+  }
+  else if (type === PIECE_TYPES.CENTER) {
+   // x.position.x += 0.5;
+    //x.position.y += 0.5;
+    x.position.z += -0.5;
+  }
 });
 
     

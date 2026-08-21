@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RubixMega } from "./RubixMega.js";
 import { PieceNormalsDebugger } from "./PieceNormalsDebugger.js";
+import { Demostrator } from "./Demostrator.js";
+import { Pingpong } from "./Pingpong.js";
 
 export class RubixWaiScene {
   constructor(canvasHost) {
@@ -27,8 +29,13 @@ export class RubixWaiScene {
     this.rubixMega.rotation.set(-0.18, 0.5, 0.08);
     this.scene.add(this.rubixMega);
     this.normalsDebugger = new PieceNormalsDebugger(this.rubixMega.piece);
+    this.demostrator = new Demostrator();
+    this.pingpong = this.demostrator.addEngine(new Pingpong());
+    this.pingpong.addCube(this.rubixMega);
+    this.pingpong.activate();
 
     this.animationFrameId = null;
+    this.clock = new THREE.Clock();
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(this.canvasHost);
     this.resize();
@@ -46,6 +53,7 @@ export class RubixWaiScene {
 
   animate() {
     this.animationFrameId = window.requestAnimationFrame(() => this.animate());
+    this.demostrator.update(Math.min(this.clock.getDelta(), 0.1));
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -58,6 +66,7 @@ export class RubixWaiScene {
     window.cancelAnimationFrame(this.animationFrameId);
     this.resizeObserver.disconnect();
     this.controls.dispose();
+    this.demostrator.dispose();
     this.normalsDebugger.dispose();
     this.rubixMega.dispose();
     this.renderer.dispose();

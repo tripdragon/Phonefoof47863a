@@ -11,6 +11,7 @@ export const PIECE_TYPES = Object.freeze({
 });
 
 export const DEFAULT_BORDER_COLOR = 0x000000;
+export const DEFAULT_PLACEHOLDER_COLOR = 0x6b7280;
 const FACE_LAYOUT = Object.freeze([
   { name: "right", axis: "x", sign: 1, rotation: [0, Math.PI / 2, 0] },
   { name: "left", axis: "x", sign: -1, rotation: [0, -Math.PI / 2, 0] },
@@ -53,6 +54,7 @@ export class Piece extends THREE.Group {
     faceColors = theme,
     colorIndexes = DEFAULT_COLOR_INDEXES[type],
     borderColor = DEFAULT_BORDER_COLOR,
+    placeholderColor = DEFAULT_PLACEHOLDER_COLOR,
   } = {}) {
     super();
     if (!Object.values(PIECE_TYPES).includes(type)) {
@@ -91,43 +93,37 @@ export class Piece extends THREE.Group {
     this.add(this.visuals.center);
 
     const factoryFaces = FACTORY_FACE_LAYOUT[type];
-    for (const [partNumber, layout] of factoryFaces.entries()) {
-      const paintIndex = this.colorIndexes[partNumber];
+    const factoryPartNumbers = new Map(
+      factoryFaces.map((layout, partNumber) => [layout.name, partNumber]),
+    );
+    const halfSize = size / 2;
+    const factoryCenter = new THREE.Vector3();
+    if (type !== PIECE_TYPES.CORE) {
+      factoryFaces.forEach(({ axis, sign }) => {
+        factoryCenter[axis] = sign * halfSize;
+      });
+    }
+
+    for (const layout of FACE_LAYOUT) {
+      const partNumber = factoryPartNumbers.get(layout.name);
+      const isPlaceholder = partNumber === undefined;
+      const paintIndex = isPlaceholder ? null : this.colorIndexes[partNumber];
       const face = new Face({
         ...layout,
         size,
-        color: faceColors[FACE_LAYOUT[paintIndex].name],
+        color: isPlaceholder
+          ? placeholderColor
+          : faceColors[FACE_LAYOUT[paintIndex].name],
         borderColor,
-        pivotAtCorner: type !== PIECE_TYPES.CORE,
       });
-      face.userData.partNumber = partNumber;
+      face.position.add(factoryCenter);
+      face.userData.partNumber = isPlaceholder ? null : partNumber;
       face.userData.paintIndex = paintIndex;
-      face.userData.isPlaceholder = false;
+      face.userData.isPlaceholder = isPlaceholder;
       this.materials.push(face.material);
       this.faces[layout.name] = face;
       this.add(face);
     }
-    //adding cause ai just cant seem to get this correct
-
-Object.values(this.faces).forEach(x => {
-  if (type === PIECE_TYPES.CORNER) {
-    x.position.x += 0.5;
-    x.position.y += 0.5;
-    x.position.z += 0.5;
-  }
-  else if (type === PIECE_TYPES.EDGE) {
-   // x.position.x += 0.5;
-    x.position.y += 0.5;
-    x.position.z += -0.5;
-  }
-  else if (type === PIECE_TYPES.CENTER) {
-   // x.position.x += 0.5;
-    //x.position.y += 0.5;
-    x.position.z += -0.5;
-  }
-});
-
-    
   }
 
   dispose() {

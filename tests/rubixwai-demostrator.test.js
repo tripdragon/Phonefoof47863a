@@ -5,6 +5,7 @@ import { Engine } from "../src/rubixwai/Engine.js";
 import {
   PAUSE_DURATION_SECONDS,
   Pingpong,
+  ROTATION_SEQUENCE,
   TURN_DURATION_SECONDS,
 } from "../src/rubixwai/Pingpong.js";
 import { RubixMega } from "../src/rubixwai/RubixMega.js";
@@ -26,7 +27,7 @@ test("Demostrator advances only active engines", () => {
   demostrator.dispose();
 });
 
-test("Pingpong turns all six sides and then restores the cube", () => {
+test("Pingpong turns all six sides and three center rings, then restores the cube", () => {
   const cube = new RubixMega();
   const engine = new Pingpong();
   const originalTransforms = cube.pieces.map((piece) => ({
@@ -38,9 +39,17 @@ test("Pingpong turns all six sides and then restores the cube", () => {
 
   assert.equal(engine.turnDuration, TURN_DURATION_SECONDS);
   assert.equal(engine.pauseDuration, PAUSE_DURATION_SECONDS);
-  engine.update(6 * TURN_DURATION_SECONDS);
+  assert.deepEqual(
+    ROTATION_SEQUENCE.slice(-3).map(({ axis, layer }) => ({ axis, layer })),
+    [
+      { axis: "x", layer: 0 },
+      { axis: "y", layer: 0 },
+      { axis: "z", layer: 0 },
+    ],
+  );
+  engine.update(ROTATION_SEQUENCE.length * TURN_DURATION_SECONDS);
   assert.equal(engine.phase, "pause-after-forward");
-  engine.update(PAUSE_DURATION_SECONDS + 6 * TURN_DURATION_SECONDS);
+  engine.update(PAUSE_DURATION_SECONDS + ROTATION_SEQUENCE.length * TURN_DURATION_SECONDS);
   assert.equal(engine.phase, "pause-after-backward");
 
   cube.pieces.forEach((piece, index) => {

@@ -4,16 +4,19 @@ import { Engine } from "./Engine.js";
 export const TURN_DURATION_SECONDS = 0.5;
 export const PAUSE_DURATION_SECONDS = 2;
 
-const FACE_TURNS = Object.freeze([
-  { axis: "x", side: 1, angle: -Math.PI / 2 },
-  { axis: "x", side: -1, angle: Math.PI / 2 },
-  { axis: "y", side: 1, angle: -Math.PI / 2 },
-  { axis: "y", side: -1, angle: Math.PI / 2 },
-  { axis: "z", side: 1, angle: -Math.PI / 2 },
-  { axis: "z", side: -1, angle: Math.PI / 2 },
+export const ROTATION_SEQUENCE = Object.freeze([
+  { axis: "x", layer: 1, angle: -Math.PI / 2 },
+  { axis: "x", layer: -1, angle: Math.PI / 2 },
+  { axis: "y", layer: 1, angle: -Math.PI / 2 },
+  { axis: "y", layer: -1, angle: Math.PI / 2 },
+  { axis: "z", layer: 1, angle: -Math.PI / 2 },
+  { axis: "z", layer: -1, angle: Math.PI / 2 },
+  { axis: "x", layer: 0, angle: -Math.PI / 2 },
+  { axis: "y", layer: 0, angle: -Math.PI / 2 },
+  { axis: "z", layer: 0, angle: -Math.PI / 2 },
 ]);
 
-/** Turns every face in sequence, then retraces the sequence forever. */
+/** Turns every face and center ring in sequence, then retraces the sequence forever. */
 export class Pingpong extends Engine {
   constructor({ turnDuration = TURN_DURATION_SECONDS, pauseDuration = PAUSE_DURATION_SECONDS } = {}) {
     super();
@@ -43,7 +46,7 @@ export class Pingpong extends Engine {
         remaining -= consumed;
         if (this.elapsed < this.pauseDuration) return;
         this.phase = this.phase === "pause-after-forward" ? "backward" : "forward";
-        this.turnIndex = this.phase === "forward" ? 0 : FACE_TURNS.length - 1;
+        this.turnIndex = this.phase === "forward" ? 0 : ROTATION_SEQUENCE.length - 1;
         this.elapsed = 0;
         continue;
       }
@@ -59,7 +62,7 @@ export class Pingpong extends Engine {
   }
 
   beginTurn() {
-    const definition = FACE_TURNS[this.turnIndex];
+    const definition = ROTATION_SEQUENCE[this.turnIndex];
     const angle = this.phase === "forward" ? definition.angle : -definition.angle;
     const pivots = this.cubes.map((cube) => {
       const pivot = new THREE.Group();
@@ -67,9 +70,10 @@ export class Pingpong extends Engine {
       cube.add(pivot);
       const positions = cube.pieces.filter((piece) => piece !== cube.core)
         .map((piece) => piece.position[definition.axis]);
-      const edge = definition.side * Math.max(...positions.map(Math.abs));
+      const extent = Math.max(...positions.map(Math.abs));
+      const layerPosition = definition.layer * extent;
       const pieces = cube.pieces.filter((piece) => (
-        piece !== cube.core && Math.abs(piece.position[definition.axis] - edge) < 1e-5
+        piece !== cube.core && Math.abs(piece.position[definition.axis] - layerPosition) < 1e-5
       ));
       pieces.forEach((piece) => pivot.attach(piece));
       return { cube, pivot, pieces };
@@ -80,7 +84,7 @@ export class Pingpong extends Engine {
   applyTurnProgress(progress) {
     const nextAngle = this.activeTurn.angle * Math.min(progress, 1);
     const delta = nextAngle - this.activeTurn.appliedAngle;
-    const { axis } = FACE_TURNS[this.turnIndex];
+    const { axis } = ROTATION_SEQUENCE[this.turnIndex];
     this.activeTurn.pivots.forEach(({ pivot }) => { pivot.rotation[axis] += delta; });
     this.activeTurn.appliedAngle = nextAngle;
   }
@@ -98,7 +102,7 @@ export class Pingpong extends Engine {
     this.activeTurn = null;
     this.elapsed = 0;
 
-    if (this.phase === "forward" && this.turnIndex === FACE_TURNS.length - 1) {
+    if (this.phase === "forward" && this.turnIndex === ROTATION_SEQUENCE.length - 1) {
       this.phase = "pause-after-forward";
     } else if (this.phase === "backward" && this.turnIndex === 0) {
       this.phase = "pause-after-backward";

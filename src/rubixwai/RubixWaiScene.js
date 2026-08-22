@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RubixMega } from "./RubixMega.js";
 import { PieceNormalsDebugger } from "./PieceNormalsDebugger.js";
+import { TumblerEngine_MV_1 } from "./TumblerEngine_MV_1.js";
 
 export const INITIAL_CAMERA_POSITION = Object.freeze([14.4, 11.4, 17.4]);
 export const MIN_CAMERA_DISTANCE = 4;
@@ -32,6 +33,17 @@ export class RubixWaiScene {
     this.scene.add(this.rubixMega);
     this.normalsDebugger = new PieceNormalsDebugger(this.rubixMega.piece);
 
+    // Construction is complete before input starts: the engine can now safely
+    // raycast every face and move whole, fully populated layers.
+    this.tumblerEngine = new TumblerEngine_MV_1({
+      camera: this.camera,
+      domElement: this.renderer.domElement,
+      orbitControls: this.controls,
+    });
+    this.tumblerEngine.addCube(this.rubixMega);
+    this.tumblerEngine.activate();
+    this.clock = new THREE.Clock();
+
     this.animationFrameId = null;
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(this.canvasHost);
@@ -50,6 +62,7 @@ export class RubixWaiScene {
 
   animate() {
     this.animationFrameId = window.requestAnimationFrame(() => this.animate());
+    this.tumblerEngine.update(this.clock.getDelta());
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -61,6 +74,7 @@ export class RubixWaiScene {
   dispose() {
     window.cancelAnimationFrame(this.animationFrameId);
     this.resizeObserver.disconnect();
+    this.tumblerEngine.dispose();
     this.controls.dispose();
     this.normalsDebugger.dispose();
     this.rubixMega.dispose();

@@ -8,7 +8,7 @@ export class RubixWaiPage {
         <header class="rubixwai-header">
           <p class="rubixwai-kicker">THREE.JS OBJECT STUDY</p>
           <h1>rubixwai</h1>
-          <p>Orbit the camera by dragging. Scroll or pinch to zoom and right-click to pan around RubixMega.</p>
+          <p>Drag a cube tile to turn its side or center ring. Drag the background to orbit, and scroll or pinch to zoom.</p>
         </header>
         <div class="rubixwai-stage" aria-label="Interactive three-dimensional RubixMega cube">
           <aside class="rubixwai-debug-shelf" aria-label="Debugger tools">
@@ -18,7 +18,7 @@ export class RubixWaiPage {
             </button>
           </aside>
         </div>
-        <p class="rubixwai-hint"><span aria-hidden="true">↻</span> Drag to inspect all six traditional colors</p>
+        <p class="rubixwai-hint"><span aria-hidden="true">↻</span> Swipe a tile and release to snap it into place</p>
       </article>
     `;
     this.scene = new RubixWaiScene(this.container.querySelector(".rubixwai-stage"));

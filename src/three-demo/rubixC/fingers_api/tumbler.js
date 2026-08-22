@@ -38,6 +38,7 @@ export class Tumbler{
 	tumbleAngle = 0;
 	snapAnimationFrame = null;
 	torque = new Vector3();
+	lockedDirection = new Vector3();
 
 	constructor({fingersAPI, touchesController, plucker}={}){
 		this.ff = fingersAPI;
@@ -53,7 +54,8 @@ export class Tumbler{
     if(!group || !group.axis || !direction || !cube?.spinGroup) return false;
 
     // Keep moving in the drag direction and land on an exact quarter turn.
-    const targetAngle = direction * Math.PI / 2;
+		const quarterTurn = Math.PI / 2;
+		const targetAngle = direction * Math.max(1, Math.ceil(Math.abs(this.tumbleAngle) / quarterTurn)) * quarterTurn;
     const remainingAngle = targetAngle - this.tumbleAngle;
 
     // this.state = states.snapping;
@@ -123,23 +125,32 @@ export class Tumbler{
     const piece = this.tc.selectedPiece?.piece;
     if(!piece) return;
 
-    const direction = this.tc.engines.directionArrow.getAbsoluteDirection();
-    const plucked = this.plucker.pluck(this.tc.hitDown, piece, direction);
+    // Pluck exactly once. After movement begins the selected side/ring remains
+    // locked even if the finger crosses a diagonal or leaves the cubie's face.
+    let plucked = this.plucker.plucked;
+    if(!plucked?.group){
+      const direction = this.tc.engines.directionArrow.getAbsoluteDirection();
+      plucked = this.plucker.pluck(this.tc.hitDown, piece, direction);
+      if(plucked?.group) this.lockedDirection.copy(plucked.force);
+    }
     if(!plucked?.group) return;
+	if(this.lockedDirection.lengthSq() === 0) this.lockedDirection.copy(plucked.force);
 
     const tumbleDelta = this.getTumbleDelta();
     const frameDelta = tumbleDelta - this.lastTumbleDelta;
     this.lastTumbleDelta = tumbleDelta;
     if(frameDelta === 0) return;
 
-    const force = plucked.force.setLength(frameDelta);
+    const force = plucked.force.copy(this.lockedDirection).setLength(frameDelta);
 
 	// Record the signed angle that torqueGroup is about to apply. The lever can
 	// scale the requested force, so the drag distance is not necessarily the
 	// angle through which the group actually turned.
 	this.torque.crossVectors(force, plucked.leverV);
-	const deltaAngle = this.torque.length() * Math.sign(this.torque.dot(plucked.group.axis));
-	if(Number.isFinite(deltaAngle)) this.tumbleAngle += deltaAngle;
+	if(plucked.group.axis){
+		const deltaAngle = this.torque.length() * Math.sign(this.torque.dot(plucked.group.axis));
+		if(Number.isFinite(deltaAngle)) this.tumbleAngle += deltaAngle;
+	}
 
     this.ff.cube.torqueGroup({group:plucked.group, leverV:plucked.leverV, forceV:force});
   }
@@ -151,6 +162,7 @@ export class Tumbler{
 	}
   	this.lastTumbleDelta = 0;
 	this.tumbleAngle = 0;
+	this.lockedDirection.set(0, 0, 0);
   }
 
 }

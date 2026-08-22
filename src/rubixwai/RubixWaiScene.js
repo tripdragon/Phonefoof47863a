@@ -3,7 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RubixMega } from "./RubixMega.js";
 import { PieceNormalsDebugger } from "./PieceNormalsDebugger.js";
 
-export const INITIAL_CAMERA_POSITION = Object.freeze([9.6, 7.6, 11.6]);
+export const INITIAL_CAMERA_POSITION = Object.freeze([14.4, 11.4, 17.4]);
 export const MIN_CAMERA_DISTANCE = 4;
 export const MAX_CAMERA_DISTANCE = 48;
 

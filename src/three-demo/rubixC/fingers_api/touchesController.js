@@ -174,13 +174,15 @@ export class TouchesController {
 
 
 
-	onPointerDown(ev){
-		const touchState = this.multitouch.pointerDown(ev);
-		if (touchState.shouldAbortDrawing) {
-		  this.quitDrawingForMultitouch(ev);
-		  return;
-		}
-		this.ff.domElement?.setPointerCapture?.(ev.pointerId);
+  onPointerDown(ev){
+
+    // REMOVING multitouch checks for now
+    // const touchState = this.multitouch.pointerDown(ev);
+
+    // if (touchState.shouldAbortDrawing) {
+    //   this.quitDrawingForMultitouch(ev);
+    //   return;
+    // }
 
 
     this.IS_DOWN = true;
@@ -200,9 +202,10 @@ export class TouchesController {
 
 
   onPointerMove(ev){
-		const touchState = this.multitouch.pointerMove(ev);
-		if (touchState.shouldAbortDrawing) this.quitDrawingForMultitouch(ev);
-		if (!touchState.shouldDraw) return;
+    // const touchState = this.multitouch.pointerMove(ev);
+
+    // if (touchState.shouldAbortDrawing) this.quitDrawingForMultitouch(ev);
+    // if (!touchState.shouldDraw) return;
 
     if(!this.IS_DOWN) return;
     if (!this.isOnCube) return;
@@ -211,14 +214,22 @@ export class TouchesController {
   }
   
   onPointerUp(ev){
-		const touchState = this.multitouch.pointerUp(ev);
-		if (touchState.hasActivePointers) return;
-		if (touchState.shouldSkipTouchUp) {
-		  this.resetInteractionState();
-		  return;
-		}
+    // const touchState = this.multitouch.pointerUp(ev);
 
-		if(this.state === states.activeTumbling && this.beginReleaseSnap()) return;
+    // if (touchState.hasActivePointers) return;
+    // if (touchState.shouldSkipTouchUp) {
+    //   this.resetInteractionState();
+    //   return;
+    // }
+
+    // if(this.state === states.activeTumbling && this.beginReleaseSnap()){
+    //   return;
+    // }
+
+    if(this.state === states.activeTumbling){
+      this.beginReleaseSnap();
+      
+    }
 
     if(this.didFlick()){
       // Flick completion will be handled separately. For now it intentionally
@@ -227,34 +238,13 @@ export class TouchesController {
 
     // Keep the completed drag available until its release action has run, then
     // flush every store so the next touch cannot reuse stale session data.
-		this.resetInteractionState();
+    // this.resetInteractionState();
 
   }
 
 
   beginReleaseSnap(){
-    return this.engines.tumbler?.begin?.() ?? false;
-  }
-
-  // Public compatibility entry point for callers that drive the top-level
-  // controller manually (and for small controller-only test harnesses).
-  updateActiveTumble(){
-    if(this.engines.tumbler?.updateActiveTumble){
-      return this.engines.tumbler.updateActiveTumble();
-    }
-    const shim = {
-        tc: this,
-        ff: this.ff,
-        plucker: this.engines.plucker,
-        lastTumbleDelta: this.lastTumbleDelta ?? 0,
-        tumbleAngle: 0,
-        torque: new Vector3(),
-        lockedDirection: new Vector3(),
-        getTumbleDelta: Tumbler.prototype.getTumbleDelta,
-    };
-    const result = Tumbler.prototype.updateActiveTumble.call(shim);
-    this.lastTumbleDelta = shim.lastTumbleDelta;
-    return result;
+    return this.engines.tumbler.begin();
   }
 
 
@@ -277,7 +267,7 @@ export class TouchesController {
     this.currentDragDistance = 0;
     this.lastTriggeredDistance = 0;
 		// this.lastTumbleDelta = 0;
-    this.engines.tumbler?.reset?.();
+    this.engines.tumbler.reset();
 					    
 					    // these feel like they belong in some other order thing
 					    // move this // this.updateDistanceHud(0);
@@ -433,7 +423,7 @@ export class TouchesController {
       this.state = states.activeTumbling;
     }
 
-    if(this.state === states.activeTumbling) this.updateActiveTumble();
+    if(this.state === states.activeTumbling) this.engines.tumbler.updateActiveTumble();
 
   }
 

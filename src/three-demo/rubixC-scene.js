@@ -5,7 +5,7 @@ import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm';
 import { RubixCubeLike } from "./rubixC/RubixCubeLike.js";
 import { PiecesGroup } from "./rubixC/PiecesGroup.js";
 import { smoothstep, remapPiToPI2 } from "./rubixC/math.js";
-import { TumblerEngine_MV_1 } from "./rubixC/TumblerEngine_MV_1.js";
+import { FingersAPI } from "./rubixC/fingers_api/fingersAPI_222.js";
 import { PrintDebugger } from "./rubixC/PrintDebugger.js";
 
 export function renderRubixCRoute(container) {
@@ -566,9 +566,7 @@ requestAnimationFrame(spinGroup);
   */
   
 
-  // The interaction engine starts here, after RubixCubeLike has completed all
-  // piece, core, and side/ring group construction.
-  const fingersAPI = new TumblerEngine_MV_1({
+  const fingersAPI = new FingersAPI({
     camera,
     domElement: renderer.domElement,
     scene,

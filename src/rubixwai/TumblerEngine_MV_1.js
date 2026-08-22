@@ -58,13 +58,7 @@ export class TumblerEngine_MV_1 extends Engine {
   }
 
   pick(event) {
-    const rect = this.domElement.getBoundingClientRect();
-    if (!rect.width || !rect.height) return null;
-    this.pointer.set(
-      ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1,
-    );
-    this.raycaster.setFromCamera(this.pointer, this.camera);
+    if (!this.setRayFromEvent(event)) return null;
 
     for (const cube of this.cubes) {
       const hit = this.raycaster.intersectObject(cube, true)[0];
@@ -84,6 +78,17 @@ export class TumblerEngine_MV_1 extends Engine {
       return { cube, piece, hitPoint: hit.point.clone(), faceAxis };
     }
     return null;
+  }
+
+  setRayFromEvent(event) {
+    const rect = this.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return false;
+    this.pointer.set(
+      ((event.clientX - rect.left) / rect.width) * 2 - 1,
+      -((event.clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    return true;
   }
 
   onPointerDown(event) {
@@ -136,6 +141,22 @@ export class TumblerEngine_MV_1 extends Engine {
     gesture.tangent = chosen.tangent;
     gesture.pixelsPerRadian = Math.max(chosen.tangent.length(), 12);
 
+    // Keep the exact point that was grabbed under the pointer. The touched
+    // point moves in a plane perpendicular to the turn axis, so intersecting
+    // each pointer ray with that plane gives an absolute angle (and avoids the
+    // drifting, screen-space approximation previously used here).
+    const cubeQuaternion = gesture.cube.getWorldQuaternion(new THREE.Quaternion());
+    gesture.worldAxis = AXIS_VECTORS[gesture.axis].clone().applyQuaternion(cubeQuaternion).normalize();
+    gesture.turnCenter = gesture.cube.getWorldPosition(new THREE.Vector3());
+    const axialOffset = gesture.hitPoint.clone().sub(gesture.turnCenter).dot(gesture.worldAxis);
+    gesture.turnCenter.addScaledVector(gesture.worldAxis, axialOffset);
+    gesture.dragPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(
+      gesture.worldAxis,
+      gesture.hitPoint,
+    );
+    gesture.startRadius = gesture.hitPoint.clone().sub(gesture.turnCenter).normalize();
+    gesture.previousRawAngle = 0;
+
     const pivot = new THREE.Group();
     pivot.name = "TumblerEngine_MV_1-turn-pivot";
     gesture.cube.add(pivot);
@@ -158,10 +179,32 @@ export class TumblerEngine_MV_1 extends Engine {
       this.beginTurn(gesture, fromStart);
     }
     event.preventDefault();
-    const movement = point.clone().sub(gesture.previous);
-    const delta = movement.dot(gesture.tangent.clone().normalize()) / gesture.pixelsPerRadian;
-    gesture.pivot.rotation[gesture.axis] += delta;
+    const hasPointerRay = this.setRayFromEvent(event);
+    const planeIsStable = hasPointerRay
+      && Math.abs(this.raycaster.ray.direction.dot(gesture.worldAxis)) > 1e-5;
+    const planePoint = planeIsStable
+      ? this.raycaster.ray.intersectPlane(gesture.dragPlane, new THREE.Vector3())
+      : null;
+    let delta;
+    if (planePoint && planePoint.distanceToSquared(gesture.turnCenter) > 1e-10) {
+      const radius = planePoint.sub(gesture.turnCenter).normalize();
+      const rawAngle = Math.atan2(
+        gesture.worldAxis.dot(gesture.startRadius.clone().cross(radius)),
+        gesture.startRadius.dot(radius),
+      );
+      let rawDelta = rawAngle - gesture.previousRawAngle;
+      if (rawDelta > Math.PI) rawDelta -= Math.PI * 2;
+      if (rawDelta < -Math.PI) rawDelta += Math.PI * 2;
+      delta = rawDelta;
+      gesture.previousRawAngle = rawAngle;
+    } else {
+      // A nearly edge-on drag plane has no stable ray intersection. Retain a
+      // screen-space fallback so the gesture never freezes at that viewpoint.
+      const movement = point.clone().sub(gesture.previous);
+      delta = movement.dot(gesture.tangent.clone().normalize()) / gesture.pixelsPerRadian;
+    }
     gesture.angle += delta;
+    gesture.pivot.rotation[gesture.axis] = gesture.angle;
     if (Math.abs(delta) > 1e-5) gesture.lastDelta = delta;
     gesture.previous.copy(point);
   }

@@ -8,7 +8,7 @@ export class RubixWaiPage {
         <header class="rubixwai-header">
           <p class="rubixwai-kicker">THREE.JS OBJECT STUDY</p>
           <h1>rubixwai</h1>
-          <p>Orbit the camera by dragging. Scroll to zoom and right-click to pan around RubixMega.</p>
+          <p>Orbit the camera by dragging. Scroll or pinch to zoom and right-click to pan around RubixMega.</p>
         </header>
         <div class="rubixwai-stage" aria-label="Interactive three-dimensional RubixMega cube">
           <aside class="rubixwai-debug-shelf" aria-label="Debugger tools">

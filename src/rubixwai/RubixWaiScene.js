@@ -2,8 +2,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RubixMega } from "./RubixMega.js";
 import { PieceNormalsDebugger } from "./PieceNormalsDebugger.js";
-import { Demostrator } from "./Demostrator.js";
-import { Pingpong } from "./Pingpong.js";
+
+export const INITIAL_CAMERA_POSITION = Object.freeze([9.6, 7.6, 11.6]);
+export const MIN_CAMERA_DISTANCE = 4;
+export const MAX_CAMERA_DISTANCE = 48;
 
 export class RubixWaiScene {
   constructor(canvasHost) {
@@ -12,7 +14,7 @@ export class RubixWaiScene {
     this.scene.background = new THREE.Color(0xe0f2fe);
 
     this.camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
-    this.camera.position.set(4.8, 3.8, 5.8);
+    this.camera.position.set(...INITIAL_CAMERA_POSITION);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -21,21 +23,16 @@ export class RubixWaiScene {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
-    this.controls.minDistance = 4;
-    this.controls.maxDistance = 24;
+    this.controls.minDistance = MIN_CAMERA_DISTANCE;
+    this.controls.maxDistance = MAX_CAMERA_DISTANCE;
     this.controls.target.set(0, 0, 0);
 
     this.rubixMega = new RubixMega();
     this.rubixMega.rotation.set(-0.18, 0.5, 0.08);
     this.scene.add(this.rubixMega);
     this.normalsDebugger = new PieceNormalsDebugger(this.rubixMega.piece);
-    this.demostrator = new Demostrator();
-    this.pingpong = this.demostrator.addEngine(new Pingpong());
-    this.pingpong.addCube(this.rubixMega);
-    this.pingpong.activate();
 
     this.animationFrameId = null;
-    this.clock = new THREE.Clock();
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(this.canvasHost);
     this.resize();
@@ -53,7 +50,6 @@ export class RubixWaiScene {
 
   animate() {
     this.animationFrameId = window.requestAnimationFrame(() => this.animate());
-    this.demostrator.update(Math.min(this.clock.getDelta(), 0.1));
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -66,7 +62,6 @@ export class RubixWaiScene {
     window.cancelAnimationFrame(this.animationFrameId);
     this.resizeObserver.disconnect();
     this.controls.dispose();
-    this.demostrator.dispose();
     this.normalsDebugger.dispose();
     this.rubixMega.dispose();
     this.renderer.dispose();
